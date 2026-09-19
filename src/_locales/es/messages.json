@@ -1755,25 +1755,17 @@
     "message": "Tus páginas guardadas, resaltados y progreso de lectura se conservan aunque el sitio web original cambie o desaparezca.",
     "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
-  "options_font_custom": { "message": "Fuente propia" },
+  "options_font_custom": { "message": "Fuente personalizada" },
   "options_font_custom_hint": {
-    "message": "Una fuente instalada en este dispositivo, por ejemplo Noto Serif. En el panel Aa aparece en la fila Tipografía como Personalizada."
+    "message": "Escribe el nombre de una fuente instalada en este dispositivo, por ejemplo Noto Serif. Para que re/read la use, abre el panel Aa y elige Personalizada en la fila Tipografía. Deja el campo vacío para usar las fuentes predeterminadas."
   },
 
-  "options_font_custom_more": {
-    "message": "Escribe el nombre tal como lo escribe el sistema. Deja el campo vacío para usar solo las fuentes integradas.",
-    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
-  },
   "options_reading_pace": { "message": "Velocidad de lectura" },
   "options_reading_pace_unit": { "message": "palabras por minuto" },
   "options_reading_pace_hint": {
-    "message": "Solo se usa para estimar el tiempo de lectura que se muestra en la lista de lectura y bajo el título de un artículo."
+    "message": "Solo se usa para estimar el tiempo de lectura que se muestra en la lista de lectura y bajo el título de un artículo. Es el número de palabras que lees en un minuto. 200 es un ritmo tranquilo en tu propio idioma; en un idioma que estás aprendiendo suele ser 100-150."
   },
 
-  "options_reading_pace_more": {
-    "message": "El número de palabras que lees en un minuto. 200 es un ritmo tranquilo en tu propio idioma; en un idioma que estás aprendiendo suele ser 100-150.",
-    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
-  },
   "options_quiet_bubble_hint": {
     "message": "La burbuja muestra entonces solo la traducción; en una pantalla táctil los botones aparecen al tocarla."
   },

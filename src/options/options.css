@@ -1086,6 +1086,31 @@ a.row-link:focus-visible {
   align-items: start;
 }
 
+/* And the description stands under the name it explains, in the same column
+   (Michał's smoke, 2026-09-19). Spanning both tracks put it under the
+   control as well, so it began a control's height below the label it belongs
+   to - several lines of air between a name and its own sentence. The storage
+   row keeps the span: its first track is only as wide as the name. */
+.row-value:not(.row-storage) > .row-note {
+  grid-column: 1;
+}
+
+/* And the control holds both lines of that column rather than standing on the
+   first one alone: a control taller than a word made the first line of the
+   grid its own height, and the description - on the line under it - began a
+   control's height below the label it belongs to. Spanning, it keeps its
+   place at the row's far edge while the name and its sentence read as the two
+   lines they are. Not in a stacked row, and not in the narrow dress at the
+   foot of this sheet: there the column is one, and an item spanning two lines
+   of it would stand on top of the description. */
+.row-value:has(> .row-note):not(.row-stack) > :is(select, button, output, .inline, .stepper) {
+  grid-row: 1 / span 2;
+  /* Named, not left to the auto-placement: an item with a row of its own is
+     placed before the items that have neither, so a control told only which
+     rows to hold took the first column and sent the label into the second. */
+  grid-column: 2;
+}
+
 /* What the row reports rather than asks - the space this device holds. The
    label keeps its own width and the figure takes the rest, flush right. */
 .row-figure {
@@ -1810,6 +1835,14 @@ button.model-delete {
   color: var(--page-fg);
 }
 
+/* Narrower than the fields it shares a dress with: this one stands in a row
+   whose description reads in the track beside it, and a font name is short
+   (the longest anybody types is "Atkinson Hyperlegible"). */
+#font-custom {
+  flex: 0 0 auto;
+  width: 14rem;
+}
+
 /* The pasted address (D187) wears the same dress, wider: an address is long,
    and a field that cuts it off hides the part that says which file it is. */
 #dictionary-link {
@@ -2290,6 +2323,13 @@ summary::marker {
   .row-value:not(.row-storage, .row-stack) > :is(select, .inline, .stepper, .row-figure) {
     justify-self: stretch;
     margin-top: 0.5rem;
+  }
+
+  /* One column: the control takes a line of its own again, under the name and
+     its description, instead of spanning theirs. */
+  .row-value:has(> .row-note):not(.row-stack) > :is(select, button, output, .inline, .stepper) {
+    grid-row: auto;
+    grid-column: auto;
   }
 
   /* A list row: the name and its action keep the first line - a Delete that

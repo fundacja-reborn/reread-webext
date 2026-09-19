@@ -2092,28 +2092,20 @@
     "message": "Your saved pages, highlights and reading progress are kept safe even if the original website changes or disappears.",
     "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
-  "options_font_custom": { "message": "Own font" },
+  "options_font_custom": { "message": "Custom font" },
   "options_font_custom_hint": {
-    "message": "A typeface installed on this device, for example Noto Serif. In the Aa panel it appears in the Type row as Custom."
+    "message": "Give the name of a font installed on this device, for example Noto Serif. For re/read to use it, open the Aa panel and choose Custom in the Type row. Leave the field empty to use the default fonts."
   },
 
-  "options_font_custom_more": {
-    "message": "Type the name as the system spells it. Leave the field empty to use the built-in typefaces only.",
-    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
-  },
   "options_reading_pace": { "message": "Reading speed" },
   "options_reading_pace_unit": {
     "message": "words a minute",
     "description": "After the number field of the reading pace row (D228). Lower case: it follows the number as a unit, the way 1.0× follows the voice's speed."
   },
   "options_reading_pace_hint": {
-    "message": "Used only to estimate the reading time shown in the reading list and under an article's title."
+    "message": "Used only to estimate the reading time shown in the reading list and under an article's title. It is the number of words you read in a minute. 200 is an unhurried pace in your own language; in a language you are learning it is usually 100-150."
   },
 
-  "options_reading_pace_more": {
-    "message": "The number of words you read in a minute. 200 is an unhurried pace in your own language; in a language you are learning it is usually 100-150.",
-    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
-  },
   "options_quiet_bubble_hint": {
     "message": "The bubble then shows the translation alone; on a touch screen the buttons appear after a tap on it."
   },

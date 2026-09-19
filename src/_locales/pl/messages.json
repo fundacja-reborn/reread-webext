@@ -2400,25 +2400,17 @@
     "message": "Zapisane strony, zakreślenia i postęp czytania są bezpieczne, nawet jeśli oryginalna strona internetowa zmieni się lub zniknie.",
     "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
-  "options_font_custom": { "message": "Własny krój" },
+  "options_font_custom": { "message": "Własna czcionka" },
   "options_font_custom_hint": {
-    "message": "Krój zainstalowany na tym urządzeniu, np. Noto Serif. W panelu Aa pojawi się w wierszu „Krój” jako „Własny”."
+    "message": "Podaj nazwę czcionki zainstalowanej na tym urządzeniu, np. Noto Serif. Aby re/read używał podanej przez Ciebie czcionki w panelu Aa, w wierszu „Krój” wybierz „Własny”. Zostaw pole puste, aby używać domyślnych czcionek."
   },
 
-  "options_font_custom_more": {
-    "message": "Wpisz nazwę tak, jak zapisuje ją system. Zostaw pole puste, aby używać tylko wbudowanych krojów.",
-    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
-  },
   "options_reading_pace": { "message": "Tempo czytania" },
   "options_reading_pace_unit": { "message": "słów na minutę" },
   "options_reading_pace_hint": {
-    "message": "Służy tylko do szacowania czasu czytania pokazywanego w czytelni i pod tytułem artykułu."
+    "message": "Służy tylko do szacowania czasu czytania pokazywanego w czytelni i pod tytułem artykułu. To liczba słów, które czytasz w ciągu minuty. 200 to spokojne tempo we własnym języku; w języku, którego się uczysz, zwykle 100-150."
   },
 
-  "options_reading_pace_more": {
-    "message": "Liczba słów, które czytasz w ciągu minuty. 200 to spokojne tempo we własnym języku; w języku, którego się uczysz, zwykle 100-150.",
-    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
-  },
   "options_quiet_bubble_hint": {
     "message": "W dymku zostaje samo tłumaczenie; na ekranie dotykowym przyciski pojawiają się po dotknięciu dymka."
   },

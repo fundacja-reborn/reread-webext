@@ -56,7 +56,10 @@ describe("the settings rows", () => {
       String(match[1]),
     );
     assert.deepEqual(opens, rests, "a More opens nothing, or a folded half has no way in");
-    assert.ok(opens.length >= 15, `only ${opens.length} rows say more than their sentence`);
+    // A floor, moved down by hand when a fold is deliberately taken off a
+    // row (Michał, 2026-09-19: the font name and the reading pace say all
+    // they have to say in the row, 15 -> 13).
+    assert.ok(opens.length >= 13, `only ${opens.length} rows say more than their sentence`);
     // Each rest is hidden until the press - `hidden`, not a clip, so a screen
     // reader hears the sentence and the rest exactly as the eye does.
     for (const id of rests) {
@@ -79,8 +82,10 @@ describe("the settings rows", () => {
     // and moves down by hand when a row is deliberately left without a fold
     // (D264 took the fold off both Pages-layout select rows, 16 -> 14;
     // Michał's second round on the panels took it off the translation-off
-    // switch, whose whole answer is two sentences long, 14 -> 13).
-    assert.ok(hints.length >= 13, `only ${hints.length} rows open with a sentence of their own`);
+    // switch, whose whole answer is two sentences long, 14 -> 13; his smoke of
+    // 2026-09-19 took it off the font name and the reading pace, where half
+    // the answer behind a press is half a setting, 13 -> 11).
+    assert.ok(hints.length >= 11, `only ${hints.length} rows open with a sentence of their own`);
     for (const locale of LOCALES) {
       const catalogue = JSON.parse(await source(`_locales/${locale}/messages.json`));
       for (const key of hints) {
@@ -193,17 +198,52 @@ describe("the settings rows", () => {
     assert.doesNotMatch(css, /p\.explain mark/, "the highlighter's stroke is still dressed on this page");
   });
 
+  it("stands a description under the name it explains, not under the control beside it (Michał, 2026-09-19)", async () => {
+    const css = await source("options/options.css");
+    const markup = await source("options/options.html");
+    // A control row is two tracks: the name and its description in the first,
+    // the control in the second. A description spanning both began a
+    // control's height below its own label - the name at the top of the row
+    // and its sentence several lines under it, with the field in between.
+    assert.match(
+      rule(css, ".row-value:not(.row-storage) > .row-note"),
+      /grid-column: 1/,
+      "a description still stands under the control as well",
+    );
+    // The two rows that sent this round: a name to type and a number to type,
+    // each saying the whole of what it is for in the row itself. Half an
+    // answer behind a press is half a setting - somebody fills the field in
+    // and wonders why nothing changed.
+    for (const row of ["s-fontFamily", "s-readingPace"]) {
+      const at = markup.indexOf(`id="${row}"`);
+      assert.ok(at > 0, `no row ${row}`);
+      const block = markup.slice(at, markup.indexOf("</div>", at));
+      assert.doesNotMatch(block, /note-more/, `${row} still keeps half of its answer behind a press`);
+      assert.match(block, /<p class="row-note" data-i18n="/, `${row} lost the description of its own`);
+    }
+    // And the field is the width of a font name rather than of the column: it
+    // stands beside a sentence now.
+    assert.match(rule(css, "#font-custom"), /width: 14rem/, "the font field takes the room its description reads in");
+    // The control keeps the row's far edge and holds both lines of the first
+    // column, so nothing stands between a name and its own sentence.
+    assert.match(
+      rule(css, ".row-value:has(> .row-note):not(.row-stack) > :is(select, button, output, .inline, .stepper)"),
+      /grid-row: 1 \/ span 2;[\s\S]*grid-column: 2/,
+      "the control still makes the first line its own height",
+    );
+  });
+
   it("ties every fold's trigger to the sentence it follows (F6)", async () => {
     const markup = await source("options/options.html");
     // The word is Details, not More: the bubble has a button called More, and
     // a sentence naming it stood beside a trigger with the same word.
     assert.doesNotMatch(markup, /data-i18n="options_note_more"/, "a fold is still called More");
-    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 15, "not every fold is called Details");
+    assert.equal((markup.match(/data-i18n="options_details"/g) ?? []).length, 13, "not every fold is called Details");
     // Hard space, so the trigger goes over a wrapping line with the last word.
     // The hard space and the trigger in one box that cannot break (D259, K2):
     // measured in the browser, the hard space alone let the trigger open a
     // line of its own at 49 widths out of 231.
-    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 15, "a trigger can be left alone at the start of a line");
+    assert.equal((markup.match(/<\/span\s*><span class="note-tail">&nbsp;<button type="button" class="note-more"/g) ?? []).length, 13, "a trigger can be left alone at the start of a line");
     const css = await source("options/options.css");
     assert.match(rule(css, ".note-tail"), /white-space: nowrap/, "the space before a trigger is a break opportunity again");
     assert.match(rule(css, "button.note-more"), /white-space: nowrap/, "the trigger's own words can be split");

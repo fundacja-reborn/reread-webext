@@ -1065,7 +1065,7 @@
            typed face - options.js sets its font-family from the cleaned
            name, never the raw value. -->
       <div class="row row-value" id="s-fontFamily" data-setting="fontFamily" data-keywords="options_keywords_font" data-section="reading-view">
-        <label class="row-name" for="font-custom" data-i18n="options_font_custom">Own font</label>
+        <label class="row-name" for="font-custom" data-i18n="options_font_custom">Custom font</label>
         <p class="inline">
           <input
             id="font-custom"
@@ -1083,14 +1083,14 @@
                disappearance is one more refresh of an e-ink panel. -->
           <output class="field-saved" id="font-custom-saved" data-i18n="options_field_saved" hidden>Saved</output>
         </p>
-        <p class="row-note">
-          <span data-i18n="options_font_custom_hint"
-            >A typeface installed on this device, for example Noto Serif. In the Aa panel it appears in the Type row as Custom.</span
-          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-fontFamily" data-i18n="options_details">Details</button></span>
-        </p>
-        <p class="row-note row-more" id="more-fontFamily" data-i18n="options_font_custom_more" hidden>
-          Type the name as the system spells it. Leave the field empty to use the built-in typefaces
-          only.
+        <!-- Whole, with no Details to press (Michał, 2026-09-19): what to type
+             is one thing, and what to do in the Aa panel afterwards is what
+             makes the typing count. Half of that behind a fold is a setting
+             somebody fills in and then wonders why nothing changed. -->
+        <p class="row-note" data-i18n="options_font_custom_hint">
+          Give the name of a font installed on this device, for example Noto Serif. For re/read to
+          use it, open the Aa panel and choose Custom in the Type row. Leave the field empty to use
+          the default fonts.
         </p>
       </div>
       <!-- The reader's own pace (D228): words a minute, typed once - the one
@@ -1108,14 +1108,10 @@
           <span class="unit" data-i18n="options_reading_pace_unit">words a minute</span>
           <output class="field-saved" id="reading-pace-saved" data-i18n="options_field_saved" hidden>Saved</output>
         </p>
-        <p class="row-note">
-          <span data-i18n="options_reading_pace_hint"
-            >Used only to estimate the reading time shown in the reading list and under an article's title.</span
-          ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-readingPace" data-i18n="options_details">Details</button></span>
-        </p>
-        <p class="row-note row-more" id="more-readingPace" data-i18n="options_reading_pace_more" hidden>
-          The number of words you read in a minute. 200 is an unhurried pace in your own language;
-          in a language you are learning it is usually 100-150.
+        <p class="row-note" data-i18n="options_reading_pace_hint">
+          Used only to estimate the reading time shown in the reading list and under an article's
+          title. It is the number of words you read in a minute. 200 is an unhurried pace in your
+          own language; in a language you are learning it is usually 100-150.
         </p>
       </div>
     </div>

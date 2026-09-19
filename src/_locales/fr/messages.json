@@ -1789,25 +1789,17 @@
     "message": "Vos pages enregistrées, vos surlignages et votre progression de lecture sont préservés même si le site d'origine change ou disparaît.",
     "description": "The rest of the options_keep_articles_hint description, behind the row's More button."
   },
-  "options_font_custom": { "message": "Police personnelle" },
+  "options_font_custom": { "message": "Police personnalisée" },
   "options_font_custom_hint": {
-    "message": "Une police installée sur cet appareil, par exemple Noto Serif. Dans le panneau Aa, elle apparaît dans la ligne Police comme Personnalisée."
+    "message": "Indiquez le nom d'une police installée sur cet appareil, par exemple Noto Serif. Pour que re/read l'utilise, ouvrez le panneau Aa et choisissez Personnalisée dans la ligne Police. Laissez le champ vide pour utiliser les polices par défaut."
   },
 
-  "options_font_custom_more": {
-    "message": "Saisissez le nom tel que le système l'écrit. Laissez le champ vide pour n'utiliser que les polices intégrées.",
-    "description": "The rest of the options_font_custom_hint description, behind the row's More button."
-  },
   "options_reading_pace": { "message": "Vitesse de lecture" },
   "options_reading_pace_unit": { "message": "mots par minute" },
   "options_reading_pace_hint": {
-    "message": "Sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article."
+    "message": "Sert uniquement à estimer le temps de lecture affiché dans la liste de lecture et sous le titre d'un article. C'est le nombre de mots que vous lisez en une minute. 200 est un rythme tranquille dans votre propre langue ; dans une langue que vous apprenez, c'est généralement 100-150."
   },
 
-  "options_reading_pace_more": {
-    "message": "Le nombre de mots que vous lisez en une minute. 200 est un rythme tranquille dans votre propre langue ; dans une langue que vous apprenez, c'est généralement 100-150.",
-    "description": "The rest of the options_reading_pace_hint description, behind the row's More button."
-  },
   "options_quiet_bubble_hint": {
     "message": "La bulle n'affiche alors que la traduction ; sur un écran tactile, les boutons apparaissent après avoir touché la bulle."
   },
