@@ -1733,7 +1733,7 @@
     "message": "Una confirmación visible de que la página ha cambiado. Con el tema E-ink elegido en el panel Aa, puede ayudar a limpiar las imágenes fantasma en una pantalla de tinta electrónica."
   },
   "options_turn_effect_note_auto": {
-    "message": "En otras pantallas la nueva página aparece con un desplazamiento suave."
+    "message": "Con el tema E-ink el área de texto se oscurece un momento; con los demás temas la nueva página aparece con un desplazamiento suave."
   },
   "options_turn_effect_note_off": {
     "message": "La página simplemente cambia, como antes de este ajuste."

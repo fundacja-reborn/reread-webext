@@ -2070,7 +2070,7 @@
     "message": "A visible confirmation that the page has changed. With the E-ink theme set in the Aa panel, it can help clear ghosting from the page on an e-ink screen."
   },
   "options_turn_effect_note_auto": {
-    "message": "On other screens the new page arrives with a smooth slide."
+    "message": "With the E-ink theme the text area darkens for a moment; with the other themes the new page arrives with a smooth slide."
   },
   "options_turn_effect_note_off": {
     "message": "The page simply changes, as it did before this setting existed."

@@ -2378,7 +2378,7 @@
     "message": "Wizualne potwierdzenie przejścia na kolejną stronę. Jeśli ustawisz w panelu Aa motyw E-ink, to na ekranie e-ink może pomóc oczyścić stronę z duchów."
   },
   "options_turn_effect_note_auto": {
-    "message": "Na innych ekranach nowa strona pojawia się z płynnym przesunięciem."
+    "message": "W motywie E-ink obszar tekstu na moment ciemnieje; w pozostałych motywach nowa strona pojawia się z płynnym przesunięciem."
   },
   "options_turn_effect_note_off": {
     "message": "Strona po prostu się zmienia, tak jak przed pojawieniem się tego ustawienia."

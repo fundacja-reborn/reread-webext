@@ -1767,7 +1767,7 @@
     "message": "Une confirmation visible que la page a changé. Avec le thème E-ink réglé dans le panneau Aa, cela peut aider à effacer les images fantômes sur un écran e-ink."
   },
   "options_turn_effect_note_auto": {
-    "message": "Sur les autres écrans, la nouvelle page arrive avec un glissement fluide."
+    "message": "Avec le thème E-ink, la zone de texte s'assombrit un instant ; avec les autres thèmes, la nouvelle page arrive avec un glissement fluide."
   },
   "options_turn_effect_note_off": {
     "message": "La page change simplement, comme avant ce réglage."
