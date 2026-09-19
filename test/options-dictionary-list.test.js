@@ -188,9 +188,10 @@ describe("the groups the list stands in (D263, L2)", () => {
   it("stand only where there is more than one language to tell apart", () => {
     const list = fn("renderDictionaryList", "renderCatalog");
     assert.match(list, /if \(groups\.length > 1\) list\.append\(dictionaryGroupHeading\(group\)\)/);
-    // And a group's heading is the card's own label (D265): the quiet voice,
-    // a label's weight, and the hairline drawn over it rather than under.
-    assert.match(rule(css, ".card-head"), /font-size: var\(--ui-small\)/);
+    // And a group's heading is the card's own label (D265): the rows' own
+    // size in the quiet ink, a label's weight, and the hairline drawn over it
+    // rather than under.
+    assert.match(rule(css, ".card-head"), /font-size: var\(--ui-text\)/);
     assert.match(css, /:is\(\.card, \.rows, \.card-list, \.models\) > \.card-head \+ \*::after \{\n  content: none;/);
   });
 });

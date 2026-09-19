@@ -2165,13 +2165,9 @@
   },
   "options_no_translation": { "message": "Use without a translation model" },
   "options_no_translation_hint": {
-    "message": "Dictionaries only, without machine translation; the reader, the offline reading list and the highlighter keep working."
+    "message": "With this on, the bubble still shows dictionary meanings, and you can save phrases and see their underlines. Ideal for reading with dictionaries or in your native language."
   },
 
-  "options_no_translation_more": {
-    "message": "With a language pair chosen, the bubble still shows dictionary meanings, and you can save phrases and see their underlines. Ideal for reading with dictionaries or in your native language. Your saved data is not deleted and returns when you turn this off.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "Do not show the bubble when selecting text" },
   "options_bubble_off_hint": {
     "message": "On an ordinary page nothing happens when you select text - open a page in the reader from re/read's button or with Alt+Shift+R.",

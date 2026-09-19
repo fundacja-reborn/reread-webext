@@ -1848,13 +1848,9 @@
   },
   "options_no_translation": { "message": "Utiliser sans modèle de traduction" },
   "options_no_translation_hint": {
-    "message": "Les dictionnaires seuls, sans traduction automatique ; le lecteur, la liste de lecture hors ligne et le surligneur continuent de fonctionner."
+    "message": "Quand cette option est activée, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle."
   },
 
-  "options_no_translation_more": {
-    "message": "Avec une paire de langues choisie, la bulle affiche toujours les sens des dictionnaires, et vous pouvez enregistrer des phrases et voir leurs soulignements. Idéal pour lire avec des dictionnaires ou dans votre langue maternelle. Vos données enregistrées ne sont pas supprimées et reviennent quand vous désactivez cette option.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "Ne pas afficher la bulle à la sélection de texte" },
   "options_bubble_off_hint": {
     "message": "Sur une page ordinaire, sélectionner du texte ne fait rien du tout - ouvrez une page dans le lecteur avec le bouton de re/read ou avec Alt+Maj+R."

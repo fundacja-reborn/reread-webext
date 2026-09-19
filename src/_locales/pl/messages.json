@@ -2459,13 +2459,9 @@
   },
   "options_no_translation": { "message": "Używaj bez modelu tłumaczenia" },
   "options_no_translation_hint": {
-    "message": "Tylko słowniki, bez tłumaczenia maszynowego; widok czytania, czytelnia offline i zakreślacz działają dalej."
+    "message": "Gdy ta opcja jest zaznaczona, dymek nadal pokazuje znaczenia ze słowników, a frazy można zapisywać i widzieć ich podkreślenia. Idealne do czytania ze słownikami albo w ojczystym języku."
   },
 
-  "options_no_translation_more": {
-    "message": "Przy wybranej parze językowej dymek nadal pokazuje znaczenia ze słowników, a frazy można zapisywać i widzieć ich podkreślenia. Idealne do czytania ze słownikami albo w ojczystym języku. Zapisane dane nie są usuwane i wracają po wyłączeniu tej opcji.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "Nie pokazuj dymka po zaznaczeniu tekstu" },
   "options_bubble_off_hint": {
     "message": "Na zwykłej stronie po zaznaczeniu tekstu nie dzieje się nic – stronę otwierasz w widoku czytania przyciskiem re/read albo skrótem Alt+Shift+R."

@@ -41,8 +41,11 @@ describe("the settings page's type", () => {
       ["--ui-h1", "1.5rem"],
       ["--ui-h2", "1.25rem"],
       ["--ui-h3", "1.0625rem"],
-      ["--ui-text", "0.9375rem"],
-      ["--ui-small", "0.8125rem"],
+      // Two sizes on the page and no third (Michał, 2026-09-19), at the
+      // size a browser's own settings are set in: the rows' own, and the
+      // small print that explains them.
+      ["--ui-text", "0.8125rem"],
+      ["--ui-small", "0.75rem"],
       ["--ui-control", "2.25rem"],
     ])) {
       assert.match(tokens, new RegExp(`${token}: ${value.replace(".", "\\.")};`), `${token} is not ${value}`);
@@ -291,7 +294,12 @@ describe("the settings page's type", () => {
     // (Michał's second round): the card's own label is the only thing that
     // takes half a step, at the small print's size, so it can never outweigh
     // the heading standing over the card.
-    assert.match(rule(css, ".card-head"), /font-size: var\(--ui-small\);\n  font-weight: 500;/, "a card's label is set at a heading's weight");
+    assert.match(rule(css, ".card-head"), /font-size: var\(--ui-text\);\n  font-weight: 500;/, "a card's label is set apart from the rows it labels");
+    // What a row holds is one size, whatever kind of thing it is: a name, a
+    // figure, the quiet Delete beside them.
+    for (const selector of [".model-meta", "button.model-delete", ".copies"]) {
+      assert.match(rule(css, selector), /font-size: var\(--ui-text\)/, `${selector} is set apart from the rows it stands in`);
+    }
     for (const selector of [".dictionary-name", ".show-all", ".fold summary h3"]) {
       assert.match(rule(css, selector), /font-weight: var\(--ui-label-weight\)/, `${selector} is set heavier than the labels around it`);
     }

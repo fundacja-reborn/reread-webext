@@ -36,9 +36,16 @@
      which is the one thing a list of five names must not be (§8). */
   --ui-h4: 0.9375rem;
   --ui-h5: 0.8125rem;
-  --ui-text: 0.9375rem;
+  /* Two sizes on the whole page, and no third (Michał, 2026-09-19): the rows'
+     own - every label, every name, every value, every button and every card
+     label - and the small print that explains them. At the size a browser's
+     own settings are set in, which is what this page is dressed as: a row of
+     re/read's settings used to read a step larger than the same row of
+     Brave's, and inside a card the name of a model stood a step over the
+     "Delete" beside it. A finger gets both a step up (below). */
+  --ui-text: 0.8125rem;
   --ui-label-weight: 400;
-  --ui-small: 0.8125rem;
+  --ui-small: 0.75rem;
   --ui-control: 2.25rem;
   /* The column of sections, and the air that puts its first line on the
      title's own line. The top is arithmetic, not taste: the title's text
@@ -805,15 +812,16 @@ section > header:not(:has(> :not([hidden]))) {
   content: none;
 }
 
-/* A card's own label - "Downloaded by you:", "Download more dictionaries",
-   a language in the list of dictionaries: the quiet voice, one step smaller
-   than the rows, and half a step of weight rather than a heading's bold
-   (Michał's second round: one size inside a card, and no bolding that is not
-   doing work). It stands close to what it names. */
+/* A card's own label - "Downloaded by you:", "Download dictionaries", a
+   language in the list of dictionaries: the rows' own size, the quiet ink,
+   and half a step of weight rather than a heading's bold (Michał's rounds:
+   one size inside a card, and no bolding that is not doing work - a label
+   set smaller than the names under it was one more size to read). It stands
+   close to what it names. */
 .card-head {
   padding: 1rem var(--row-pad-x) 0.25rem;
   color: var(--page-muted);
-  font-size: var(--ui-small);
+  font-size: var(--ui-text);
   font-weight: 500;
   line-height: 1.4;
 }
@@ -1303,7 +1311,7 @@ p.explain.row-more {
   justify-content: flex-end;
   gap: 0.25rem 0.75rem;
   color: var(--page-muted);
-  font-size: var(--ui-small);
+  font-size: var(--ui-text);
   font-variant-numeric: tabular-nums;
   text-align: end;
 }
@@ -1487,7 +1495,7 @@ ul.models {
   max-width: 36ch;
   min-height: var(--ui-control);
   font: inherit;
-  font-size: var(--ui-small);
+  font-size: var(--ui-text);
   padding: 0.35rem 0.6rem;
   border-radius: 6px;
   border: 1px solid var(--page-border);
@@ -1561,7 +1569,7 @@ button.model-delete {
   padding: 0.35rem 0.8rem;
   border-color: transparent;
   color: var(--page-muted);
-  font-size: var(--ui-small);
+  font-size: var(--ui-text);
   white-space: nowrap;
 }
 
@@ -2058,7 +2066,7 @@ button.step-done {
   margin: 0 var(--row-pad-x);
   border-collapse: collapse;
   color: var(--page-muted);
-  font-size: var(--ui-small);
+  font-size: var(--ui-text);
   font-variant-numeric: tabular-nums;
   text-align: start;
 }
@@ -2079,7 +2087,7 @@ button.step-done {
    fill - a fill is one of the sixteen greys an e-ink panel rounds away. */
 .copies thead th {
   padding-top: 0;
-  font-size: 0.8125rem;
+  font-size: var(--ui-small);
   border-bottom: var(--sep-row);
 }
 

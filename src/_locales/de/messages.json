@@ -1763,13 +1763,9 @@
   },
   "options_no_translation": { "message": "Ohne Übersetzungsmodell verwenden" },
   "options_no_translation_hint": {
-    "message": "Nur Wörterbücher, ohne maschinelle Übersetzung; Leseansicht, Offline-Leseliste und Textmarker funktionieren weiter."
+    "message": "Wenn diese Option aktiviert ist, zeigt die Sprechblase weiterhin Bedeutungen aus Wörterbüchern, und Phrasen lassen sich speichern und unterstreichen. Ideal zum Lesen mit Wörterbüchern oder in der Muttersprache."
   },
 
-  "options_no_translation_more": {
-    "message": "Mit einem gewählten Sprachpaar zeigt die Sprechblase weiterhin Bedeutungen aus Wörterbüchern, und Phrasen lassen sich speichern und unterstreichen. Ideal zum Lesen mit Wörterbüchern oder in der Muttersprache. Gespeicherte Daten werden nicht gelöscht und kehren zurück, wenn Sie die Option ausschalten.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "Keine Sprechblase beim Auswählen von Text zeigen" },
   "options_bubble_off_hint": {
     "message": "Auf einer gewöhnlichen Seite tut das Auswählen von Text gar nichts - eine Seite öffnen Sie in der Leseansicht über die Schaltfläche von re/read oder mit Alt+Umschalt+R."

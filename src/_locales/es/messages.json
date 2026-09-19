@@ -1814,13 +1814,9 @@
   },
   "options_no_translation": { "message": "Usar sin modelo de traducción" },
   "options_no_translation_hint": {
-    "message": "Solo diccionarios, sin traducción automática; la vista de lectura, la lista de lectura sin conexión y el marcador siguen funcionando."
+    "message": "Con esta opción activada, la burbuja sigue mostrando significados de los diccionarios, y puedes guardar frases y ver sus subrayados. Ideal para leer con diccionarios o en tu idioma materno."
   },
 
-  "options_no_translation_more": {
-    "message": "Con un par de idiomas elegido, la burbuja sigue mostrando significados de los diccionarios, y puedes guardar frases y ver sus subrayados. Ideal para leer con diccionarios o en tu idioma materno. Tus datos guardados no se borran y vuelven al desactivar esta opción.",
-    "description": "The rest of the options_no_translation_hint description, behind the row's More button."
-  },
   "options_bubble_off": { "message": "No mostrar la burbuja al seleccionar texto" },
   "options_bubble_off_hint": {
     "message": "En una página normal, seleccionar texto no hace nada - abre una página en la vista de lectura con el botón de re/read o con Alt+Mayús+R."
