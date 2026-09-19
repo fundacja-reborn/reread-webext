@@ -1649,13 +1649,9 @@
   },
   "options_reader_only": { "message": "Unterstreichungen und Sprechblase nur in der Leseansicht zeigen" },
   "options_reader_only_hint": {
-    "message": "Auf einer gewöhnlichen Seite erscheint nach dem Markieren von Text stattdessen eine Sprechblase mit zwei Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
+    "message": "Auf einer gewöhnlichen Seite erscheint nach dem Markieren von Text statt der Übersetzungs-Sprechblase eine Sprechblase mit zwei Schaltflächen: die Seite in der Leseansicht öffnen und zur Leseliste gehen."
   },
 
-  "options_reader_only_more": {
-    "message": "Ist die Option eingeschaltet, kann keine Webseite feststellen, welche ihrer Wörter Sie gespeichert haben. Auf Android und iOS ist die Option standardmäßig eingeschaltet.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Seitenzahl zeigen" },
   "options_page_number_hint": {

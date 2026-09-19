@@ -2037,13 +2037,9 @@
   },
   "options_reader_only": { "message": "Show the underlines and the bubble only in the reader" },
   "options_reader_only_hint": {
-    "message": "On an ordinary page, selecting text brings up a bubble with two buttons instead: open the page in the reader, and go to the reading list."
+    "message": "On an ordinary page, selecting text brings up a bubble with two buttons instead of the translation bubble: open the page in the reader, and go to the reading list."
   },
 
-  "options_reader_only_more": {
-    "message": "With it on, no web page can tell which of its words you have saved. On Android and iOS it is on by default.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Show the page number" },
   "options_page_number_hint": {

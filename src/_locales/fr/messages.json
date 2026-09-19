@@ -1734,13 +1734,9 @@
   },
   "options_reader_only": { "message": "Afficher les soulignements et la bulle uniquement dans le lecteur" },
   "options_reader_only_hint": {
-    "message": "Sur une page ordinaire, après une sélection de texte, une bulle apparaît avec deux boutons : ouvrir la page dans le lecteur et aller à la liste de lecture."
+    "message": "Sur une page ordinaire, après une sélection de texte, une bulle avec deux boutons apparaît à la place de la bulle de traduction : ouvrir la page dans le lecteur et aller à la liste de lecture."
   },
 
-  "options_reader_only_more": {
-    "message": "Lorsqu'elle est activée, aucune page web ne peut savoir lesquels de ses mots vous avez enregistrés. Sur Android et iOS, l'option est activée par défaut.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Afficher le numéro de page" },
   "options_page_number_hint": {

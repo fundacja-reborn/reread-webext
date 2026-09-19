@@ -2345,13 +2345,9 @@
   },
   "options_reader_only": { "message": "Pokazuj podkreślenia i dymek tylko w widoku czytania" },
   "options_reader_only_hint": {
-    "message": "Na zwykłej stronie po zaznaczeniu tekstu pojawi się dymek z przyciskami do otwarcia strony w widoku czytania i do czytelni."
+    "message": "Na zwykłej stronie po zaznaczeniu tekstu zamiast dymka tłumaczenia pojawi się dymek z przyciskami do otwarcia strony w widoku czytania i do czytelni."
   },
 
-  "options_reader_only_more": {
-    "message": "Przy włączonej opcji żadna strona nie może stwierdzić, które z jej słów masz zapisane. Na Androidzie i iOS opcja jest domyślnie włączona.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Pokazuj numer strony" },
   "options_page_number_hint": {

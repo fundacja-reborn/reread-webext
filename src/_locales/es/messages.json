@@ -1700,13 +1700,9 @@
   },
   "options_reader_only": { "message": "Mostrar los subrayados y la burbuja solo en la vista de lectura" },
   "options_reader_only_hint": {
-    "message": "En una página normal, al seleccionar texto aparece una burbuja con dos botones: abrir la página en la vista de lectura e ir a la lista de lectura."
+    "message": "En una página normal, al seleccionar texto aparece, en lugar de la burbuja de traducción, una burbuja con dos botones: abrir la página en la vista de lectura e ir a la lista de lectura."
   },
 
-  "options_reader_only_more": {
-    "message": "Con la opción activada, ninguna página web puede saber cuáles de sus palabras has guardado. En Android e iOS la opción está activada de forma predeterminada.",
-    "description": "The rest of the options_reader_only_hint description, behind the row's More button."
-  },
 
   "options_page_number": { "message": "Mostrar el número de página" },
   "options_page_number_hint": {
