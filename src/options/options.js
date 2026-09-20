@@ -2213,6 +2213,48 @@ function chosenLanguage(id, fallback) {
 }
 
 /**
+ * The arrow of a move button, drawn rather than typed.
+ *
+ * The typed arrows (U+2191, U+2193) are whatever the system's font makes of
+ * them, and the fonts disagree: macOS draws a full head, Android's Roboto a
+ * hairline with a head too small to read at a glance (Michał's Pixel,
+ * 2026-09-20 - "the arrows are very small, their heads in particular"). A
+ * drawing looks the same everywhere: the back arrow's own strokes, turned
+ * upright, in the button's ink - so the resting, hover and disabled colours
+ * the button already has dress the arrow too.
+ *
+ * The proportions are the typed arrow's as macOS drew it, measured (12.3px
+ * tall, a head 9.9px wide, a 1.4px stem at the size the button had): the
+ * first drawing kept the back arrow's wider head at a larger size and read
+ * as heavy beside the words of the row (Michał, the same day - "the
+ * thickness and the size of the ones the desktop had before"). So the head's
+ * arms are 3.95 units, not the back arrow's 4.2, and the size lives in the
+ * stylesheet, which scales all three numbers together.
+ *
+ * @param {-1 | 1} step
+ * @returns {SVGSVGElement}
+ */
+function moveIcon(step) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "move-icon");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  // Decoration to assistive tech - the button's aria-label carries the words.
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+
+  const path = document.createElementNS(NS, "path");
+  path.setAttribute("d", step < 0 ? "M8 13.25V3.1M4.05 7.05 8 3.1l3.95 3.95" : "M8 2.75V12.9M4.05 8.95 8 12.9l3.95-3.95");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", "1.3");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  svg.append(path);
+  return svg;
+}
+
+/**
  * One arrow of a stored dictionary's row.
  *
  * Two buttons rather than a drag: this page is read on a phone, on e-ink and
@@ -2231,7 +2273,7 @@ function moveButton(dictionary, step, enabled) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "model-move";
-  button.textContent = step < 0 ? "↑" : "↓";
+  button.append(moveIcon(step));
   button.disabled = !enabled || importing;
   // Said twice for the end of the list - the attribute and the state - so
   // an assistive technology that reads only one of them still hears it.

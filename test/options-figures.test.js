@@ -87,7 +87,7 @@ describe("the door inside the copies note", () => {
     const door = rule(css, ".note .doorway");
     assert.match(door, /color: var\(--page-accent\)/, "a door is not the colour of a link");
     assert.match(door, /text-decoration: underline/, "a door is not underlined like a link");
-    assert.doesNotMatch(door, /content: "\\25B8/, "a door still draws a fold's triangle");
+    assert.doesNotMatch(door, /content:|clip-path/, "a door still draws a fold's triangle");
 
     // It still opens the page itself - this round changes no protocol.
     const script = await source("options/options.js");

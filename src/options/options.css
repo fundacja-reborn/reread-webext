@@ -1334,13 +1334,55 @@ button.note-more {
   transition: none;
 }
 
-button.note-more::before {
-  content: "\25B8\00A0";
+/* The fold marker itself, drawn by the sheet rather than typed. The typed
+   pair (U+25B8, U+25BE) are the "small" triangles, and small is what they
+   were: measured 3.5px across beside 13px words, shaped by whatever font the
+   system had - Michał, 2026-09-20: "microscopic, you can hardly see it change
+   direction on a press". A box clipped to a triangle is the same everywhere
+   and a size this sheet chooses: 0.54em, the height of the lowercase letters
+   beside it (7px beside 13px words, 8.6px beside 16px ones), so it stands on
+   the word's own line, the turn from right to down is plain to see, and it
+   stays smaller than the capitals - a mark, not an icon.
+
+   One rule for the three doors that wear it (D259, K1): the row notes' More,
+   a list's Show all and a folded section's summary. Its ink is each door's
+   own `color`, which is how the hover and the quiet greys below still reach
+   it. No transition on the turn (e-ink, as above).
+
+   On a More only where it folds something: the quiet buttons that borrow
+   this dress without folding anything - Hide and Show the first steps, the
+   search line's Clear - carry no `aria-expanded`, and a triangle that can be
+   seen would promise a fold they do not have. */
+button.note-more[aria-expanded]::before,
+.show-all::before,
+.fold > summary::before {
+  content: "";
+  display: inline-block;
+  flex: none;
+  width: 0.54em;
+  height: 0.54em;
+  margin-inline-end: 0.3em;
+  background: currentColor;
+  clip-path: polygon(11% 0, 89% 50%, 11% 100%);
   text-decoration: none;
 }
 
-button.note-more[aria-expanded="true"]::before {
-  content: "\25BE\00A0";
+button.note-more[aria-expanded="true"]::before,
+.show-all[aria-expanded="true"]::before,
+.fold[open] > summary::before {
+  clip-path: polygon(0 11%, 100% 11%, 50% 89%);
+}
+
+/* A forced palette paints every background in the window's paper, which
+   would erase a mark made of background alone - so there it keeps a fill of
+   its own, in the system's text colour. */
+@media (forced-colors: active) {
+  button.note-more[aria-expanded]::before,
+  .show-all::before,
+  .fold > summary::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
 }
 
 button.note-more:hover,
@@ -1702,15 +1744,32 @@ ul.models {
    controls. Square, so the pair costs one Delete's width on a phone; the
    element is in the selector for the same reason it is below. */
 button.model-move {
+  /* Centred both ways: the label is a drawing (`moveIcon` in options.js),
+     and a drawing has no baseline to stand on. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: var(--ui-control);
   min-width: var(--ui-control);
   padding: 0.35rem;
   border-color: transparent;
   color: var(--page-muted);
-  /* The glyph is the label: at the button's own font size it reads as
-     punctuation next to the words around it. */
-  font-size: 1.05rem;
   line-height: 1;
+}
+
+/* The arrow itself. Drawn, because the typed one is the system font's to
+   shape and Android's has a head too small to read (Michał's Pixel,
+   2026-09-20). The box is what makes it the arrow the desktop had before,
+   measured: 17.2px beside 13px words draws it 12.3px tall with a 1.4px
+   stroke, as macOS typed it - at 1.6 it came out a fifth larger and heavier
+   and dominated the row (Michał, the same day). Sized from the row's own
+   text, so under a finger it keeps that proportion: 21.1px beside 16px
+   words. It takes the button's ink, so the resting, hover and disabled
+   colours above and below need no rule of their own. */
+.move-icon {
+  width: calc(var(--ui-text) * 1.32);
+  height: calc(var(--ui-text) * 1.32);
+  flex: none;
 }
 
 .model-move:hover:not(:disabled),
@@ -1818,13 +1877,10 @@ button.model-delete {
   text-align: start;
 }
 
+/* The triangle is the page's one fold marker, drawn by the shared rule above
+   (`button.note-more[aria-expanded]::before`); here it only takes its grey. */
 .show-all::before {
-  content: "\25B8\00A0";
   color: var(--page-muted);
-}
-
-.show-all[aria-expanded="true"]::before {
-  content: "\25BE\00A0";
 }
 
 .show-all:hover,
@@ -1870,7 +1926,7 @@ button.model-delete {
   padding: var(--row-pad-y) var(--row-pad-x);
   cursor: pointer;
   /* The browser's own triangle goes, because the one below is the page's:
-     the same glyph the row notes' More wears, in the same grey. */
+     the same mark the row notes' More wears, in the same grey. */
   list-style: none;
 }
 
@@ -1878,13 +1934,10 @@ button.model-delete {
   display: none;
 }
 
+/* Drawn by the shared rule above, turned by `.fold[open]` there; here it
+   only takes its grey. */
 .fold > summary::before {
-  content: "\25B8\00A0";
   color: var(--page-muted);
-}
-
-.fold[open] > summary::before {
-  content: "\25BE\00A0";
 }
 
 /* The heading sits on the marker's line, at the row labels' size - and the
