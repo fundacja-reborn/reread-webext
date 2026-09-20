@@ -1719,7 +1719,8 @@
   },
   "reader_mark_text_changed": { "message": "Le texte de la page a changé depuis le surlignage, qui ne peut donc pas être affiché ici." },
   "reader_marks_missing_doc": { "message": "Son document n'est plus enregistré - cette citation est revenue de la copie. Rouvrez la page et le surlignage y sera." },
-  "options_pair_hint": { "message": "Affiche les paires de langues téléchargées sur cet appareil. Pour ajouter d'autres langues, téléchargez-les dans la section" },
+  "options_pair_hint": { "message": "Affiche les paires de langues téléchargées sur cet appareil. Pour ajouter d'autres langues, téléchargez-les dans les sections" },
+  "options_pair_hint_or": { "message": "ou" },
   "options_pair_hint_rest": { "message": "ci-dessous." },
   "options_pair_none": { "message": "Pas encore de modèle ni de dictionnaire - ajoutez-en un ci-dessous" },
   "options_pair_dictionary_only": {

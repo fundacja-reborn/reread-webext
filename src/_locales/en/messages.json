@@ -2012,11 +2012,15 @@
   },
   "options_pair_hint": {
     "message": "Shows the language pairs downloaded to this device. To add new languages, download them in the",
-    "description": "Followed by an anchor link wearing the options_models_heading text, then options_pair_hint_rest. No part starts or ends with whitespace."
+    "description": "Followed by an anchor link wearing the options_models_heading text, then options_pair_hint_or, a second anchor wearing options_dictionaries_heading, and options_pair_hint_rest. No part starts or ends with whitespace."
+  },
+  "options_pair_hint_or": {
+    "message": "or",
+    "description": "Stands between the pair hint's two anchor links - the models section and the dictionaries section. Must not start or end with whitespace."
   },
   "options_pair_hint_rest": {
-    "message": "section below.",
-    "description": "The end of the pair hint, after the anchor link that wears the options_models_heading text; closes the sentence with its own full stop. Must not start or end with whitespace."
+    "message": "sections below.",
+    "description": "The end of the pair hint, after the second anchor link; closes the sentence with its own full stop. Must not start or end with whitespace."
   },
   "options_pair_none": {
     "message": "No model or dictionary yet - add one below",
