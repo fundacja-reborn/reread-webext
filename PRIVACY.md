@@ -209,8 +209,8 @@ own scripts cannot select a phrase or press a button on the extension's behalf.
 
 Two counts are kept with each saved phrase, on your device like the phrase itself: how
 many times you opened its bubble (clicked its underline, or selected it again), and how many
-times it occurred in the texts you finished in the reader - a part of a book you left
-through the **Next** button under its text, or an article you marked as read - each with
+times it occurred in the texts you finished in the reader - a book's text as you read on
+past it, or an article you marked as read - each with
 the time it last happened. They are shown on the saved phrases page, which can order the
 list by them. They record no page, no title and no text: not where you met the phrase, only
 how often. A page you read outside the reader adds to the first count only, when you open a

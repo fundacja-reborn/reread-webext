@@ -1037,7 +1037,8 @@
       "percent": { "content": "$1", "example": "34" }
     }
   },
-  "reader_book_nav": { "message": "Buchteile" },
+  "reader_book_earlier": { "message": "Vorheriger Text" },
+  "reader_book_onward": { "message": "Weiterlesen" },
   "reader_book_toc": { "message": "Inhalt" },
   "reader_search_title": { "message": "Im Text suchen" },
   "reader_search_label": { "message": "Die gesuchte Phrase" },

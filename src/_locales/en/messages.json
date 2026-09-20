@@ -1344,9 +1344,13 @@
       "percent": { "content": "$1", "example": "34" }
     }
   },
-  "reader_book_nav": {
-    "message": "Book parts",
-    "description": "Accessible name of the two rows that turn a book's segments."
+  "reader_book_earlier": {
+    "message": "Earlier text",
+    "description": "Over the first line of a long book's text when it is scrolled, not read by pages: the step back to the text before what is on screen. Named for the reading - the book is never said to be in parts."
+  },
+  "reader_book_onward": {
+    "message": "Continue reading",
+    "description": "Under the last line of a long book's text when it is scrolled: the step on to the text that follows. See reader_book_earlier."
   },
   "reader_book_toc": {
     "message": "Contents",

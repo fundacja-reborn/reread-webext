@@ -60,6 +60,7 @@ import { lookUpAnswer } from "../lib/dict/lookup.js";
 import { describeError } from "../lib/messages.js";
 import { ErrorCode, Message, asPage, asPageRequest, asResult, ok } from "../lib/protocol.js";
 import { NO_BASE, buildArticle } from "../lib/reader/article.js";
+import { bookFrame } from "../lib/reader/book-frame.js";
 import { MAX_DOWNLOAD_BYTES, pictureSources, picturesState, picturesSummary } from "../lib/reader/pictures.js";
 import { sourceOf, webAddress } from "../lib/reader/source.js";
 import {
@@ -503,27 +504,16 @@ const bookImportLine = document.getElementById("book-import-status");
 const bookNote = document.getElementById("book-note");
 const bookNoteText = document.getElementById("book-note-text");
 const bookNoteSettings = document.getElementById("book-note-settings");
-const segmentNavs = [
-  document.getElementById("segment-nav"),
-  document.getElementById("segment-nav-end"),
-];
-const segmentLabels = [
-  document.getElementById("segment-label"),
-  document.getElementById("segment-label-end"),
-];
-const segmentPrevs = [
-  document.getElementById("segment-prev"),
-  document.getElementById("segment-prev-end"),
-];
-const segmentNexts = [
-  document.getElementById("segment-next"),
-  document.getElementById("segment-next-end"),
-];
-/** The Next under the text alone: the one that says a part was read to its end (D209). */
-const segmentNextEndButton = document.getElementById("segment-next-end");
-// The book's table of contents (D116): the two doors in the pagers, and the
-// dialog they open.
-const tocButtons = [document.getElementById("toc"), document.getElementById("toc-end")];
+// The two quiet steps around a book's text in the scroll layout (D270): back
+// to the earlier text over the first line, on with the reading under the
+// last. The ids are the pager's they replace - names a reader may have
+// dressed with a rule of their own (D176).
+const segmentNavTop = document.getElementById("segment-nav");
+const segmentNavEnd = document.getElementById("segment-nav-end");
+const segmentEarlierButton = document.getElementById("segment-prev");
+/** The step under the text: it says the text above it was read to its end (D209). */
+const segmentOnwardButton = document.getElementById("segment-next-end");
+// The book's table of contents (D116): the dialog the menu's row opens.
 const tocDialog = /** @type {HTMLDialogElement | null} */ (
   document.getElementById("toc-dialog")
 );
@@ -654,6 +644,16 @@ let shownPictures = [];
 let shownWords = 0;
 /** @type {number | null} */
 let foundPhrases = null;
+
+/**
+ * The whole book's length, for the line under its title (D270): a number
+ * once counted, null while a book from before the count (D226) waits for its
+ * sum, undefined over a document that is not a book - whose length is the
+ * text on screen (`shownWords`).
+ *
+ * @type {number | null | undefined}
+ */
+let wholeBookWords;
 
 /**
  * The addresses whose reader said no on this way in: deleted from the
@@ -1117,6 +1117,7 @@ function setBase(doc, url) {
  *   lang: string | null,
  *   link: string | null,
  *   segment?: { index: number, count: number },
+ *   words?: number | null,
  *   source: Element,
  *   pictures?: import("../lib/reader/article.js").Pictures,
  * }} piece
@@ -1124,7 +1125,8 @@ function setBase(doc, url) {
  *   `link` is the address worth offering as "Open the original", which a
  *   book does not have; `pictures` is how the saved pictures are shown
  *   (D145, and a book's, D183) - absent, the text keeps its pictures'
- *   addresses and shows none.
+ *   addresses and shows none; `segment` is the stretch of a book on screen
+ *   and `words` the whole book's length, null while it is not known (D270).
  */
 function renderArticle(piece) {
   if (article === null || contentElement === null || titleElement === null) return;
@@ -1187,6 +1189,22 @@ function renderArticle(piece) {
     bylineElement.textContent = piece.credit.join(" - ");
     bylineElement.hidden = piece.credit.length === 0;
   }
+  // A book wears its head once, at its beginning (D270, `bookFrame`): the
+  // title, the author and the length over every stretch - sixty-three times
+  // in a long novel - took half of a phone's page each time, and said of a
+  // piece of housekeeping that it was a chapter. Past the beginning the text
+  // simply goes on: the stylesheet reads the attribute and takes the title
+  // block away. Absent over an article.
+  const place = piece.origin === "book" && piece.segment !== undefined ? bookFrame(piece.segment) : null;
+  if (place === null) article.removeAttribute("data-book-place");
+  else article.setAttribute("data-book-place", place.head ? "start" : "within");
+  // Where the title is not shown the article is named by it, so a screen
+  // reader landing in the middle of a book still hears which one.
+  if (place !== null && !place.head) article.setAttribute("aria-label", piece.title);
+  else article.removeAttribute("aria-label");
+  // The length the head states: a book's own, whole (null until counted);
+  // undefined over everything else, whose length is the text on screen.
+  wholeBookWords = piece.origin === "book" ? (piece.words ?? null) : undefined;
   // The pictures line (D231) waits for the database's say like the action
   // rows do: the offer of the document just left must not stand over this one.
   if (picturesOffer !== null) picturesOffer.hidden = true;
@@ -1311,6 +1329,20 @@ function renderFacts() {
   if (factsElement === null) return;
   /** @type {string[]} */
   const pieces = [];
+  if (wholeBookWords !== undefined) {
+    // Under a book's title the length is the book's (D270), as its row in
+    // the list says it: the stretch on screen is nothing the reader was told
+    // about, and "2100 words - about 11 minutes" under the title of a novel
+    // was a fact about this extension's storage. No count of saved phrases
+    // here: the paint has only seen the stretch on screen, and "in this
+    // text" under a book's title would claim the book.
+    if (wholeBookWords !== null && wholeBookWords > 0) {
+      pieces.push(plural(wholeBookWords, "reader_words"), timeLabel(wholeBookWords));
+    }
+    factsElement.textContent = pieces.join(" · ");
+    factsElement.hidden = pieces.length === 0;
+    return;
+  }
   if (shownWords > 0) pieces.push(plural(shownWords, "reader_words"), timeLabel(shownWords));
   if (foundPhrases !== null) {
     pieces.push(
@@ -2405,6 +2437,21 @@ function landOnLastPage() {
   const pages = pagesNow();
   if (pages === null) return false;
   showPageOf(pages, pages.tops.length - 1);
+  return true;
+}
+
+/**
+ * The same landing for a scrolled book (D270): the step back to the earlier
+ * text opens the stretch before at its END, where that text left off, with
+ * the step on with the reading under its last line - not at its first line
+ * a quarter of an hour further back, which is where the pager's Previous
+ * used to land. As far down as the window goes; instant, like every landing
+ * here.
+ *
+ * @returns {boolean}
+ */
+function landAtEnd() {
+  scrollTo(0, document.documentElement.scrollHeight);
   return true;
 }
 
@@ -4246,52 +4293,32 @@ async function openSaved(url, target) {
 }
 
 /**
- * The two rows around a book's text: which part is on screen, and the way to
- * its neighbours. Or, with null, no rows at all - which is every view that
- * is not a book - and none over a book of one part either (a Markdown text
- * that fit in one, a short EPUB; Michał's smoke, 2026-09-16): with no
- * neighbour to turn to, "Part 1 of 1" between two dead buttons said
- * nothing, and the contents stay a menu row away (D117).
+ * The two steps around a book's text (D270, `bookFrame`): back to the
+ * earlier text over the first line, on with the reading under the last -
+ * each only where there is text that way. Or, with null, neither - which is
+ * every view that is not a book, and a book kept in one stretch too. Whether
+ * a step that the place allows is seen at all is the layout's say, in the
+ * stylesheet: read by pages, a turn crosses from one stretch to the next by
+ * itself and both rows are hidden, so the layout can change under a book on
+ * screen with nothing here to redo.
  *
  * @param {{ index: number, count: number } | null} segment
  */
 function showSegmentNav(segment) {
-  const shown = segment !== null && segment.count > 1;
-  for (const nav of segmentNavs) {
-    if (nav !== null) nav.hidden = !shown;
-  }
-  if (segment === null || !shown) return;
-  for (const label of segmentLabels) {
-    if (label !== null) {
-      label.textContent = t("reader_book_part_of", [
-        (segment.index + 1).toLocaleString(),
-        segment.count.toLocaleString(),
-      ]);
-    }
-  }
-  // A button with nowhere to go leaves the row rather than standing greyed
-  // (Michał, 2026-09-16): "Previous" over the first part, "Next" under the
-  // last. It keeps its slot (`.pager-blank`), so the label and the other
-  // button do not move between two turns.
-  for (const button of segmentPrevs) blankPager(button, segment.index <= 0);
-  for (const button of segmentNexts) blankPager(button, segment.index >= segment.count - 1);
-}
-
-/**
- * @param {HTMLElement | null} button
- * @param {boolean} blank whether the button has nowhere to go
- */
-function blankPager(button, blank) {
-  if (!(button instanceof HTMLButtonElement)) return;
-  button.disabled = blank;
-  button.classList.toggle("pager-blank", blank);
+  const frame = segment === null ? null : bookFrame(segment);
+  if (segmentNavTop !== null) segmentNavTop.hidden = frame === null || !frame.earlier;
+  if (segmentNavEnd !== null) segmentNavEnd.hidden = frame === null || !frame.onward;
 }
 
 /**
  * The quiet line over a book whose language is not what the current pair
- * translates from (O20): said once, with the settings one press away, and
- * never acted on by itself. Books that do not declare a language, and books
- * that match, say nothing.
+ * translates from (O20): with the settings one press away, and never acted
+ * on by itself. Books that do not declare a language, and books that match,
+ * say nothing. Said at the book's beginning alone (D270, the caller's
+ * rule): it is about the book, and over every stretch of it - sixty-three
+ * times in a long novel - it was a standing banner about a setting, in the
+ * middle of the reading. A word selected in such a book still says what is
+ * the matter where it matters: the bubble names the language it found.
  *
  * @param {import("../lib/store/book.js").BookMeta | null} book
  */
@@ -4314,14 +4341,12 @@ function showBookNote(book) {
 }
 
 /**
- * The doors to the table of contents - the pagers' two icons and the menu's
- * row (D117) - shown only over a document that has one. The menu row is the
- * stuck bar's door: the pagers scroll away with the text, the bar does not.
+ * The door to the table of contents - the menu's row (D117), in the stuck
+ * bar, where it stays in reach however far the text has gone - shown only
+ * over a document that has one. The pagers carried an icon for it too until
+ * D270 took the pagers away.
  */
 function updateTocButtons() {
-  for (const button of tocButtons) {
-    if (button !== null) button.hidden = docToc.length === 0;
-  }
   if (navToc !== null) navToc.hidden = docToc.length === 0;
 }
 
@@ -4639,14 +4664,19 @@ async function openBook(id, wanted, target) {
     lang: book.lang,
     link: null,
     segment: { index, count: book.segmentCount },
+    // The length its head states is the whole book's (D270) - the stretch on
+    // screen is nothing the reader was ever told about. Null until a book
+    // from before the count has had its sum (D226, below).
+    words: book.words ?? null,
     // Our own rebuilt markup, stored at import - and still not trusted back:
     // parsed inert and rebuilt through the allowed list again.
     source: new DOMParser().parseFromString(segment.blocks.join(""), "text/html").body,
     pictures: shownSet.resolve,
   });
   shownPictures = shownSet.addresses;
+  const frame = bookFrame({ index, count: book.segmentCount });
   showSegmentNav({ index, count: book.segmentCount });
-  showBookNote(book);
+  showBookNote(frame.head ? book : null);
   docToc = book.toc ?? [];
   updateTocButtons();
   // A row from before the TOC existed is owed its scan (D116) - behind the
@@ -4671,7 +4701,7 @@ async function openBook(id, wanted, target) {
         : "start" in target
           ? scrollToTargetMark(target)
           : "end" in target
-            ? landOnLastPage()
+            ? landOnLastPage() || landAtEnd()
             : scrollToBlock(target.block);
   if (!landed) restorePosition(position, index);
   // Same reason as `openSaved`: the open winds the position row's clock. For
@@ -4873,9 +4903,12 @@ function scrollToBlock(block) {
 }
 
 /**
- * One press on Previous or Next: the neighbouring segment in the same tab,
- * no navigation and no animation. The position of the segment being left was
- * flushed by `renderArticle` before its blocks went away.
+ * The neighbouring stretch of the book in the same tab, no navigation and
+ * no animation: the one after opens at its first line, the one before at
+ * its END (D270) - the text runs on both ways, so going back arrives where
+ * the earlier text left off, the way a page turned back does. The position
+ * of the stretch being left was flushed by `renderArticle` before its blocks
+ * went away.
  *
  * @param {number} step
  */
@@ -4884,7 +4917,8 @@ function turnSegment(step) {
   if (target === null || target.origin !== "book") return;
   const next = target.segmentIndex + step;
   if (next < 0 || next >= target.segmentCount) return;
-  void openBook(target.url, next);
+  if (step < 0) void openBook(target.url, next, { end: true });
+  else void openBook(target.url, next);
 }
 
 /**
@@ -5422,14 +5456,11 @@ function detailLine(entry) {
       ? ""
       : `${plural(entry.words, "reader_words")} · ${timeLabel(entry.words)}`;
   if (entry.kind === "book") {
-    const progress =
-      entry.progress === null
-        ? ""
-        : t("reader_book_part_of", [
-            entry.progress.at.toLocaleString(),
-            entry.progress.of.toLocaleString(),
-          ]);
-    detail.textContent = [entry.hostname, t("reader_book_label"), progress, length, pictures, percent]
+    // How far in the book the reading is, is the percent's to say - of the
+    // whole book, as it always was. The row used to say "Part 5 of 63" beside
+    // it: the stretches a long book is kept in are this extension's
+    // housekeeping and are said nowhere (D270).
+    detail.textContent = [entry.hostname, t("reader_book_label"), length, pictures, percent]
       .filter((part) => part.length > 0)
       .join(" - ");
   } else {
@@ -7100,8 +7131,19 @@ async function refreshActions() {
       : await getArticleMeta(target.url).catch(() => null);
   if (shown !== target) return;
 
-  actions.hidden = false;
-  if (actionsEnd !== null) actionsEnd.hidden = false;
+  const book = target.origin === "book";
+  // A book opens on its acts once, at its beginning, and closes on the acts
+  // of finishing once, under its last line (D270, `bookFrame`): between them
+  // there is text, and no stretch of it begins or ends with a row of buttons
+  // - least of all read by pages, where such a row would stand at the head of
+  // a page in the middle of a chapter. An article is its own beginning and
+  // its own end.
+  const frame = book
+    ? bookFrame({ index: target.segmentIndex, count: target.segmentCount })
+    : { head: true, ending: true };
+
+  actions.hidden = !frame.head;
+  if (actionsEnd !== null) actionsEnd.hidden = !frame.ending;
   if (toLibraryButton !== null) toLibraryButton.hidden = false;
   if (toLibraryEndButton !== null) toLibraryEndButton.hidden = false;
 
@@ -7113,13 +7155,9 @@ async function refreshActions() {
     keepButton.textContent = t("reader_save");
   }
 
-  const book = target.origin === "book";
   // The twins under the text stand only where the document finishes: under
-  // an article's last line, and under a book's LAST part - under any earlier
-  // part the honest next act is the pager's, one row above. The bar's copies
-  // stay on every part, because filing or dropping a book must not cost
-  // paging to its end.
-  const lastPart = !book || target.segmentIndex >= target.segmentCount - 1;
+  // an article's last line, and under a book's last one.
+  const lastPart = frame.ending;
 
   // Delete stands over everything that lives only in this database - a
   // saved article, whichever door it came through, and a book - and under
@@ -8510,15 +8548,16 @@ async function runBookImport(file, kind) {
   }
 }
 
-for (const button of segmentPrevs) button?.addEventListener("click", () => turnSegment(-1));
-// The Next under the text counts the part it leaves as finished (D209),
-// registered before the turn so the count reads the part still on screen.
-// Only that one: the bar's Next above is a way of moving, the one under the
-// last line is a way of arriving, and only arriving counts.
-segmentNextEndButton?.addEventListener("click", () => countFinished());
-for (const button of segmentNexts) button?.addEventListener("click", () => turnSegment(1));
+segmentEarlierButton?.addEventListener("click", () => turnSegment(-1));
+// The step under the text counts the text it leaves as finished (D209),
+// before the turn so the count reads the stretch still on screen: arriving
+// at the last line and reading on is what finishing is - the same count a
+// page turned past the last one makes, read by pages.
+segmentOnwardButton?.addEventListener("click", () => {
+  countFinished();
+  turnSegment(1);
+});
 
-for (const button of tocButtons) button?.addEventListener("click", () => openTocDialog());
 tocCloseButton?.addEventListener("click", () => closeTocDialog());
 // To a click the backdrop is the dialog element itself - everything inside
 // is covered by the header and the rows, which carry the padding.

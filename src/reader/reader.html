@@ -1347,10 +1347,12 @@
       </div>
 
       <!--
-        The book's language against the current pair (O20): said quietly,
-        once, outside the article element - interface, not text anybody is
-        studying - and never acted on by itself: the settings stay one press
-        away, the pair is never switched behind anybody's back.
+        The book's language against the current pair (O20): said quietly, at
+        the book's beginning alone (D270) - it is about the book, not about
+        the stretch of it on screen - outside the article element (interface,
+        not text anybody is studying), and never acted on by itself: the
+        settings stay one press away, as a link inside the sentence, and the
+        pair is never switched behind anybody's back.
       -->
       <p id="book-note" class="hint book-note" hidden>
         <span id="book-note-text"></span>
@@ -1358,18 +1360,28 @@
       </p>
 
       <!--
-        A book arrives one segment at a time, and these two rows are the way
-        between segments - the same quiet pager the lists speak (the chevrons
-        and their words, see the reading list's), above the text and again
-        under its last line, where finishing a segment leaves the reader.
-        Turning a segment swaps the content of this same page: no
-        navigation, no animation (e-ink).
+        A book is kept and rendered one stretch at a time, and nothing on this
+        page says so (D270, `lib/reader/book-frame.js`): the reader has a book,
+        its table of contents and its pages, and the stretches are this
+        extension's housekeeping. Read by pages a turn crosses from one
+        stretch to the next by itself, and the stylesheet hides both of these
+        rows. Scrolled, the window can go no further than a stretch's two
+        ends, so each end gets one quiet step named for the reading, never
+        for the part: back to the earlier text here, over the first line - it
+        opens the stretch before at its END, where that text left off - and on
+        with the reading under the last line (below). Up and down chevrons,
+        the scroll's own axis: a chevron pointing sideways is a page's.
+
+        The pager that stood here said "Part 2 of 63" between two framed
+        chevrons in the row's corners - which, over a book read by pages, is
+        what a control for the previous and the next page looks like, and a
+        press on one jumped a quarter of an hour of text (Michał, 2026-09-20).
       -->
-      <nav id="segment-nav" class="pager segment-nav" hidden aria-label="Book parts" data-i18n-aria-label="reader_book_nav">
+      <div id="segment-nav" class="segment-nav" hidden>
         <button type="button" id="segment-prev">
-          <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
             <path
-              d="M10.1 3.8 5.9 8l4.2 4.2"
+              d="M3.8 10.1 8 5.9l4.2 4.2"
               fill="none"
               stroke="currentColor"
               stroke-width="1.3"
@@ -1377,51 +1389,9 @@
               stroke-linejoin="round"
             />
           </svg>
-          <span class="pager-word" data-i18n="pager_prev">Previous</span>
+          <span data-i18n="reader_book_earlier">Earlier text</span>
         </button>
-        <!-- The way to the map of parts (D116), an icon beside the part it
-             locates - a word here would decide the row's width in six
-             languages. Hidden for a book without one. -->
-        <span class="segment-middle">
-          <button
-            type="button"
-            id="toc"
-            class="toc-button"
-            hidden
-            title="Contents"
-            data-i18n-title="reader_book_toc"
-            aria-label="Contents"
-            data-i18n-aria-label="reader_book_toc"
-          >
-            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path
-                d="M6.5 4.25h7M6.5 8h7M6.5 11.75h7"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.3"
-                stroke-linecap="round"
-              />
-              <circle cx="3.1" cy="4.25" r="0.9" fill="currentColor" />
-              <circle cx="3.1" cy="8" r="0.9" fill="currentColor" />
-              <circle cx="3.1" cy="11.75" r="0.9" fill="currentColor" />
-            </svg>
-          </button>
-          <span class="pager-label" id="segment-label"></span>
-        </span>
-        <button type="button" id="segment-next">
-          <span class="pager-word" data-i18n="pager_next">Next</span>
-          <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-            <path
-              d="M5.9 3.8 10.1 8l-4.2 4.2"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-      </nav>
+      </div>
 
       <article id="article" hidden>
         <h1 id="title"></h1>
@@ -1485,51 +1455,16 @@
         <div id="content"></div>
       </article>
 
-      <nav id="segment-nav-end" class="pager segment-nav" hidden aria-label="Book parts" data-i18n-aria-label="reader_book_nav">
-        <button type="button" id="segment-prev-end">
-          <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-            <path
-              d="M10.1 3.8 5.9 8l4.2 4.2"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.3"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span class="pager-word" data-i18n="pager_prev">Previous</span>
-        </button>
-        <span class="segment-middle">
-          <button
-            type="button"
-            id="toc-end"
-            class="toc-button"
-            hidden
-            title="Contents"
-            data-i18n-title="reader_book_toc"
-            aria-label="Contents"
-            data-i18n-aria-label="reader_book_toc"
-          >
-            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path
-                d="M6.5 4.25h7M6.5 8h7M6.5 11.75h7"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.3"
-                stroke-linecap="round"
-              />
-              <circle cx="3.1" cy="4.25" r="0.9" fill="currentColor" />
-              <circle cx="3.1" cy="8" r="0.9" fill="currentColor" />
-              <circle cx="3.1" cy="11.75" r="0.9" fill="currentColor" />
-            </svg>
-          </button>
-          <span class="pager-label" id="segment-label-end"></span>
-        </span>
+      <!-- On with the reading, under a stretch's last line (D270): the step the
+           scroll layout needs where the window ends and the book does not. It
+           counts the text above it as read to its end (D209), as the Next it
+           replaces did. -->
+      <div id="segment-nav-end" class="segment-nav" hidden>
         <button type="button" id="segment-next-end">
-          <span class="pager-word" data-i18n="pager_next">Next</span>
-          <svg class="pager-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <span data-i18n="reader_book_onward">Continue reading</span>
+          <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
             <path
-              d="M5.9 3.8 10.1 8l-4.2 4.2"
+              d="M3.8 5.9 8 10.1l4.2-4.2"
               fill="none"
               stroke="currentColor"
               stroke-width="1.3"
@@ -1538,7 +1473,7 @@
             />
           </svg>
         </button>
-      </nav>
+      </div>
 
       <!--
         The book's table of contents (D116): a native dialog, so Esc, the

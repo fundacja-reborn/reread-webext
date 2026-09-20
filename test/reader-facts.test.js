@@ -136,9 +136,12 @@ describe("the facts line (D226) - the count of words", () => {
     }
   });
 
-  it("stands on the list row between the date or the part and the pictures", async () => {
+  it("stands on the list row between the date or the book's label and the pictures", async () => {
     const reader = await source("src/reader/reader.js");
     assert.match(reader, /\[entry\.hostname, when, length, pictures, percent\]/);
-    assert.match(reader, /\[entry\.hostname, t\("reader_book_label"\), progress, length, pictures, percent\]/);
+    // A book's row said "Part 5 of 63" before the length until D270: the
+    // stretches a long book is kept in are said nowhere, and the percent at
+    // the row's end is of the whole book.
+    assert.match(reader, /\[entry\.hostname, t\("reader_book_label"\), length, pictures, percent\]/);
   });
 });

@@ -1535,7 +1535,8 @@
       "percent": { "content": "$1", "example": "34" }
     }
   },
-  "reader_book_nav": { "message": "Частини книжки" },
+  "reader_book_earlier": { "message": "Попередній текст" },
+  "reader_book_onward": { "message": "Читати далі" },
   "reader_book_toc": { "message": "Зміст" },
   "reader_search_title": { "message": "Пошук у тексті" },
   "reader_search_label": { "message": "Фраза для пошуку" },
