@@ -1474,13 +1474,6 @@
   "reader_transfer_link": { "message": "Імпорт та експорт (резервна копія або EPUB)" },
   "reader_transfer_accepts": { "message": "Імпорт читає поданий файл: резервну копію re/read (.zip - або старіші файли .json списку та позначень), електронну книгу (.epub) чи текст Markdown (.md)." },
   "reader_book_label": { "message": "Книжка" },
-  "reader_book_part_of": {
-    "message": "Частина $PART$ з $PARTS$",
-    "placeholders": {
-      "part": { "content": "$1", "example": "3" },
-      "parts": { "content": "$2", "example": "12" }
-    }
-  },
   "reader_words_one": {
     "message": "$COUNT$ слово",
     "placeholders": { "count": { "content": "$1", "example": "1" } }
@@ -1581,6 +1574,12 @@
     "placeholders": {
       "at": { "content": "$1", "example": "12" },
       "total": { "content": "$2", "example": "80" }
+    }
+  },
+  "reader_search_scanned": {
+    "message": "Переглянуто $PERCENT$% книги.",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "19" }
     }
   },
   "reader_search_in_titles": { "message": "У заголовках" },

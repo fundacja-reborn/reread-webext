@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   MIN_QUERY,
   SHOWN_SNIPPETS,
+  chapterHeadings,
   chapterOf,
   findHits,
   foldForSearch,
@@ -11,6 +12,7 @@ import {
   hitsInText,
   isSearchableQuery,
   metaMatches,
+  scanPercent,
   snippetAround,
   snippetPlan,
 } from "../src/lib/reader/search.js";
@@ -217,5 +219,69 @@ describe("chapterOf", () => {
   it("answers nothing before the first heading and without a table", () => {
     assert.equal(chapterOf(toc, 0, 1), null);
     assert.equal(chapterOf([], 3, 3), null);
+  });
+});
+
+// The headings between a book's hits (D270, stage 2): a chapter's own title
+// and nothing else. "Part 3 of 63 - The Ranch" named the stretch the book is
+// kept in, which is ours and is said nowhere.
+describe("chapterHeadings", () => {
+  /** @type {import("../src/lib/book/toc.js").TocEntry[]} */
+  const toc = [
+    { title: "One", level: 1, segmentIndex: 0, blockIndex: 2 },
+    { title: "Two", level: 1, segmentIndex: 1, blockIndex: 0 },
+  ];
+  const at = (/** @type {number} */ segmentIndex, /** @type {number} */ block) => ({ segmentIndex, block });
+
+  it("says a chapter once, over the first hit under it", () => {
+    assert.deepEqual(
+      chapterHeadings(toc, [at(0, 2), at(0, 9), at(1, 0), at(1, 4), at(5, 1)]),
+      ["One", null, "Two", null, null],
+    );
+  });
+
+  it("leaves hits before the first heading without one, however many stretches they cross", () => {
+    const late = [{ title: "Late", level: /** @type {const} */ (1), segmentIndex: 3, blockIndex: 0 }];
+    assert.deepEqual(chapterHeadings(late, [at(0, 0), at(1, 5), at(2, 8), at(3, 0)]), [null, null, null, "Late"]);
+  });
+
+  it("gives a book without a table no headings at all", () => {
+    // The stretches change under these hits and nothing marks it.
+    assert.deepEqual(chapterHeadings([], [at(0, 0), at(7, 3), at(40, 1)]), [null, null, null]);
+  });
+
+  it("tells two chapters of the same name apart by their place", () => {
+    /** @type {import("../src/lib/book/toc.js").TocEntry[]} */
+    const twice = [
+      { title: "I", level: 2, segmentIndex: 0, blockIndex: 1 },
+      { title: "I", level: 2, segmentIndex: 4, blockIndex: 0 },
+    ];
+    assert.deepEqual(chapterHeadings(twice, [at(0, 3), at(4, 2)]), ["I", "I"]);
+  });
+
+  it("answers one entry per hit, and nothing for no hits", () => {
+    assert.deepEqual(chapterHeadings(toc, []), []);
+  });
+});
+
+describe("scanPercent", () => {
+  it("counts the stretches already read through, rounded down", () => {
+    assert.equal(scanPercent(0, 63), 0);
+    assert.equal(scanPercent(12, 63), 19);
+    assert.equal(scanPercent(62, 63), 98);
+    assert.equal(scanPercent(63, 63), 100);
+  });
+
+  it("never says a hundred while a stretch is still to come", () => {
+    for (let count = 1; count <= 400; count += 1) {
+      assert.ok(scanPercent(count - 1, count) < 100, `${count - 1} of ${count}`);
+    }
+  });
+
+  it("answers zero for a count that is no count, and stays inside 0-100", () => {
+    assert.equal(scanPercent(3, 0), 0);
+    assert.equal(scanPercent(Number.NaN, 10), 0);
+    assert.equal(scanPercent(-2, 10), 0);
+    assert.equal(scanPercent(15, 10), 100);
   });
 });

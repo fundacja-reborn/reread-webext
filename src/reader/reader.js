@@ -5683,11 +5683,9 @@ function markRowElement(row, index, withTitle) {
   const detail = document.createElement("span");
   detail.className = "library-item-detail";
   const when = row.mark.createdAt > 0 ? new Date(row.mark.createdAt).toLocaleDateString() : "";
-  const part =
-    row.part === null
-      ? ""
-      : t("reader_book_part_of", [row.part.at.toLocaleString(), row.part.of.toLocaleString()]);
-  detail.textContent = [withTitle ? row.title : "", part, when]
+  // The chapter, where the book has chapters - never the stretch of the book
+  // the quote is stored under, which is said nowhere (D270).
+  detail.textContent = [withTitle ? row.title : "", row.chapter ?? "", when]
     .filter((piece) => piece.length > 0)
     .join(" - ");
   text.append(quote);

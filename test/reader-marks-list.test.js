@@ -97,7 +97,7 @@ describe("markRows", () => {
 
     const rows = markRows([meta(1)], [], marks, kept);
     assert.deepEqual(
-      rows.map((row) => [row.mark.text, row.title, row.kind, row.missing, row.part]),
+      rows.map((row) => [row.mark.text, row.title, row.kind, row.missing, row.chapter]),
       [
         ["still here", "Article 1", "article", false, null],
         ["from the copy", "Gone article", "article", true, null],
@@ -123,21 +123,53 @@ describe("markRows", () => {
     );
   });
 
-  it("dresses a book's quote in its part, and only when the book has parts", () => {
-    const many = book("book:many", { segmentCount: 12, lang: "de" });
-    const single = book("book:one", { segmentCount: 1 });
+  it("dresses a book's quote in its chapter, and never in the stretch it is stored under (D270)", () => {
+    /** @type {import("../src/lib/book/toc.js").TocEntry[]} */
+    const toc = [
+      { title: "The Valley", level: 1, segmentIndex: 0, blockIndex: 4 },
+      { title: "The Ranch", level: 1, segmentIndex: 2, blockIndex: 7 },
+    ];
+    const chaptered = book("book:many", { segmentCount: 12, lang: "de", toc });
     const marks = new Map([
-      [many.id, [mark("deep in", { segmentIndex: 2, createdAt: 30 })]],
-      [single.id, [mark("alone", { createdAt: 20 })]],
+      [
+        chaptered.id,
+        [
+          mark("before any heading", { start: { block: 1, offset: 0 }, end: { block: 1, offset: 5 }, createdAt: 30 }),
+          mark("under the first", { segmentIndex: 2, start: { block: 6, offset: 0 }, end: { block: 6, offset: 5 } }),
+          mark("under the second", { segmentIndex: 2, start: { block: 7, offset: 0 }, end: { block: 9, offset: 5 } }),
+          mark("far on", { segmentIndex: 9, start: { block: 0, offset: 0 }, end: { block: 0, offset: 5 } }),
+        ],
+      ],
     ]);
 
-    const rows = markRows([], [many, single], marks);
-    assert.deepEqual(rows[0]?.part, { at: 3, of: 12 });
+    const rows = markRows([], [chaptered], marks);
+    assert.deepEqual(
+      rows.map((row) => row.chapter),
+      [null, "The Valley", "The Ranch", "The Ranch"],
+      "the chapter the quote begins in; nothing before the book's first heading",
+    );
     assert.equal(rows[0]?.kind, "book");
     // The language rides along for the row's speaker - a book declares one,
     // an article's meta does not (see the null in the orphan test's rows).
     assert.equal(rows[0]?.lang, "de");
-    assert.equal(rows[1]?.part, null);
+    // A row has no field left to say "Part 3 of 12" with.
+    assert.ok(!("part" in (rows[1] ?? {})), "the row still carries a part");
+  });
+
+  it("says no chapter for a book without headings, one still owed its scan, and an article", () => {
+    const bare = book("book:bare", { segmentCount: 63, toc: [] });
+    const owed = book("book:owed", { segmentCount: 63, toc: null });
+    const marks = new Map([
+      [bare.id, [mark("no table", { segmentIndex: 40, createdAt: 30 })]],
+      [owed.id, [mark("not scanned yet", { segmentIndex: 5, createdAt: 20 })]],
+      [meta(1).url, [mark("an article's", { createdAt: 10 })]],
+    ]);
+
+    const rows = markRows([meta(1)], [bare, owed], marks);
+    assert.deepEqual(
+      rows.map((row) => row.chapter),
+      [null, null, null],
+    );
   });
 
   it("counts a document's quotes on every one of its rows (D150)", () => {

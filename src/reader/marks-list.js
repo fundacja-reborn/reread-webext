@@ -15,6 +15,7 @@
  * quotes.
  */
 
+import { chapterOf } from "../lib/reader/search.js";
 import { matchesFilter } from "../options/models-view.js";
 
 /** @typedef {import("../lib/reader/marks.js").Mark} Mark */
@@ -24,10 +25,17 @@ import { matchesFilter } from "../options/models-view.js";
 /**
  * One quote on the page: the mark itself, and what its document answers when
  * the row is drawn or pressed - the key to open it by, which store answers
- * for it, the title the detail line shows, for a book of many parts the
- * part the quote stands in, and the language the row's speaker reads in
- * (a book declares one; an article's meta does not, and null lets the
- * caller fall back to the pair's source language).
+ * for it, the title the detail line shows, for a book with a table of
+ * contents the chapter the quote stands in, and the language the row's
+ * speaker reads in (a book declares one; an article's meta does not, and
+ * null lets the caller fall back to the pair's source language).
+ *
+ * `chapter` is a chapter's own title or nothing - never the stretch of the
+ * book the quote is stored under (D270): that division is how a long book
+ * is kept, and a reader looking for a quote thinks in chapters. A quote
+ * before the book's first heading, a quote of a book without headings, and
+ * every article's quote (an article's table is read off the screen and
+ * stored nowhere, D117) carry null, and the row simply says less.
  *
  * `missing` marks a quote whose document is gone - the library was emptied
  * and the marks came back from their copy (`lib/store/marks-backup.js`)
@@ -41,7 +49,7 @@ import { matchesFilter } from "../options/models-view.js";
  *   kind: "article" | "book",
  *   title: string,
  *   lang: string | null,
- *   part: { at: number, of: number } | null,
+ *   chapter: string | null,
  *   missing: boolean,
  *   count: number,
  *   mark: Mark,
@@ -70,14 +78,16 @@ export const MARKS_PAGE_SIZE = 25;
  * @returns {MarkRow[]}
  */
 export function markRows(metas, books, marks, kept = new Map()) {
-  /** @typedef {{ kind: "article" | "book", title: string, lang: string | null, parts: number, missing: boolean }} Doc */
+  /** @typedef {{ kind: "article" | "book", title: string, lang: string | null, toc: import("../lib/book/toc.js").TocEntry[], missing: boolean }} Doc */
   /** @type {Map<string, Doc>} */
   const docs = new Map();
   for (const meta of metas) {
-    docs.set(meta.url, { kind: "article", title: meta.title, lang: null, parts: 1, missing: false });
+    docs.set(meta.url, { kind: "article", title: meta.title, lang: null, toc: [], missing: false });
   }
   for (const book of books) {
-    docs.set(book.id, { kind: "book", title: book.title, lang: book.lang, parts: book.segmentCount, missing: false });
+    // A row from before the table existed (`toc: null`) reads as a book
+    // without one until the reader's backfill has scanned it.
+    docs.set(book.id, { kind: "book", title: book.title, lang: book.lang, toc: book.toc ?? [], missing: false });
   }
 
   /** @type {{ docId: string, doc: Doc, newest: number, list: Mark[] }[]} */
@@ -87,7 +97,7 @@ export function markRows(metas, books, marks, kept = new Map()) {
     if (doc === undefined) {
       const remembered = kept.get(docId);
       if (remembered === undefined) continue;
-      doc = { kind: remembered.kind, title: remembered.title, lang: null, parts: 1, missing: true };
+      doc = { kind: remembered.kind, title: remembered.title, lang: null, toc: [], missing: true };
     }
     if (list.length === 0) continue;
     const newest = Math.max(...list.map((mark) => mark.createdAt));
@@ -103,12 +113,10 @@ export function markRows(metas, books, marks, kept = new Map()) {
       kind: doc.kind,
       title: doc.title,
       lang: doc.lang,
-      // Only a book of many parts has a part worth naming; an article's
-      // implicit one and a one-part book would be a number saying nothing.
-      part:
-        doc.kind === "book" && doc.parts > 1
-          ? { at: mark.segmentIndex + 1, of: doc.parts }
-          : null,
+      // The chapter the quote begins in - the same `chapterOf` the search
+      // results and the contents dialog's "you are here" answer by, so the
+      // three can never name different chapters for one place.
+      chapter: chapterOf(doc.toc, mark.segmentIndex, mark.start.block)?.title ?? null,
       missing: doc.missing,
       count: list.length,
       mark,

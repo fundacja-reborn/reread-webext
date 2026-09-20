@@ -312,3 +312,45 @@ export function chapterOf(toc, segmentIndex, block) {
   }
   return found;
 }
+
+/**
+ * The heading each of a book's hits opens, in the hits' own order: the
+ * chapter's title where a hit is the first under its chapter, null where it
+ * stands under the heading already said. A hit before the book's first
+ * heading - and every hit of a book without a table - answers null too and
+ * simply stands without one: the stretches a long book is kept in are ours
+ * (D270), never a heading a reader is shown.
+ *
+ * Chapters are told apart by their place, not by their words: "I" under
+ * Part One and "I" under Part Two are two headings, and a list that merged
+ * them would say that hits a hundred pages apart stand together.
+ *
+ * @param {import("../book/toc.js").TocEntry[]} toc
+ * @param {Array<{ segmentIndex: number, block: number }>} hits in reading order
+ * @returns {Array<string | null>} one answer per hit
+ */
+export function chapterHeadings(toc, hits) {
+  /** @type {import("../book/toc.js").TocEntry | null} */
+  let said = null;
+  return hits.map((hit) => {
+    const chapter = chapterOf(toc, hit.segmentIndex, hit.block);
+    if (chapter === null || chapter === said) return null;
+    said = chapter;
+    return chapter.title;
+  });
+}
+
+/**
+ * How far a book's scan has walked, in whole percent - what the status line
+ * says while the scan runs, where it used to count the stretches the book
+ * is kept in (D270). Rounded down, so the line never says a hundred while
+ * there is still text to read; a count that is no count answers zero.
+ *
+ * @param {number} done how many stretches have been read through
+ * @param {number} count how many the book holds
+ * @returns {number} 0-100
+ */
+export function scanPercent(done, count) {
+  if (!Number.isFinite(done) || !Number.isFinite(count) || count <= 0) return 0;
+  return Math.min(100, Math.max(0, Math.floor((done / count) * 100)));
+}

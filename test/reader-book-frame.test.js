@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { describe, it } from "node:test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -85,6 +85,31 @@ describe("the reader's page over a book", () => {
     assert.match(row, /\[entry\.hostname, t\("reader_book_label"\), length, pictures, percent\]/);
     // And the steps are not the lists' pager in another dress.
     assert.doesNotMatch(page, /class="pager segment-nav"/);
+  });
+
+  it("has no words left to name a part with, anywhere in the package", () => {
+    // Stage 2 took the label from its last two homes - the search dialog's
+    // headings and scan line, and the highlights page's rows - and then from
+    // the catalogs, so a part cannot be named by accident either.
+    /** @type {string[]} */
+    const naming = [];
+    /** @param {string} dir */
+    const walk = (dir) => {
+      for (const entry of readdirSync(join(ROOT, dir), { withFileTypes: true })) {
+        const path = `${dir}/${entry.name}`;
+        if (entry.isDirectory()) walk(path);
+        else if (/\.(js|json|html|css)$/.test(entry.name) && read(path).includes("reader_book_part_of")) naming.push(path);
+      }
+    };
+    walk("src");
+    assert.deepEqual(naming, []);
+
+    // The search says chapters, and how much of the book its scan has read.
+    const search = read("src/reader/doc-search.js");
+    assert.match(search, /chapterHeadings\(toc, held\.hits\)/);
+    assert.match(search, /t\("reader_search_scanned", \[scanPercent\(index, doc\.segmentCount\)\.toLocaleString\(\)\]\)/);
+    // A quote's row says its chapter, or less.
+    assert.match(fn("markRowElement", "markOriginalLink"), /\[withTitle \? row\.title : "", row\.chapter \?\? "", when\]/);
   });
 
   it("hides both steps when the book is read by pages, by the stylesheet alone", () => {
