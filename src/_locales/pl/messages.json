@@ -2331,6 +2331,7 @@
   "reader_mark_text_changed": { "message": "Tekst strony zmienił się od czasu zakreślenia, więc zakreślenia nie da się tu pokazać." },
   "reader_marks_missing_doc": { "message": "Ten dokument nie jest już zapisany – cytat wrócił z kopii. Otwórz stronę ponownie, a zakreślenie będzie na miejscu." },
   "options_pair_hint": { "message": "Pokazuje pary językowe pobrane na to urządzenie. Aby dodać nowe języki, pobierz je w sekcji" },
+  "options_pair_hint_or": { "message": "i/lub" },
   "options_pair_hint_rest": { "message": "poniżej." },
   "options_pair_none": { "message": "Nie ma jeszcze modelu ani słownika – dodaj któryś poniżej" },
   "options_pair_dictionary_only": {
