@@ -356,9 +356,12 @@ summary {
    of paper stuck over the text would be the bar's ghost. (Until then the
    body held half of it, and that half kept the ribbon 0.75rem off the
    window's edge until a scroll ate it - Michał's smoke, 2026-09-01 - so a
-   rule here zeroed it while folded.) */
+   rule here zeroed it while folded.) Not quite zero in full screen: what
+   is left is the screen's own inset (D269), 0px on a screen with nothing
+   to avoid, so the ribbon hangs below a phone's lens rather than behind
+   it - the box is what the ribbon hangs from (`.chrome-tab`, `top: 100%`). */
 :root[data-reader-chrome="hidden"] body.reader:has(#article:not([hidden])) .reader-chrome {
-  padding-top: 0;
+  padding-top: var(--safe-top);
 }
 
 /* The room over the text (`#page`) must not be a margin while the box is
@@ -3039,7 +3042,10 @@ body.reader:has(#mark-bar:not([hidden])) {
    own paper underneath it, so nothing of the article shows through in the
    beat before the frame's own page paints. The frame carries no border and
    no scrolling of its own: the page inside it scrolls, as it does on its
-   own screen. */
+   own screen. The screen's inset is the room's own padding (D269), not the
+   frame's: the document in a frame is told nothing about the window's
+   insets, so its bar would stand under a phone's lens if the frame began
+   at the window's edge. The room's paper fills the strip above it. */
 .room {
   position: fixed;
   inset-inline: 0;
@@ -3049,6 +3055,7 @@ body.reader:has(#mark-bar:not([hidden])) {
      the foot of the page inside the frame would sit off screen. The bars
      keep the same unit for the same reason. */
   height: 100dvh;
+  padding-top: var(--safe-top);
   z-index: 4;
   background: var(--page-bg);
 }
