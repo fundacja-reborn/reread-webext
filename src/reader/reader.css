@@ -3045,7 +3045,9 @@ body.reader:has(#mark-bar:not([hidden])) {
    own screen. The screen's inset is the room's own padding (D269), not the
    frame's: the document in a frame is told nothing about the window's
    insets, so its bar would stand under a phone's lens if the frame began
-   at the window's edge. The room's paper fills the strip above it. */
+   at the window's edge. The strip above the frame is painted like every
+   other strip the cutout takes (`--safe-fill`, page.css) - its own rule
+   below, because a room stands over the bar and would cover the bar's. */
 .room {
   position: fixed;
   inset-inline: 0;
@@ -3058,6 +3060,22 @@ body.reader:has(#mark-bar:not([hidden])) {
   padding-top: var(--safe-top);
   z-index: 4;
   background: var(--page-bg);
+}
+
+/* The room's own strip under the cutout (D269): the bar's strip is drawn
+   by the bar's box, which stands at 2 and so under a room at 4 - a room
+   would cover it with its own paper and the lens would sit over a white
+   band again. Painted after the frame in the room's own box, so it stands
+   over it; `--safe-top` is its height, which is nothing on a screen with
+   no cutout. */
+:root:fullscreen .room::after {
+  content: "";
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  height: var(--safe-top);
+  background: var(--safe-fill);
+  pointer-events: none;
 }
 
 .room iframe {
