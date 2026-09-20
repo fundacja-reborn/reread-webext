@@ -1702,15 +1702,30 @@ ul.models {
    controls. Square, so the pair costs one Delete's width on a phone; the
    element is in the selector for the same reason it is below. */
 button.model-move {
+  /* Centred both ways: the label is a drawing (`moveIcon` in options.js),
+     and a drawing has no baseline to stand on. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: var(--ui-control);
   min-width: var(--ui-control);
   padding: 0.35rem;
   border-color: transparent;
   color: var(--page-muted);
-  /* The glyph is the label: at the button's own font size it reads as
-     punctuation next to the words around it. */
-  font-size: 1.05rem;
   line-height: 1;
+}
+
+/* The arrow itself. Drawn, because the typed one is the system font's to
+   shape and Android's has a head too small to read (Michał's Pixel,
+   2026-09-20). Sized from the row's own text, so it grows with it under a
+   finger: 20.8px beside 13px words, 25.6px beside 16px ones - the height the
+   typed arrow had on a desktop, where it read well, and the same proportion
+   on a phone. It takes the button's ink, so the resting, hover and disabled
+   colours above and below need no rule of their own. */
+.move-icon {
+  width: calc(var(--ui-text) * 1.6);
+  height: calc(var(--ui-text) * 1.6);
+  flex: none;
 }
 
 .model-move:hover:not(:disabled),

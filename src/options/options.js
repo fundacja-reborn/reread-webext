@@ -2213,6 +2213,40 @@ function chosenLanguage(id, fallback) {
 }
 
 /**
+ * The arrow of a move button, drawn rather than typed.
+ *
+ * The typed arrows (U+2191, U+2193) are whatever the system's font makes of
+ * them, and the fonts disagree: macOS draws a full head, Android's Roboto a
+ * hairline with a head too small to read at a glance (Michał's Pixel,
+ * 2026-09-20 - "the arrows are very small, their heads in particular"). A
+ * drawing looks the same everywhere: the back arrow's own strokes, turned
+ * upright, in the button's ink - so the resting, hover and disabled colours
+ * the button already has dress the arrow too.
+ *
+ * @param {-1 | 1} step
+ * @returns {SVGSVGElement}
+ */
+function moveIcon(step) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "move-icon");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  // Decoration to assistive tech - the button's aria-label carries the words.
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+
+  const path = document.createElementNS(NS, "path");
+  path.setAttribute("d", step < 0 ? "M8 13.25V3.1M3.8 7.3 8 3.1l4.2 4.2" : "M8 2.75V12.9M3.8 8.7 8 12.9l4.2-4.2");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", "1.3");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  svg.append(path);
+  return svg;
+}
+
+/**
  * One arrow of a stored dictionary's row.
  *
  * Two buttons rather than a drag: this page is read on a phone, on e-ink and
@@ -2231,7 +2265,7 @@ function moveButton(dictionary, step, enabled) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "model-move";
-  button.textContent = step < 0 ? "↑" : "↓";
+  button.append(moveIcon(step));
   button.disabled = !enabled || importing;
   // Said twice for the end of the list - the attribute and the state - so
   // an assistive technology that reads only one of them still hears it.
