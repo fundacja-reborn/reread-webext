@@ -407,8 +407,12 @@ describe("the settings page's type", () => {
     assert.match(heading, /font-weight: var\(--ui-label-weight\)/, "a fold reads heavier than the rows around it");
     // The page's own triangle, the one the row notes' More wears - never a
     // chevron (D254 §2.6), and never a turn that an e-ink panel would smear.
-    assert.match(css, /\.fold > summary::before \{\n  content: "\\25B8\\00A0";/, "a fold wears no marker of the page's own");
-    assert.match(css, /\.fold\[open\] > summary::before \{\n  content: "\\25BE\\00A0";/, "an open fold keeps the closed marker");
+    // Drawn by the one rule the three doors share (below), turned by the
+    // fold's own `open`, and wearing the quiet grey here.
+    assert.match(css, /button\.note-more\[aria-expanded\]::before,\n\.show-all::before,\n\.fold > summary::before \{/, "a fold wears no marker of the page's own");
+    assert.match(css, /button\.note-more\[aria-expanded="true"\]::before,\n\.show-all\[aria-expanded="true"\]::before,\n\.fold\[open\] > summary::before \{\n  clip-path:/, "an open fold keeps the closed marker");
+    assert.match(css, /\n\.fold > summary::before \{\n  color: var\(--page-muted\);\n\}/, "a fold's marker lost its grey");
+    assert.match(css, /\n\.show-all::before \{\n  color: var\(--page-muted\);\n\}/, "the list's fold lost its marker's grey");
     // A fold is a row of its card since D265, so its floor is the rows'.
     assert.match(rule(css, ".fold > summary"), /min-height: var\(--row-min-h\)/, "a fold is under the touch floor");
     assert.match(rule(css, ".fold > summary"), /padding: var\(--row-pad-y\) var\(--row-pad-x\)/, "a fold's door is not a row of its card");
@@ -419,5 +423,53 @@ describe("the settings page's type", () => {
     // And nothing after the first fold opens a gap: they are a list of doors,
     // which since D265 means a list of rows in one card.
     assert.match(rule(css, ".fold"), /margin: 0;/, "a fold keeps an air of its own inside its card");
+  });
+
+  it("draws the fold marker rather than typing it, at a size that shows its turn", async () => {
+    const css = await source("options/options.css");
+    // The typed pair are the "small" triangles, 3.5px across beside 13px
+    // words and shaped by the system's font (Michał, 2026-09-20: "microscopic,
+    // you can hardly see it change direction"). Neither may come back.
+    assert.doesNotMatch(css, /\\25B8|\\25BE|\\25B6|\\25BC/, "a typed triangle is back in the sheet");
+
+    const at = css.indexOf("\nbutton.note-more[aria-expanded]::before,\n.show-all::before,\n.fold > summary::before {");
+    assert.notEqual(at, -1, "the three doors no longer share one marker");
+    const mark = css.slice(at, css.indexOf("\n}\n", at));
+    assert.match(mark, /content: "";/);
+    assert.match(mark, /display: inline-block;/);
+    // A flex summary would otherwise squeeze it.
+    assert.match(mark, /flex: none;/);
+    // The height of the lowercase letters beside it: seen, and still smaller
+    // than the capitals - a mark, not an icon.
+    assert.match(mark, /width: 0\.54em;\n  height: 0\.54em;/);
+    assert.match(mark, /background: currentColor;/, "the marker no longer takes its door's ink");
+    assert.match(mark, /clip-path: polygon\(11% 0, 89% 50%, 11% 100%\);/, "closed does not point right");
+    const open = css.slice(css.indexOf('\nbutton.note-more[aria-expanded="true"]::before,'));
+    assert.match(open.slice(0, open.indexOf("\n}\n")), /clip-path: polygon\(0 11%, 100% 11%, 50% 89%\);/, "open does not point down");
+    // Never a turn an e-ink panel would smear.
+    assert.doesNotMatch(mark, /transition|transform|rotate/);
+
+    // A forced palette paints backgrounds in the window's paper; the mark
+    // keeps a fill of its own there.
+    const forced = css.slice(css.indexOf("@media (forced-colors: active) {\n  button.note-more[aria-expanded]::before"));
+    assert.match(forced.slice(0, forced.indexOf("\n}\n")), /forced-color-adjust: none;\n    background: CanvasText;/, "the marker vanishes under a forced palette");
+
+    // Only where something folds: the quiet buttons that borrow the More's
+    // dress without folding anything carry no aria-expanded, so a triangle
+    // that can now be seen does not promise a fold they do not have.
+    const markup = await source("options/options.html");
+    for (const id of ["first-steps-hide", "first-steps-show"]) {
+      const tag = markup.slice(markup.lastIndexOf("<button", markup.indexOf(`id="${id}"`)), markup.indexOf(">", markup.indexOf(`id="${id}"`)));
+      assert.match(tag, /class="note-more"/, `${id} no longer wears the quiet dress`);
+      assert.doesNotMatch(tag, /aria-expanded/, `${id} claims to fold something`);
+    }
+    const search = await source("options/search.js");
+    const clear = search.slice(search.indexOf('clear.className = "note-more"'), search.indexOf("line.append(clear)"));
+    assert.ok(clear.length > 0, "the search line's Clear is gone");
+    assert.doesNotMatch(clear, /aria-expanded/, "the search line's Clear claims to fold something");
+    // And every More in the markup that does fold says so from the start.
+    const folds = [...markup.matchAll(/<button[^>]*class="note-more[^>]*>/g)].map((m) => m[0]).filter((tag) => /aria-controls=/.test(tag));
+    assert.ok(folds.length >= 9, `only ${folds.length} folding Mores in the markup`);
+    for (const tag of folds) assert.match(tag, /aria-expanded="false"/, `a folding More without its state: ${tag.slice(0, 80)}`);
   });
 });
