@@ -550,6 +550,7 @@
   },
   "reader_save": { "message": "Guardar en la lista de lectura" },
   "reader_delete_confirm": { "message": "¿Seguro?" },
+  "reader_menu_delete": { "message": "Eliminar de la lista de lectura" },
   "reader_delete_aria": {
     "message": "Eliminar el artículo $TITLE$",
     "placeholders": { "title": { "content": "$1", "example": "Old Chinese" } }

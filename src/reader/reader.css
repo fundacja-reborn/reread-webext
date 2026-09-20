@@ -531,6 +531,33 @@ html {
   display: none;
 }
 
+/* The document's two acts in the menu (D272). The read mark says its state
+   with a drawn check before its words, shown while the mark is set - the
+   pill it wears around the article would be a wash across a whole row of
+   the sheet, with the words flush against its edge. Drawn, not typed: a
+   check from a font is whatever the system's font makes of it. */
+#nav-mark-read .nav-check {
+  margin-inline-end: 0.5rem;
+}
+
+#nav-mark-read[aria-pressed="false"] .nav-check {
+  display: none;
+}
+
+/* Delete asking "Sure?": the changed words are the question, and their
+   weight says the row is waiting - no fill, for the pill's reason above,
+   and no accent on the words, which the row's hover already wears. The
+   line under the row takes the accent, as every armed Delete's frame does.
+   The hover is written in, so the asking row looks the same under a
+   pointer that has not moved since the first press. */
+.nav-menu #nav-delete[data-armed],
+.nav-menu #nav-delete[data-armed]:hover {
+  border-color: var(--page-accent);
+  background: none;
+  color: var(--page-fg);
+  font-weight: 600;
+}
+
 /* The bar's tight dress under a phone's width - tighter gaps, a slimmer
    floor for the tools - is every page's since D219's smoke (page.css, the
    `@media (max-width: 30rem)` block on `.page-bar` and `.page-tools`): kept
