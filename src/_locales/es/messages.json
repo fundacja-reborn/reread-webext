@@ -504,6 +504,12 @@
       "pages": { "content": "$2", "example": "48" }
     }
   },
+  "reader_page_book_percent": {
+    "message": "$PERCENT$ % del libro",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_page_prev": { "message": "Página anterior" },
   "reader_page_next": { "message": "Página siguiente" },
   "reader_panel_more": { "message": "Mostrar más" },
@@ -1074,6 +1080,12 @@
     "message": "$PERCENT$ % leído",
     "placeholders": {
       "percent": { "content": "$1", "example": "34" }
+    }
+  },
+  "reader_percent": {
+    "message": "$PERCENT$ %",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "12" }
     }
   },
   "reader_book_earlier": { "message": "Texto anterior" },
@@ -1709,7 +1721,7 @@
 
   "options_page_number": { "message": "Mostrar el número de página" },
   "options_page_number_hint": {
-    "message": "La página actual y el total, por ejemplo 3 / 12, en la parte inferior de la ventana."
+    "message": "La página actual y el total, por ejemplo 3 / 12, en la parte inferior de la ventana. En un libro largo es la parte del libro ya leída, en porcentaje - por ejemplo 12 %."
   },
 
   "options_paged_heading": { "message": "Vista Páginas" },

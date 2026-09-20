@@ -104,6 +104,7 @@ import {
   edgeZone,
   onPage,
   pageAt,
+  pageFootCount,
   pagePercent,
   pageTops,
   revealTarget,
@@ -2530,7 +2531,8 @@ function settlePage() {
  * The curtain and the page count, as they stand for the window's position:
  * the curtain over the foot of the page shown - and only while the window
  * stands on a page, because shown off its top the page's foot is somewhere
- * else - and the count of the page shown out of the part's pages, said in
+ * else - and the count: the page shown out of the document's pages, or over
+ * a long book how much of the whole book is read, in percent (D273) - said in
  * three places (D238): at the foot, where the stylesheet shows it only
  * when the setting asks (off, the foot is the phone's safe area alone);
  * in the bar beside the brand while the foot keeps none, on a screen wide
@@ -2569,8 +2571,22 @@ function refreshCurtain() {
     : null;
   pageCurtain.hidden = cover === null;
   if (cover !== null) pageCurtain.style.top = `${cover}px`;
-  const count = pages.tops.length;
-  const said = `${(page + 1).toLocaleString()} / ${count.toLocaleString()}`;
+  // What is counted (D273): the page out of the pages where that is the
+  // whole document's truth, the percent of the whole book over a long book -
+  // whose pages here are one stretch's, and would start again from one at
+  // every stretch (`pageFootCount`).
+  const counted = pageFootCount({
+    page,
+    pages: pages.tops.length,
+    segment:
+      shown !== null && shown.origin === "book"
+        ? { index: shown.segmentIndex, count: shown.segmentCount }
+        : null,
+  });
+  const said =
+    counted.kind === "percent"
+      ? t("reader_percent", counted.percent.toLocaleString())
+      : `${counted.page.toLocaleString()} / ${counted.pages.toLocaleString()}`;
   if (pageFooter.textContent !== said) pageFooter.textContent = said;
   if (pageCount !== null) {
     pageCount.hidden = settings.reader.pageNumber;
@@ -2579,7 +2595,10 @@ function refreshCurtain() {
   if (pageLive !== null) {
     // Written only on a change: a live region repeats whatever is written
     // into it, and the curtain is refreshed on every scroll.
-    const spoken = t("reader_page_of", [(page + 1).toLocaleString(), count.toLocaleString()]);
+    const spoken =
+      counted.kind === "percent"
+        ? t("reader_page_book_percent", counted.percent.toLocaleString())
+        : t("reader_page_of", [counted.page.toLocaleString(), counted.pages.toLocaleString()]);
     if (pageLive.textContent !== spoken) pageLive.textContent = spoken;
   }
   // The active mark's pins, on this page or not (D239).

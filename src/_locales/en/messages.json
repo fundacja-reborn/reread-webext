@@ -654,6 +654,13 @@
       "pages": { "content": "$2", "example": "48" }
     }
   },
+  "reader_page_book_percent": {
+    "message": "$PERCENT$% of the book",
+    "description": "What a screen reader hears at the foot of a page over a long book, in place of reader_page_of: how much of the whole book is read, in whole percent.",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_page_prev": {
     "message": "Previous page",
     "description": "The highlighter's toolbar in the paged layout: the page before this one. With the highlighter in hand a tap on the text is the highlighter's, so the toolbar carries the two turns."
@@ -1342,6 +1349,13 @@
     "description": "The tail of an unread row's detail line, shown once some of the document has been read: how much of the whole has passed before the eyes, in percent.",
     "placeholders": {
       "percent": { "content": "$1", "example": "34" }
+    }
+  },
+  "reader_percent": {
+    "message": "$PERCENT$%",
+    "description": "A bare percent of a whole book: how far into the book a place stands (the contents of a book without chapter headings), how far the reading has come (the foot of a page over a book).",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "12" }
     }
   },
   "reader_book_earlier": {
@@ -2052,7 +2066,7 @@
 
   "options_page_number": { "message": "Show the page number" },
   "options_page_number_hint": {
-    "message": "The current page and how many there are, for example 3 / 12, at the foot of the window."
+    "message": "The current page and how many there are, for example 3 / 12, at the foot of the window. In a long book it is how much of the book you have read, in percent - for example 12%."
   },
 
   "options_paged_heading": { "message": "Pages layout" },

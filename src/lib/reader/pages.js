@@ -542,6 +542,54 @@ export function pagePercent(page, count) {
 }
 
 /**
+ * How far into a whole book the reading has reached, in whole percent, when
+ * a long book is read by pages (D273) - what the foot of the page says over
+ * such a book, where it used to count the pages of the stretch on screen
+ * and start again from one at every stretch, giving away a division that is
+ * said nowhere (D270).
+ *
+ * The arithmetic is the reading list's, on purpose and to the rounding:
+ * the stretches before the one on screen count as read through, and the one
+ * on screen as far as `pagePercent` says - the very number the position row
+ * stores for it - so the foot and the book's row in the list say one number
+ * (`overallPercent` in `position.js`; the test holds the two together).
+ * Whole percent because that is what the list shows and what e-readers
+ * show; in a long book one percent is a dozen pages, so the number moves
+ * every dozen turns rather than at each.
+ *
+ * @param {number} index the stretch on screen
+ * @param {number} count how many stretches the book is kept in
+ * @param {number} page the page on screen, within the stretch
+ * @param {number} pages how many pages the stretch was cut into
+ * @returns {number} 0-100
+ */
+export function bookPercent(index, count, page, pages) {
+  if (!Number.isInteger(count) || count <= 1) return pagePercent(page, pages);
+  const within = pagePercent(page, pages) / 100;
+  const whole = (Math.min(Math.max(0, index), count - 1) + within) / count;
+  return Math.min(100, Math.max(0, Math.round(whole * 100)));
+}
+
+/**
+ * What the foot of a page counts (D238, D273): the page out of the pages,
+ * wherever that is the truth about the whole document - an article, a book
+ * short enough to be kept in one stretch - and the percent of the whole
+ * book over a book kept in more. The pages of the rest of a long book are
+ * not laid out, so there is no honest "page 412 of 1630" to say; an
+ * estimate would change from stretch to stretch.
+ *
+ * @param {{ page: number, pages: number, segment: { index: number, count: number } | null }} at
+ *   `segment` is a book's place in its stretches, null over everything else
+ * @returns {{ kind: "pages", page: number, pages: number } | { kind: "percent", percent: number }}
+ */
+export function pageFootCount({ page, pages, segment }) {
+  if (segment === null || !Number.isInteger(segment.count) || segment.count <= 1) {
+    return { kind: "pages", page: page + 1, pages };
+  }
+  return { kind: "percent", percent: bookPercent(segment.index, segment.count, page, pages) };
+}
+
+/**
  * The page turned from the window's edge while a range is being stretched
  * (D239): a finger dragging a selection, a handle or the pen's stroke to
  * the foot of the page turns it under the finger and goes on, the way
