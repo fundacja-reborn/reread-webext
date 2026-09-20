@@ -217,17 +217,29 @@ describe("the arrows", () => {
     // their own - and silent to assistive tech, since the button's
     // accessible name already says which dictionary moves where.
     const icon = fn("moveIcon", "moveButton");
-    assert.match(icon, /step < 0 \? "M8 13\.25V3\.1M3\.8 7\.3 8 3\.1l4\.2 4\.2" : "M8 2\.75V12\.9M3\.8 8\.7 8 12\.9l4\.2-4\.2"/);
+    assert.match(icon, /step < 0 \? "M8 13\.25V3\.1M4\.05 7\.05 8 3\.1l3\.95 3\.95" : "M8 2\.75V12\.9M4\.05 8\.95 8 12\.9l3\.95-3\.95"/);
+    assert.match(icon, /setAttribute\("stroke-width", "1\.3"\)/);
     assert.match(icon, /setAttribute\("stroke", "currentColor"\)/);
     assert.match(icon, /setAttribute\("fill", "none"\)/);
     assert.match(icon, /setAttribute\("aria-hidden", "true"\)/);
     assert.doesNotMatch(icon, /innerHTML/);
 
     // Sized from the row's text, so it grows with it under a finger, and
-    // centred in a button that no longer has a baseline to offer it.
+    // centred in a button that no longer has a baseline to offer it. The
+    // factor is the measured one: at 1.32 the drawing is the arrow macOS
+    // typed at the button's old size - 12.3px tall, a 1.4px stroke beside 13px
+    // words - where 1.6 made it a fifth larger and heavier than the row
+    // around it (Michał, 2026-09-20).
     const size = rule(css, ".move-icon");
-    assert.match(size, /width: calc\(var\(--ui-text\) \* 1\.6\)/);
-    assert.match(size, /height: calc\(var\(--ui-text\) \* 1\.6\)/);
+    assert.match(size, /width: calc\(var\(--ui-text\) \* 1\.32\)/);
+    assert.match(size, /height: calc\(var\(--ui-text\) \* 1\.32\)/);
+    const box = 13 * 1.32;
+    const tall = ((13.25 - 3.1 + 1.3) * box) / 16;
+    const stroke = (1.3 * box) / 16;
+    const wide = ((3.95 * 2 + 1.3) * box) / 16;
+    assert.ok(Math.abs(tall - 12.3) < 0.1, "the arrow is " + tall.toFixed(2) + "px tall beside 13px words");
+    assert.ok(Math.abs(stroke - 1.4) < 0.05, "its stroke is " + stroke.toFixed(2) + "px");
+    assert.ok(Math.abs(wide - 9.9) < 0.1, "its head is " + wide.toFixed(2) + "px wide");
     const dress = rule(css, "button.model-move");
     assert.match(dress, /display: inline-flex/);
     assert.match(dress, /align-items: center/);

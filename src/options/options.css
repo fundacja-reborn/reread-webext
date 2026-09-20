@@ -1717,14 +1717,16 @@ button.model-move {
 
 /* The arrow itself. Drawn, because the typed one is the system font's to
    shape and Android's has a head too small to read (Michał's Pixel,
-   2026-09-20). Sized from the row's own text, so it grows with it under a
-   finger: 20.8px beside 13px words, 25.6px beside 16px ones - the height the
-   typed arrow had on a desktop, where it read well, and the same proportion
-   on a phone. It takes the button's ink, so the resting, hover and disabled
+   2026-09-20). The box is what makes it the arrow the desktop had before,
+   measured: 17.2px beside 13px words draws it 12.3px tall with a 1.4px
+   stroke, as macOS typed it - at 1.6 it came out a fifth larger and heavier
+   and dominated the row (Michał, the same day). Sized from the row's own
+   text, so under a finger it keeps that proportion: 21.1px beside 16px
+   words. It takes the button's ink, so the resting, hover and disabled
    colours above and below need no rule of their own. */
 .move-icon {
-  width: calc(var(--ui-text) * 1.6);
-  height: calc(var(--ui-text) * 1.6);
+  width: calc(var(--ui-text) * 1.32);
+  height: calc(var(--ui-text) * 1.32);
   flex: none;
 }
 
