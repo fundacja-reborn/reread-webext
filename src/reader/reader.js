@@ -95,12 +95,17 @@ import {
 } from "../lib/reader/marks.js";
 import {
   BLOB_SAMPLES,
+  EDGE_COOLDOWN_MS,
   EDGE_TURN_FIRST_MS,
   EDGE_TURN_REPEAT_MS,
   FLASH_HOLD_MS,
+  atEdgeFor,
   blobTrusted,
   curtainTop,
+  edgeSwipe,
   edgeTurn,
+  edgeWheel,
+  edgeWheelStart,
   edgeZone,
   onPage,
   pageAt,
@@ -111,9 +116,11 @@ import {
   tapIntent,
   turnMotion,
   turnTarget,
+  wheelPixels,
   wheelTurn,
+  windowEdge,
 } from "../lib/reader/pages.js";
-import { foldSnap, pageStep, pageTurn } from "../lib/reader/paging.js";
+import { edgeKeyTurn, foldSnap, pageStep, pageTurn } from "../lib/reader/paging.js";
 import {
   POSITION_SAVE_DELAY,
   blockAtLine,
@@ -1776,7 +1783,7 @@ function onPageKey(event) {
   if (roomShown !== null) return;
 
   const target = event.target instanceof HTMLElement ? event.target : null;
-  const turn = pageTurn({
+  const press = {
     key: event.key,
     shift: event.shiftKey,
     alt: event.altKey,
@@ -1788,7 +1795,19 @@ function onPageKey(event) {
     reading: readingState() !== "off",
     dialog: document.querySelector("dialog[open]") !== null,
     paged: paged(),
-  });
+  };
+  // Scrolled, a book's text ends where the stretch on screen ends: a key
+  // that moves the text on, pressed with the window already standing at
+  // that end, opens what follows - and at the text's beginning, what came
+  // before (D275). The press that arrives at the end only arrives: the
+  // window is asked where it stands before this press has moved it.
+  const past = paged() ? null : edgeKeyTurn({ ...press, repeat: event.repeat });
+  if (past !== null && atEdgeFor(edgeNow(), past) && mayCarryOn(past)) {
+    event.preventDefault();
+    carryOn(past);
+    return;
+  }
+  const turn = pageTurn(press);
   if (turn === null) return;
 
   event.preventDefault();
@@ -1813,6 +1832,157 @@ function onPageKey(event) {
 }
 
 document.addEventListener("keydown", onPageKey);
+
+/**
+ * Scrolling past the end of a book's text (D275, the rule is in
+ * `lib/reader/pages.js`): the gesture the reader is already making carries
+ * the reading over a border nobody told them about (D270). Three inputs,
+ * one rule - the gesture has to begin with the window standing at the edge
+ * - and one act, the very one the two quiet steps around the text press.
+ */
+
+/** When a gesture at the edge last opened another stretch - the cooldown's clock. */
+let edgeTurnedAt = -Infinity;
+
+/** The wheel's gesture in flight, as the edge rule keeps it. */
+let edgeWheelState = edgeWheelStart();
+
+/**
+ * The finger on the glass, from its landing: where it landed, where the
+ * window stood then, whether it stayed alone. Null when the landing is not
+ * a gesture the edge rule has anything to say about.
+ *
+ * @type {{ id: number, x: number, y: number, startedAt: import("../lib/reader/pages.js").WindowEdge, alone: boolean } | null}
+ */
+let edgeTouch = null;
+
+/** Where the window stands against the two ends of the text, right now. */
+function edgeNow() {
+  return windowEdge(window.scrollY, window.innerHeight, document.documentElement.scrollHeight);
+}
+
+/** What stands over the text, or beside it, and answers a gesture itself. */
+const EDGE_DEAF = ".reader-chrome, dialog, .speech-bar, .mark-bar, .note-popover";
+
+/**
+ * Whether a gesture at the text's edge may open another stretch of it: over
+ * a book read by scrolling, with text in that direction, and with nothing
+ * else in the hand - no room over the reading (D243), no open sheet or
+ * dialog, no pen (its strokes are drags), no range being stretched and no
+ * selection standing, no bubble open - and not within a moment of the last
+ * carry.
+ *
+ * @param {"down" | "up"} turn
+ * @returns {boolean}
+ */
+function mayCarryOn(turn) {
+  const target = shown;
+  if (target === null || target.origin !== "book" || paged()) return false;
+  if (article === null || article.hidden) return false;
+  const frame = bookFrame({ index: target.segmentIndex, count: target.segmentCount });
+  if (turn === "down" ? !frame.onward : !frame.earlier) return false;
+  if (roomShown !== null || anyPanelOpen() || document.querySelector("dialog[open]") !== null) return false;
+  if (markerOn || stretching || bubbleOpen()) return false;
+  if (window.getSelection()?.isCollapsed === false) return false;
+  return performance.now() - edgeTurnedAt >= EDGE_COOLDOWN_MS;
+}
+
+/**
+ * The carry itself - what "Continue reading" and "Earlier text" press: on,
+ * with the text being left counted as finished (D209); back, to the end of
+ * what came before.
+ *
+ * @param {"down" | "up"} turn
+ */
+function carryOn(turn) {
+  // The wheel's gesture is left as the rule left it - spent, its clock
+  // running: what is still to come of the same push, a trackpad's momentum
+  // most of all, must not read as a new gesture over the text just opened.
+  edgeTurnedAt = performance.now();
+  if (turn === "down") countFinished();
+  turnSegment(turn === "down" ? 1 : -1);
+}
+
+// The wheel and the trackpad. Passive, and asking the document for its
+// height only at a gesture's first event and while one pushes against the
+// edge (`edgeWheel`) - every other scroll passes through untouched.
+document.addEventListener(
+  "wheel",
+  (event) => {
+    if (paged() || shown === null || shown.origin !== "book" || roomShown !== null) return;
+    const over = event.target instanceof Element ? event.target : null;
+    if (over !== null && over.closest(EDGE_DEAF) !== null) return;
+    // A zoom chord and a sideways scroll are not a push against the end.
+    const sideways = event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY);
+    const { state, turn } = edgeWheel(
+      edgeWheelState,
+      {
+        delta: sideways ? 0 : wheelPixels(event.deltaY, event.deltaMode, window.innerHeight),
+        now: performance.now(),
+        lastTurnAt: edgeTurnedAt,
+      },
+      edgeNow,
+    );
+    edgeWheelState = state;
+    if (turn !== null && mayCarryOn(turn)) carryOn(turn);
+  },
+  { passive: true },
+);
+
+// The finger. Touch events rather than pointer events: a pan belongs to
+// the browser, which takes the pointer away the moment it begins
+// (`pointercancel`), while the touch goes on being reported to its lift.
+// Read at the lift, so nothing happens under a finger still on the glass
+// and a drag taken back asks for nothing.
+document.addEventListener(
+  "touchstart",
+  (event) => {
+    if (event.touches.length !== 1) {
+      if (edgeTouch !== null) edgeTouch.alone = false;
+      return;
+    }
+    edgeTouch = null;
+    if (paged() || shown === null || shown.origin !== "book" || roomShown !== null) return;
+    const over = event.target instanceof Element ? event.target : null;
+    if (over !== null && over.closest(EDGE_DEAF) !== null) return;
+    const touch = event.touches[0];
+    const startedAt = edgeNow();
+    if (touch === undefined || startedAt === null) return;
+    edgeTouch = { id: touch.identifier, x: touch.clientX, y: touch.clientY, startedAt, alone: true };
+  },
+  { capture: true, passive: true },
+);
+
+document.addEventListener(
+  "touchend",
+  (event) => {
+    const began = edgeTouch;
+    if (began === null) return;
+    const touch = Array.from(event.changedTouches).find((one) => one.identifier === began.id);
+    // Another finger lifting: the gesture is still on the glass.
+    if (touch === undefined) return;
+    edgeTouch = null;
+    const turn = edgeSwipe({
+      startedAt: began.startedAt,
+      edge: edgeNow(),
+      dx: touch.clientX - began.x,
+      dy: touch.clientY - began.y,
+      alone: began.alone,
+      now: performance.now(),
+      lastTurnAt: edgeTurnedAt,
+    });
+    if (turn !== null && mayCarryOn(turn)) carryOn(turn);
+  },
+  { capture: true, passive: true },
+);
+
+document.addEventListener(
+  "touchcancel",
+  () => {
+    edgeTouch = null;
+  },
+  { capture: true, passive: true },
+);
 
 /**
  * Reading by pages (D233): the document stays the window's scroller, and

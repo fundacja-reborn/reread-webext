@@ -128,6 +128,36 @@ export function pageTurn(press) {
 }
 
 /**
+ * The turn a key asks for at the very end of a scrolled text (D275), or
+ * null: the keys that move the text on - the page keys, the space bar, the
+ * Mac's Option chord (`pageTurn`'s own list for a scrolled document) and,
+ * beside them, the bare arrows, which scroll by a line. Pressed with the
+ * window already standing at the end, they are the reader asking for more.
+ *
+ * A key held down never asks (`repeat`): auto-repeat runs into the end of
+ * the text the way a trackpad's momentum does, and the rule is the same for
+ * every input - the gesture has to begin at the edge (`lib/reader/pages.js`).
+ * The caller answers for the other half of that rule, by asking only when
+ * the window stood at the edge before the press. An e-reader's hardware
+ * page keys send PageDown and PageUp (D127), so they are covered by name.
+ *
+ * @param {Press & { repeat: boolean }} press
+ * @returns {"down" | "up" | null}
+ */
+export function edgeKeyTurn(press) {
+  if (press.repeat) return null;
+  const turn = pageTurn({ ...press, paged: false });
+  if (turn === "down" || turn === "up") return turn;
+  if (press.dialog || press.editable || TYPING.has(press.tag)) return null;
+  // Bare arrows only: with Shift they stretch a selection, with the rest
+  // they are the browser's or the system's.
+  if (press.shift || press.alt || press.ctrl || press.meta) return null;
+  if (press.key === "ArrowDown") return "down";
+  if (press.key === "ArrowUp") return "up";
+  return null;
+}
+
+/**
  * How far one turn moves the page: the readable strip of the window, less one
  * line kept on screen so that nothing falls between two pages.
  *
