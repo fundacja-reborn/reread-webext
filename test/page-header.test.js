@@ -43,7 +43,10 @@ describe("the bar stuck to the top of every page", () => {
     // Above the scrim (1) and above everything in a list - the highlighter's
     // pins and badges stand at 0 for this reason.
     assert.match(box, /z-index: 2;/, "the box lost its place over the scrim and the lists");
-    assert.match(box, /padding-top: var\(--header-air\);/, "the stuck box holds no paper over the bar");
+    // The paper over the bar is the page's headroom plus whatever the
+    // screen itself took (D269, `safe-area`): 0px in a tab and on a panel
+    // with nothing to avoid, a phone's cutout in full screen.
+    assert.match(box, /padding-top: calc\(var\(--safe-top\) \+ var\(--header-air\)\);/, "the stuck box holds no paper over the bar");
     assert.doesNotMatch(box, /transition/, "the box animates, which an e-ink panel draws as a smear");
     // The bar rests exactly where it sticks: the page's whole headroom is
     // the box's own paper, and the body keeps none - with half of it on
@@ -106,7 +109,9 @@ describe("the bar stuck to the top of every page", () => {
 
   it("has a height the stylesheet knows, as one token every page shares, which the bar's box takes outright", async () => {
     const styles = await source("assets/page.css");
-    assert.match(styles, /--header-h: calc\(var\(--header-air\) \+ var\(--bar-h\)\);/, "the bar's reach is not one token");
+    // The screen's inset stands first in the reach (D269): everything that
+    // leans on the token moves down with the bar in full screen.
+    assert.match(styles, /--header-h: calc\(var\(--safe-top\) \+ var\(--header-air\) \+ var\(--bar-h\)\);/, "the bar's reach is not one token");
     const bar = ruleOf(styles, ".page-bar");
     assert.match(bar, /height: var\(--bar-h\);/, "the bar's box is left to measure itself");
     assert.match(bar, /border-bottom: 1px solid var\(--page-line\);/, "the line under the bar is not the separators' token");

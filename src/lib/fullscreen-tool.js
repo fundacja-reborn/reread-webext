@@ -36,6 +36,39 @@
 import { t } from "./i18n.js";
 
 /**
+ * What the page asks of a screen with a cutout in it - a notch, or the
+ * lens punched through the panel - and it asks it only while it has the
+ * whole screen (D269): `viewport-fit=cover` says "lay me out under it,
+ * and tell me how much you took", which is what `env(safe-area-inset-top)`
+ * then answers for the stylesheet's `--safe-top` (page.css).
+ *
+ * Asked for the duration of the full screen rather than written into the
+ * pages' markup, because the declaration is not only ours: Firefox for
+ * Android hands a page's `viewport-fit` to the whole browser window
+ * (`GeckoEngineSession.onMetaViewportFitChange` maps it onto the
+ * activity's display-cutout mode), so a page that wore `cover` in a tab
+ * would be laying the browser's own bars under the lens for as long as it
+ * was open. In full screen there are no bars left to lay anywhere.
+ *
+ * Gecko reports the inset without being asked (it reads the window's own
+ * insets and hands them to CSS), so on Firefox the stylesheet alone is
+ * enough; Chromium and WebKit report it only to a page that asked, which
+ * is what this is for - the reader travels to Chromium-based browsers with
+ * extensions and to iOS.
+ */
+function armViewportFit() {
+  const meta = document.querySelector("meta[name=viewport]");
+  if (!(meta instanceof HTMLMetaElement)) return;
+  // What the page says in a tab, kept once: the sentence is the page's
+  // own (the reader's carries `interactive-widget`, D118), and the ask is
+  // added to it rather than replacing it.
+  const inTab = meta.content;
+  document.addEventListener("fullscreenchange", () => {
+    meta.content = document.fullscreenElement === null ? inTab : `${inTab}, viewport-fit=cover`;
+  });
+}
+
+/**
  * Wires a page's `#fullscreen` button, or does nothing on a page without
  * one. Called once, at load, by the reader, the saved phrases and the
  * settings. What comes back asks the room question again, for the one
@@ -47,6 +80,10 @@ import { t } from "./i18n.js";
  * @returns {() => void}
  */
 export function armFullscreenTool(tool, closePanels) {
+  // Before the tool, and whether or not there is one: the screen can be
+  // entered from the reader's menu row and left with Back or Esc, and a
+  // row too narrow for the tool still has a page that may be in it.
+  armViewportFit();
   if (tool === null) return () => {};
   const bar = tool.closest(".page-bar");
 

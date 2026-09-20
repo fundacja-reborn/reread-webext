@@ -215,11 +215,42 @@
    the bar's box takes `--bar-h` as its height outright - a tool that
    outgrew the floor would show over the line rather than move it, so the
    number here and the bar on screen cannot quietly part. In rem, so the
-   browser's text zoom grows both alike. */
+   browser's text zoom grows both alike.
+
+   `--safe-top` is what the screen itself takes off the top of the window:
+   zero everywhere until the page has the whole screen (below), and the
+   height of a phone's cutout - a notch, or the lens punched through the
+   panel - once it has. It stands first in `--header-h`, so everything that
+   leans on that number moves down with the bar rather than under the lens:
+   the panels' ceiling, an anchor's landing, the reader's rooms. */
 :root {
   --header-air: 0.75rem;
   --bar-h: calc(2.1rem + 1rem + 1px);
-  --header-h: calc(var(--header-air) + var(--bar-h));
+  --safe-top: 0px;
+  --header-h: calc(var(--safe-top) + var(--header-air) + var(--bar-h));
+}
+
+/* The screen's own inset, taken only while the page has the whole screen
+   (D269): in full screen the browser's bars are gone and the lens is all
+   that is left over the page, and on a Pixel it stood exactly over the
+   bar's tools (Michał's report, 2026-09-20).
+
+   Only in full screen, for a reason. In a tab the browser's own bars stand
+   between the page and the lens, so the engine reports no inset for the
+   page's window - but Firefox for Android folds its address bar away on a
+   scroll, and a page that took the inset whenever one was reported would
+   grow a strip mid-reading and drop it on the way back up. A bar that
+   moves with the scroll is not a bar. In full screen the number means one
+   thing and keeps it for as long as the screen is ours.
+
+   No setting guards this (Michał's call, 2026-09-20): `env()` answers 0px
+   on a screen with nothing to avoid, so a Boox, a tablet and a laptop see
+   no change at all, and the one device that would need the setting is the
+   one that cannot be asked to go looking for it. The strip wears the
+   page's own paper rather than black: in the light theme a black band over
+   a white page reads as some other program's. */
+:root:fullscreen {
+  --safe-top: env(safe-area-inset-top, 0px);
 }
 
 * {
@@ -829,12 +860,15 @@ button.page-mark:hover {
    paper below can stand under everything in it. Plain sticky, no hiding
    on scroll and no transition: the simplest thing an e-ink panel can be
    asked to redraw (D93). A child of the body, not of a page's header: a
-   stuck box never leaves its parent's box. */
+   stuck box never leaves its parent's box. The paper over the bar carries
+   the screen's inset on top of the page's headroom (D269), so in full
+   screen the tools stand below a phone's lens rather than under it; the
+   inset is 0px everywhere else, and the box keeps the headroom it had. */
 .page-chrome {
   position: sticky;
   top: 0;
   z-index: 2;
-  padding-top: var(--header-air);
+  padding-top: calc(var(--safe-top) + var(--header-air));
   background: var(--page-bg);
 }
 
