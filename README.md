@@ -51,8 +51,8 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 - **Toolbar popup.** Per-site off switch (a site can also be added by its address in the settings, under **Switched-off sites**), language pair, a field to look up a word, reader, reading list, saved phrases and settings in one place. The extension's own pages - reader, reading list, highlights, saved phrases, settings - share one tab instead of opening a new one each time.
 - **Six UI languages.** English, Polish, German, French, Spanish, Ukrainian.
 - **Settings you can find things in.** The settings page is grouped into sections - Languages,
-  Where it works, Bubble and phrases, Reading view, Reading aloud, Data and copies, Custom CSS,
-  About - with a table of contents beside it that follows what you are reading, and a search
+  Bubble and phrases, Reading view, Reading aloud, Data and copies, Switched-off sites, Custom CSS,
+  About re/read - with a table of contents beside it that follows what you are reading, and a search
   field over it: type a few letters of a setting's name or of its description and the page
   narrows to what matches. Accents need not be typed. Every setting has its own address
   (`#s-<name>`), so a link to one lands on it.
