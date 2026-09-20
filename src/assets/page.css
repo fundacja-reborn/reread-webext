@@ -222,11 +222,16 @@
    height of a phone's cutout - a notch, or the lens punched through the
    panel - once it has. It stands first in `--header-h`, so everything that
    leans on that number moves down with the bar rather than under the lens:
-   the panels' ceiling, an anchor's landing, the reader's rooms. */
+   the panels' ceiling, an anchor's landing, the reader's rooms.
+   `--safe-fill` is what that strip is painted in - black, the panel around
+   the lens; the reason it is not the page's paper is under the full-screen
+   rule below. One token because two boxes draw the strip: the bar's, and
+   the reader's room over an article. */
 :root {
   --header-air: 0.75rem;
   --bar-h: calc(2.1rem + 1rem + 1px);
   --safe-top: 0px;
+  --safe-fill: #000000;
   --header-h: calc(var(--safe-top) + var(--header-air) + var(--bar-h));
 }
 
@@ -246,11 +251,35 @@
    No setting guards this (Michał's call, 2026-09-20): `env()` answers 0px
    on a screen with nothing to avoid, so a Boox, a tablet and a laptop see
    no change at all, and the one device that would need the setting is the
-   one that cannot be asked to go looking for it. The strip wears the
-   page's own paper rather than black: in the light theme a black band over
-   a white page reads as some other program's. */
+   one that cannot be asked to go looking for it.
+
+   The strip is painted black, not in the page's paper. 0.5.72 wore the
+   paper and Michał read it back off the Pixel the same day: "wyświetla się
+   w kolorze tła, przez co nagłówek wydaje się wielki i pusty" - a white
+   band under a white bar has nothing to say it is not the bar, so the bar
+   looked twice its height. Black is what the strip actually is: the panel
+   around the lens, and the letterbox Android itself drew there before
+   edge-to-edge became the rule. It stays black in every theme - in the
+   dark one the paper is nearly there anyway, and in the light one the
+   band reads as the phone's own edge rather than as a bar gone empty. */
 :root:fullscreen {
   --safe-top: env(safe-area-inset-top, 0px);
+}
+
+/* The strip drawn, by the box that keeps the paper for it. Fixed rather
+   than absolute, because the box is a column (`body` is 44rem wide at
+   most) and the strip is the window's whole width; fixed also keeps it
+   out of the page's own overflow, so the 0px case - a screen with no
+   cutout, in full screen - costs no sideways scrollbar. `--safe-top` is
+   its height, so on such a screen the strip is nothing at all. */
+:root:fullscreen .page-chrome::after {
+  content: "";
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  height: var(--safe-top);
+  background: var(--safe-fill);
+  pointer-events: none;
 }
 
 * {

@@ -228,7 +228,10 @@ describe("the bar stuck to the top of every page", () => {
     // which is the window while it stands, the seventh the strip at the
     // foot of a panel that scrolls within itself (D246), and the eighth
     // the band in ink for the beat a page turns on e-ink paper (D251).
-    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 8, "a strip of chrome beyond the speech bar, the two curtains, the page count, the edge line, the room, the panel's foot and the turn's flash is stuck or fixed on the reader page");
+    // The ninth is the black strip a room draws under a phone's cutout in
+    // full screen (D269) - the bar's own strip stands at 2 and a room at
+    // 4, so a room has to draw its own or the lens sits over white again.
+    assert.equal((styles.match(/position: (?:sticky|fixed)/g) ?? []).length, 9, "a strip of chrome beyond the speech bar, the two curtains, the page count, the edge line, the room and its cutout strip, the panel's foot and the turn's flash is stuck or fixed on the reader page");
     assert.match(ruleOf(styles, ".panel-more"), /position: sticky;\s*bottom: 0;/, "the panel's foot does not stand at the panel's foot");
     assert.match(ruleOf(styles, ".room"), /position: fixed;[\s\S]*?height: 100dvh;/, "the room does not fill the window as it stands - a fixed box runs under Android's toolbar");
     assert.match(ruleOf(styles, ".page-curtain"), /position: fixed;/, "the curtain is not fixed to the window");

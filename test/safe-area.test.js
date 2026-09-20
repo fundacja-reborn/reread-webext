@@ -61,6 +61,29 @@ describe("the screen's own inset", () => {
     assert.match(box, /background: var\(--page-bg\);/, "the strip over the bar is not the page's own paper");
   });
 
+  it("is painted black, by the bar's box and again by a room standing over it", async () => {
+    const styles = await source("assets/page.css");
+    // 0.5.72 wore the page's paper there and the bar read as twice its
+    // height on the Pixel (Michał's smoke, 2026-09-20): a white band under
+    // a white bar has nothing to say it is not the bar.
+    assert.match(styles, /--safe-fill: #000000;/, "the strip is not painted in one colour the pages share");
+    for (const [sheet, selector, why] of /** @type {[string, string, string][]} */ ([
+      ["assets/page.css", ":root:fullscreen .page-chrome::after", "the bar's box draws no strip"],
+      ["reader/reader.css", ":root:fullscreen .room::after", "a room over an article covers the bar's strip and draws none of its own"],
+    ])) {
+      const strip = ruleOf(await source(sheet), selector);
+      assert.match(strip, /content: "";/, `${selector}: ${why}`);
+      // Fixed, not absolute: the box is a column (44rem at most) while the
+      // strip is the window's whole width, and a fixed box adds nothing to
+      // the page's overflow - so the 0px case costs no sideways scrollbar.
+      assert.match(strip, /position: fixed;/, `${selector}: the strip is laid out in a column narrower than the window`);
+      assert.match(strip, /inset-inline: 0;\s*top: 0;/, `${selector}: the strip does not stand across the window's top`);
+      assert.match(strip, /height: var\(--safe-top\);/, `${selector}: the strip has a height of its own, not the screen's inset`);
+      assert.match(strip, /background: var\(--safe-fill\);/, `${selector}: the strip is painted in something other than the shared colour`);
+      assert.match(strip, /pointer-events: none;/, `${selector}: the strip takes presses meant for the page`);
+    }
+  });
+
   it("keeps the reader's ribbon and its rooms clear of the lens", async () => {
     const sheet = await source("reader/reader.css");
     // A bar folded behind its ribbon keeps no paper (D219's smoke), but in
