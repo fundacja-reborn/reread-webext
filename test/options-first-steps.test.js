@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
-import { stepsView } from "../src/options/first-steps.js";
+import { hasToolbar, stepsView } from "../src/options/first-steps.js";
 
 /**
  * The fresh install's three steps (D254, P6) and the data section under them
@@ -33,15 +33,53 @@ function rule(css, selector) {
 
 /** @param {Partial<Parameters<typeof stepsView>[0]>} state */
 function view(state) {
-  return stepsView({ model: false, dictionary: false, pinned: false, hidden: false, ...state });
+  return stepsView({ model: false, dictionary: false, pinned: false, hidden: false, toolbar: true, ...state });
+}
+
+/**
+ * The steps as "is it done", in the card's own order.
+ *
+ * @param {Partial<Parameters<typeof stepsView>[0]>} state
+ */
+function marks(state) {
+  return view(state).steps.map((step) => step.done);
 }
 
 describe("the first steps", () => {
   it("counts what is actually stored", () => {
-    assert.deepEqual(view({}).steps, [false, false]);
+    assert.deepEqual(marks({}), [false, false]);
     assert.equal(view({}).done, 0);
-    assert.deepEqual(view({ model: true, pinned: true }).steps, [true, true]);
+    assert.deepEqual(marks({ model: true, pinned: true }), [true, true]);
     assert.equal(view({ model: true, pinned: true }).done, 2);
+    // Each step names the row it draws, so a card one step shorter draws the
+    // right row rather than the first two of a list.
+    assert.deepEqual(
+      view({}).steps.map((step) => step.id),
+      ["step-source", "step-pin"],
+    );
+  });
+
+  it("does not ask for a toolbar a phone has not got (Michał's Boox, 2026-09-19)", () => {
+    // Firefox on Android puts the button in the browser's own menu and offers
+    // no pinning at all, so the step could never be ticked: the card stood
+    // for ever at "1 of 2" on the one platform where the settings page is
+    // most of what a reader sees.
+    assert.equal(hasToolbar("android"), false);
+    assert.equal(hasToolbar("ios"), false, "Safari on a phone has a toolbar to pin to");
+    assert.equal(hasToolbar("ipados"), false, "the iPad's other name is not known");
+    assert.equal(hasToolbar("mac"), true, "the desktop lost the step with the phones");
+    assert.equal(hasToolbar(""), true, "an unanswered platform is treated as a phone");
+
+    const phone = view({ toolbar: false });
+    assert.deepEqual(
+      phone.steps.map((step) => step.id),
+      ["step-source"],
+      "the phone is still asked to pin the button",
+    );
+    assert.equal(phone.total, 1);
+    // And the one step that is left still finishes the card.
+    assert.equal(view({ toolbar: false, model: true }).show, false, "a finished card stands on for ever on a phone");
+    assert.equal(view({ toolbar: false, dictionary: true }).done, 1);
   });
 
   it("asks for one of the two downloads, not for both (Michał, 2026-09-19)", () => {
@@ -49,10 +87,10 @@ describe("the first steps", () => {
     // explains words, and either one alone makes the bubble answer. A card
     // that asked for them in turn said something untrue about the one that
     // is optional.
-    assert.equal(view({ model: true }).steps[0], true, "a model does not answer the first step");
-    assert.equal(view({ dictionary: true }).steps[0], true, "a dictionary does not answer the first step");
-    assert.equal(view({ model: true, dictionary: true }).steps[0], true);
-    assert.equal(view({}).steps[0], false, "an empty device counts as set up");
+    assert.equal(marks({ model: true })[0], true, "a model does not answer the first step");
+    assert.equal(marks({ dictionary: true })[0], true, "a dictionary does not answer the first step");
+    assert.equal(marks({ model: true, dictionary: true })[0], true);
+    assert.equal(marks({})[0], false, "an empty device counts as set up");
     // And the sentence that explains it goes with the step.
     assert.equal(view({ dictionary: true }).intro, false, "the sentence stands over a step already done");
     assert.equal(view({ dictionary: true }).open, false, "the card stays open with its first step done");

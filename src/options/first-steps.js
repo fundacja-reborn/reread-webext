@@ -8,8 +8,9 @@
  * switch that says none is wanted), and a dictionary. The third, whether the
  * toolbar button has been pinned, the browser answers where it has the API
  * (Firefox and Chromium both do, `action.getUserSettings`); where it has not,
- * or where there is no toolbar at all, the reader says so with a press and the
- * page writes that down.
+ * the reader says so with a press and the page writes that down - and where
+ * there is no toolbar at all, on a phone or a tablet, the step is not asked
+ * (`hasToolbar`).
  *
  * What is written down is the only new thing this round stores: one key of its
  * own beside the settings, never inside them - the shape of `config` is a
@@ -88,6 +89,22 @@ export async function pinnedByBrowser() {
 }
 
 /**
+ * Whether this platform has a toolbar to pin the button to. Firefox on
+ * Android has none - the button stands in the browser's own menu - and
+ * neither has Safari on a phone or a tablet, so the step that asks for it is
+ * not a step there at all: it is an errand nobody can run, and it kept the
+ * card standing for good (Michał's Boox, 2026-09-19).
+ *
+ * The same three names `effectiveReaderOnly` knows, for the same reason: no
+ * browser has said which of "ios" and "ipados" an iPad answers with.
+ *
+ * @param {string} os as `getPlatformInfo` names it
+ */
+export function hasToolbar(os) {
+  return os !== "android" && os !== "ios" && os !== "ipados";
+}
+
+/**
  * What the card shows, from what is stored and what the browser said. Kept
  * apart from the DOM so the rule can be held to examples without a browser:
  * the first step is "something to explain words with", and a model or a
@@ -95,13 +112,22 @@ export async function pinnedByBrowser() {
  * for both in turn said something untrue about the one that is optional
  * (Michał, 2026-09-19).
  *
+ * The steps carry their own row's id rather than a place in a list, because
+ * how many there are depends on the platform: a phone has no toolbar, and
+ * the card there is one step long.
+ *
  * @param {{ model: boolean, dictionary: boolean, pinned: boolean | null,
- *   hidden: boolean }} state
- * @returns {{ steps: boolean[], done: number, total: number, show: boolean, open: boolean, intro: boolean }}
+ *   hidden: boolean, toolbar: boolean }} state
+ * @returns {{ steps: { id: string, done: boolean }[], done: number,
+ *   total: number, show: boolean, open: boolean, intro: boolean }}
  */
 export function stepsView(state) {
-  const steps = [state.model || state.dictionary, state.pinned === true];
-  const done = steps.filter(Boolean).length;
+  const source = state.model || state.dictionary;
+  const steps = [
+    { id: "step-source", done: source },
+    ...(state.toolbar ? [{ id: "step-pin", done: state.pinned === true }] : []),
+  ];
+  const done = steps.filter((step) => step.done).length;
   return {
     steps,
     done,
@@ -109,8 +135,8 @@ export function stepsView(state) {
     // Gone once every step is done, or once it has been put away by hand.
     show: !state.hidden && done < steps.length,
     // Open while the first step is undone; one line once it is.
-    open: !steps[0],
+    open: !source,
     // And the old sentence only where it is true.
-    intro: !steps[0],
+    intro: !source,
   };
 }

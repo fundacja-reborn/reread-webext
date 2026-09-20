@@ -111,21 +111,25 @@ describe("the signal that a page has turned (D251)", () => {
 
   it("offers the effect on the settings page, in every language", async () => {
     const markup = await source("options/options.html");
+    // Three radios on the page rather than a select (D268): what a select
+    // opens on Android is the browser's own dialog, which no rule of ours
+    // reaches - and on an e-ink panel it vanishes into the page under it.
     assert.match(
       markup,
-      /<select id="turn-effect">\s*<option value="smooth"[\s\S]*?<option value="flash"[\s\S]*?<option value="off"/,
+      /name="turn-effect" value="smooth"[\s\S]*?name="turn-effect" value="flash"[\s\S]*?name="turn-effect" value="off"/,
       "the row does not offer the three values, smoothest first",
     );
+    assert.doesNotMatch(markup, /<select id="turn-effect"/, "the values are behind the browser's own dialog again");
     // One paragraph, always open (D264): what the row is for, then what the
     // value in force looks like - no trigger, and no folded rest opening
     // under the line that had already said it.
-    assert.match(markup, /<p class="row-note">\s*<span data-i18n="options_turn_effect_hint">[^<]*<\/span>\s*<span id="turn-effect-note"><\/span>\s*<\/p>/, "the row's two halves are not one paragraph");
+    assert.match(markup, /<p class="row-note" id="turn-effect-note-group">\s*<span data-i18n="options_turn_effect_hint">[^<]*<\/span>\s*<span id="turn-effect-note"><\/span>\s*<\/p>/, "the row's two halves are not one paragraph");
     assert.doesNotMatch(markup, /more-turnEffect|options_turn_effect_more/, "the row still folds a rest away");
     assert.match(markup, /id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn"/, "the row cannot be found by the words its folded rest used to carry");
     const script = await source("options/options.js");
-    assert.match(script, /if \(!\(select instanceof HTMLSelectElement\) \|\| !isTurnEffect\(select\.value\)\) return;/, "a value the guard does not know can be written");
-    assert.match(script, /writeConfig\(\{ reader: \{ turnEffect: select\.value \} \}\)/, "the row does not write the reader's setting");
-    assert.match(bodyOf(script, "renderTurning"), /effect\.value = config\.reader\.turnEffect;\s*sayEffect\(effect\.value\);/, "the row does not show what is stored, or says nothing about it");
+    assert.match(script, /if \(!\(chosen instanceof HTMLInputElement\) \|\| !isTurnEffect\(chosen\.value\)\) return;/, "a value the guard does not know can be written");
+    assert.match(script, /writeConfig\(\{ reader: \{ turnEffect: chosen\.value \} \}\)/, "the row does not write the reader's setting");
+    assert.match(bodyOf(script, "renderTurning"), /if \(markChoice\("turn-effect", config\.reader\.turnEffect\)\) sayEffect\(config\.reader\.turnEffect\);/, "the row does not show what is stored, or says nothing about it");
     // The second half of that paragraph, one sentence per value, each key a
     // literal.
     assert.match(markup, /<span id="turn-effect-note"><\/span>/, "there is nothing to say what the chosen effect looks like");
@@ -157,7 +161,7 @@ describe("the signal that a page has turned (D251)", () => {
         assert.doesNotMatch(message, /E-ink/, `${lang}/${key} still ties the effect to the theme`);
       }
     }
-    assert.match(script, /sayEffect\(select\.value\);/, "the line stands still when the effect is changed");
+    assert.match(script, /sayEffect\(chosen\.value\);/, "the line stands still when the effect is changed");
     for (const lang of ["en", "pl", "de", "fr", "es", "uk"]) {
       const catalogue = JSON.parse(await source(`_locales/${lang}/messages.json`));
       for (const key of [

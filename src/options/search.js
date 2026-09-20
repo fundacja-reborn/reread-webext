@@ -114,6 +114,10 @@ function readRow(row, inherited) {
     name?.textContent ?? "",
     hint?.textContent ?? "",
     more?.textContent ?? "",
+    // A row of choices says all of them out loud (D268), so all of them can
+    // be looked up: "slide", "flash" and the rest were words behind a select
+    // until the three gestures came onto the page.
+    [...row.querySelectorAll(".choice")].map((choice) => choice.textContent ?? "").join(" "),
     keywords.length > 0 ? t(keywords) : "",
     inherited,
   ];

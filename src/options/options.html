@@ -1098,13 +1098,31 @@
            quicker and more precise. Off is for a reader with hardware page
            keys, where no gesture is worth an accidental turn. Chosen by name
            in a select, like the language pair: three values, set once. -->
-      <div class="row row-value row-stack" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout">
-        <label class="row-name" for="touch-turn" data-i18n="options_touch_turn">Turning pages by touch</label>
-        <select id="touch-turn">
-          <option value="zones" data-i18n="options_touch_turn_zones">Tap the left or right side of the screen</option>
-          <option value="swipe" data-i18n="options_touch_turn_swipe">Slide a finger sideways</option>
-          <option value="off" data-i18n="options_touch_turn_off">Off</option>
-        </select>
+      <!-- The three gestures stand on the page rather than in a select
+           (Michał's smoke on the Boox, 2026-09-19): a select's open list on
+           Android is the browser's own dialog - `ChoiceDialogFragment`, a
+           Material alert built by Fenix - which no rule of ours can reach,
+           and on an e-ink panel it is a pale sheet carried by a shadow the
+           screen does not draw. Three fixed choices fit on the page as rows
+           of their own, where the frame, the ink and the touch floor are this
+           page's; nothing opens, nothing redraws the screen, and all three
+           can be read without a press. The long lists - the pair, a
+           dictionary's languages, a voice - keep their select: a hundred
+           rows want the dialog's own scrolling. -->
+      <div class="row row-choice" id="s-touchTurn" data-setting="touchTurn" data-keywords="options_keywords_turn" data-section="paged-layout" role="radiogroup" aria-labelledby="touch-turn-name" aria-describedby="touch-turn-note">
+        <p class="row-name" id="touch-turn-name" data-i18n="options_touch_turn">Turning pages by touch</p>
+        <label class="choice">
+          <input type="radio" name="touch-turn" value="zones" />
+          <span data-i18n="options_touch_turn_zones">Tap the left or right side of the screen</span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="touch-turn" value="swipe" />
+          <span data-i18n="options_touch_turn_swipe">Slide a finger sideways</span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="touch-turn" value="off" />
+          <span data-i18n="options_touch_turn_off">Off</span>
+        </label>
         <!-- What the chosen gesture does, in the reader's own words (Michał's
              smoke, 2026-09-18): three gestures named in three words each say
              too little, and what a reader needs is the one they picked - where
@@ -1122,13 +1140,20 @@
       </div>
       <!-- The turn made visible (D251). Two values, not three: a signal
            given every fifth page would not be a confirmation of anything. -->
-      <div class="row row-value" id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn" data-section="paged-layout">
-        <label class="row-name" for="turn-effect" data-i18n="options_turn_effect">Page turn effect</label>
-        <select id="turn-effect">
-          <option value="smooth" data-i18n="options_turn_effect_smooth">Smooth slide</option>
-          <option value="flash" data-i18n="options_turn_effect_flash">Dark flash (e-ink)</option>
-          <option value="off" data-i18n="options_turn_effect_off">Off</option>
-        </select>
+      <div class="row row-choice" id="s-turnEffect" data-setting="turnEffect" data-keywords="options_keywords_turn" data-section="paged-layout" role="radiogroup" aria-labelledby="turn-effect-name" aria-describedby="turn-effect-note-group">
+        <p class="row-name" id="turn-effect-name" data-i18n="options_turn_effect">Page turn effect</p>
+        <label class="choice">
+          <input type="radio" name="turn-effect" value="smooth" />
+          <span data-i18n="options_turn_effect_smooth">Smooth slide</span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="turn-effect" value="flash" />
+          <span data-i18n="options_turn_effect_flash">Dark flash (e-ink)</span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="turn-effect" value="off" />
+          <span data-i18n="options_turn_effect_off">Off</span>
+        </label>
         <!-- One paragraph, always open (D264): what the row is for, then what
              the value in force looks like on this screen - a sentence the
              reader reads in one breath instead of a sentence, a trigger, and
@@ -1136,7 +1161,7 @@
              it. The second half is filled by script and changes with the
              select, so the two halves are two elements in one paragraph
              rather than two paragraphs. -->
-        <p class="row-note">
+        <p class="row-note" id="turn-effect-note-group">
           <span data-i18n="options_turn_effect_hint">A visible confirmation that the page has changed.</span>
           <span id="turn-effect-note"></span>
         </p>

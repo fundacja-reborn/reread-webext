@@ -49,6 +49,25 @@ describe("the settings page's navigation", () => {
     assert.match(script, /option\.textContent = link\.textContent/, "the bar's lines are not the column's own");
   });
 
+  it("asks the section whether it is on the page, never the link that names it", async () => {
+    // The bug Michał found on the Boox and then caught in the emulator
+    // (2026-09-19): the select came up empty - a chevron with no words - and
+    // the page had no list of sections at all below 60rem. The column it is
+    // built from is `display: none` there, so every link measured as not
+    // drawn and every line was filtered out, on exactly the screens where the
+    // select is the only shape of the list.
+    const script = await source("options/sections.js");
+    assert.match(script, /const wanted = entries\(\)\.filter\(onPage\);/, "the bar's list is filtered by something other than what is on the page");
+    assert.match(
+      script,
+      /function onPage\(\{ link, heading \}\) \{\s*return !link\.hidden && shown\(heading\);/,
+      "the verdict is taken off the link's own box, which the breakpoint hides",
+    );
+    // And the marker follows the same list, so the two cannot disagree about
+    // which sections exist.
+    assert.match(script, /const visible = list\.filter\(onPage\);/, "the marker and the select judge the page differently");
+  });
+
   it("takes the bar's list again whenever a section joins or leaves the page", async () => {
     const options = await source("options/options.js");
     // The two moments a section comes or goes: the first-steps card looking

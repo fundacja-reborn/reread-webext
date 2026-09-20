@@ -8,7 +8,9 @@
  * built from them, so a section can never be in one and missing from the
  * other, and a link the page has hidden - the first-steps card before it has
  * looked at the stores, everything about models with translation switched off
- * - leaves both at once.
+ * - leaves both at once. What decides that is the section, not the link: the
+ * column itself is off the page below the breakpoint, and a list built from
+ * what is drawn there would be empty exactly where it is needed (`onPage`).
  *
  * No smooth scrolling anywhere in here on purpose: an e-ink panel draws an
  * animated scroll as a smear, and every landing on this page is a jump.
@@ -49,6 +51,21 @@ function shown(element) {
 }
 
 /**
+ * Whether a section is on the page, asked of the section itself and never of
+ * the link that names it (Michał's Boox and his emulator, 2026-09-19): below
+ * the breakpoint the whole column is `display: none`, so a link measured
+ * there is never drawn and the bar's list came out empty - a chevron with no
+ * words, on exactly the screens the select is the only list there is. The
+ * link is still asked whether the page put it away by hand, which is how the
+ * first-steps entry leaves both shapes of the list at once.
+ *
+ * @param {{ link: HTMLAnchorElement, heading: HTMLElement }} entry
+ */
+function onPage({ link, heading }) {
+  return !link.hidden && shown(heading);
+}
+
+/**
  * The bar's select, rebuilt from the links that are on the page. Called again
  * whenever the page changes shape - the mode switch, the first-steps card -
  * because a select is a snapshot and the column is not.
@@ -56,7 +73,7 @@ function shown(element) {
 export function fillSectionSelect() {
   const select = document.getElementById("section-jump");
   if (!(select instanceof HTMLSelectElement)) return;
-  const wanted = entries().filter(({ link }) => shown(link));
+  const wanted = entries().filter(onPage);
   const current = select.value;
   select.replaceChildren();
   for (const { link, id } of wanted) {
@@ -81,7 +98,7 @@ export function fillSectionSelect() {
  * @returns {string | null}
  */
 function readingNow(list) {
-  const visible = list.filter(({ heading }) => shown(heading));
+  const visible = list.filter(onPage);
   if (visible.length === 0) return null;
   const foot = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
   if (foot) return String(visible[visible.length - 1]?.id);
