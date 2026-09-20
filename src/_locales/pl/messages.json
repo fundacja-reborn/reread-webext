@@ -1535,7 +1535,8 @@
       "percent": { "content": "$1", "example": "34" }
     }
   },
-  "reader_book_nav": { "message": "Części książki" },
+  "reader_book_earlier": { "message": "Wcześniejszy tekst" },
+  "reader_book_onward": { "message": "Czytaj dalej" },
   "reader_book_toc": { "message": "Spis treści" },
   "reader_search_title": { "message": "Szukaj w tekście" },
   "reader_search_label": { "message": "Szukana fraza" },

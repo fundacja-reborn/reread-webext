@@ -1535,20 +1535,34 @@ body.reader:has(#library:not([hidden])) {
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }
 
-/* The note over a book whose language is not the pair's source (O20): one
-   muted line with the settings one press away, never a bar and never a
-   dialog. */
+/* The note over a book whose language is not the pair's source (O20), at
+   the book's beginning alone since D270: one muted line at the chrome's
+   size, never a bar and never a dialog. The way to the settings is a link
+   inside the sentence - the dress every door named in running text wears on
+   these pages - rather than a framed button under it: a frame made a
+   reminder about a setting the heaviest thing on the book's first page
+   (Michał, 2026-09-20: "is it needed here, in this form?"). */
 .book-note {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.75rem;
+  margin: 0 0 1rem;
+  color: var(--page-muted);
+  font-size: 0.85rem;
 }
 
 .book-note button {
-  min-height: 44px;
-  padding: 0.35rem 0.8rem;
-  white-space: nowrap;
+  display: inline;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--page-accent);
+  font: inherit;
+  text-decoration: underline;
+}
+
+.book-note button:hover,
+.book-note button:focus-visible {
+  color: var(--page-fg);
 }
 
 /* The offer a picked file becomes: its size, a taste of its titles, and the
@@ -2000,53 +2014,85 @@ a.marks-act {
   margin: 0 0 1.25rem;
 }
 
-/* --- the book's pager: the shared one (`.pager`, page.css), in the article
-   view's own voice --- */
+/* --- a book as one text (D270, `lib/reader/book-frame.js`) --- */
 
-/* Under the article's quiet action row and over its title, the pager speaks
-   at the size the article view's chrome speaks - the bar, the panels, the
-   actions, the notice - not the lists' full interface size: a row of
-   controls a step louder than the bar over it read as part of the text.
-   Its label is the pager's muted count, like every pager's. */
+/* A long book is kept and rendered one stretch at a time, and the page says
+   so nowhere. What is left of the pager that stood here - "Part 2 of 63"
+   between two framed chevrons, which over a book read by pages looked like
+   the previous and the next PAGE and were pressed as such - is one quiet
+   step at each end of a scrolled stretch: the chrome's own size and the
+   quiet acts' dress (no frame at rest, muted, the wash under a pointer), a
+   chevron on the scroll's own axis beside the words. The 44px floor stands
+   on the button; the negative margin hands its padding to the gutter, so
+   the words begin on the text's own left edge. */
 .segment-nav {
+  display: flex;
   font-size: 0.85rem;
 }
 
-/* A pager button with nowhere to go - "Previous" over the first part,
-   "Next" under the last (Michał, 2026-09-16; a greyed button was still a
-   button). Invisible rather than gone: the slot stays, so the part label
-   and the other button stand where they stood on the part before. */
-.segment-nav .pager-blank {
-  visibility: hidden;
-}
-
-/* The way onward under a segment's last line, pushed off it: finishing a
-   part deserves a breath between the prose and the buttons (Michał,
-   2026-08-17). Distance alone does the parting, as everywhere on this page;
-   the twin above the text keeps the pager's usual rhythm. */
-#segment-nav-end {
-  margin-top: 3rem;
-}
-
-/* --- the book's table of contents (D116) --- */
-
-/* The pager's middle: the part label with the door to the map of parts
-   beside it. `min-width: 0` lets the pair give way before the row does on a
-   narrow screen. */
-.segment-middle {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-/* An icon among the pager's worded buttons: the shared touch floor without
-   a word's width. */
-.pager .toc-button {
+.segment-nav button {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0.35rem 0.5rem;
+  gap: 0.35rem;
+  min-height: 44px;
+  margin-inline-start: calc(-0.8rem - 1px);
+  padding: 0.35rem 0.8rem;
+  border-color: transparent;
+  color: var(--page-muted);
+  white-space: nowrap;
+}
+
+.segment-nav button:hover,
+.segment-nav button:focus-visible {
+  border-color: var(--page-border);
+  background: color-mix(in srgb, var(--page-fg) 6%, transparent);
+  color: var(--page-fg);
+}
+
+/* Back to the earlier text, over the first line: close to the text it leads
+   away from, since nothing else stands over a stretch past the book's
+   beginning. */
+#segment-nav {
+  margin: 0 0 0.75rem;
+}
+
+/* On with the reading, under the last line, pushed off it: arriving at the
+   end of what the window holds deserves a breath between the prose and the
+   button (Michał, 2026-08-17). Down here the step wears its frame at rest,
+   for the reason the acts of finishing do: after the last line a bare word
+   reads as a stray word, least of all like a button on a paper screen,
+   which has no hover to reveal one - and this is the one press the scrolled
+   book cannot be read without. A framed button aligns by its frame. */
+#segment-nav-end {
+  margin: 3rem 0 0;
+}
+
+#segment-nav-end button {
+  margin-inline-start: 0;
+  border-color: var(--page-border);
+  color: var(--page-fg);
+}
+
+/* Read by pages, a turn past a stretch's last page opens the next one, and
+   a turn back past its first page the last page of the one before: the
+   book's pages run on, and a button for it would be a second control for
+   what the hand already does - standing at the head or the foot of a page in
+   the middle of a chapter. The stylesheet's rule rather than the script's,
+   so the layout can change under a book on screen with nothing to redraw. */
+:root[data-reader-layout="paged"] .segment-nav {
+  display: none;
+}
+
+/* Past its beginning a book's text simply goes on: the title block is the
+   book's head, worn once (`data-book-place`, reader.js). Taken away whole
+   rather than clipped out of sight: a clipped box is still a block of the
+   flow, and the page table counts the article's children without asking how
+   they are placed (`flowBlocks`). A screen reader is told what it has landed
+   in by the article's own name instead, which the script sets to the title
+   over these stretches. The children by name and by `>`: a book's own
+   chapter headings are `h1` too, inside the content. */
+#article[data-book-place="within"] > :is(#title, .reader-byline, .reader-source, .reader-facts) {
+  display: none;
 }
 
 /* The reader's first native dialog. No padding of its own - the header and
