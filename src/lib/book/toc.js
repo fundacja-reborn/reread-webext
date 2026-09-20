@@ -15,6 +15,15 @@
  * `>` and U+00A0), so raw `<` only ever opens a real tag; the one `>` that
  * can stand anywhere but a tag's edge is inside a quoted attribute value,
  * which the strip pattern reads quotes to step over.
+ *
+ * A book whose text has no headings has no chapters to list, and since D270
+ * nothing else to move about by either - the stretches it is kept in are
+ * said nowhere. Its contents are then **places in the book** (D271): one row
+ * per stretch, named by the first words that stand there (`placeTitle`) and
+ * carrying how far into the book the place is. A place has a chapter row's
+ * shape, so everything that reads a table of contents reads this one; it is
+ * built in memory by the reader and never stored - an empty `toc` on the
+ * book's row keeps meaning "scanned, no headings found".
  */
 
 import { isHeadingTag } from "./segment.js";
@@ -44,6 +53,31 @@ export const TOC_ENTRY_CAP = 500;
 
 /** Characters a title may keep - an abused heading is cut, never refused. */
 export const TOC_TITLE_CAP = 120;
+
+/**
+ * A place's row (D271): a chapter row's shape, plus how far into the book
+ * the place stands, in whole percent - the number its row shows on the
+ * right, where a chapter's title needs none.
+ *
+ * @typedef {TocEntry & { percent: number }} PlaceEntry
+ */
+
+/**
+ * Characters a place's name may keep, the ellipsis included. Half a chapter
+ * title's cap on purpose: a heading is a name somebody wrote to be listed,
+ * first words are a way to recognize a place, and a list of sixty of them
+ * has to stay a list on a phone.
+ */
+export const PLACE_TITLE_CAP = 64;
+
+/**
+ * Characters a place's name wants before it stops collecting. A stretch
+ * that opens on a line of dialogue or on a chapter number set as a plain
+ * paragraph ("XII") is named by that line and the words after it - the
+ * number alone would name sixty places "I" to "LX" at best, and "- Yes."
+ * names nothing.
+ */
+export const PLACE_TITLE_MIN = 24;
 
 /** A block that opens a chapter: the tags the segmenter prefers to cut before. */
 const HEADING_BLOCK = /^<h([123])[\s>]/;
@@ -80,13 +114,23 @@ export function tocTitle(text) {
  * @returns {string | null}
  */
 function titleOf(block) {
-  const text = block
+  return tocTitle(wordsOf(block));
+}
+
+/**
+ * The text of a stored block with its markup taken off - see the header
+ * for why a regular expression may read this markup at all.
+ *
+ * @param {string} block
+ * @returns {string}
+ */
+function wordsOf(block) {
+  return block
     .replace(TAGS, "")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&");
-  return tocTitle(text);
 }
 
 /**
@@ -154,4 +198,149 @@ export function renderedEntries(blocks, segmentIndex) {
  */
 export function cappedToc(entries) {
   return entries.length <= TOC_ENTRY_CAP ? entries : entries.slice(0, TOC_ENTRY_CAP);
+}
+
+/**
+ * Whether a book is shown places for its contents (D271): a book kept in
+ * more than one stretch whose scanned table has fewer than two rows. None
+ * is the book without headings; one is, in practice, the title page's own
+ * heading over a book whose chapters are set as plain paragraphs - a table
+ * of one row leads nowhere, and its reader is as lost as the first one's.
+ * A row still owed its scan (`null`) answers false: the scan decides.
+ *
+ * @param {TocEntry[] | null} toc as the book's row carries it
+ * @param {number} segmentCount
+ * @returns {boolean}
+ */
+export function wantsPlaces(toc, segmentCount) {
+  return toc !== null && toc.length < 2 && Number.isInteger(segmentCount) && segmentCount > 1;
+}
+
+/**
+ * A footnote's mark inside a stored block: the anchor the import left with
+ * the note's text in `data-note` (`book/notes.js`) and a digit or a symbol
+ * for its words - bare, or wrapped in a `sup` of its own. Quotes are stepped
+ * over as `TAGS` steps over them (a note may hold a `>`), and the match ends
+ * at the first closing tag: anchors do not nest.
+ */
+const ANCHORS = /<a\s[^>"']*(?:"[^"]*"[^>"']*|'[^']*'[^>"']*)*>[\s\S]*?<\/a>/g;
+
+/** A letter or a digit of any script: what makes a block's text words. */
+const WORDS = /[\p{L}\p{N}]/u;
+
+/**
+ * What may not stand before the ellipsis of a name that was cut: space,
+ * the punctuation a clause ends or a quotation opens with, and the dashes -
+ * the en and em dash spelled as codes, since no file of this repository
+ * holds a literal em-dash.
+ */
+const LOOSE_END = new RegExp("[\\s,;:(\\[\\-\\u2013\\u2014\\u00ab\\u201e\\u201c\"']+$", "u");
+
+/**
+ * The words of a stored block as a place is named by them: footnote marks
+ * taken out whole (their digit would glue itself to the word before it),
+ * markup off, whitespace collapsed. Empty for a block that holds no letter
+ * and no digit - a picture, a rule, a row of asterisks between two scenes.
+ *
+ * @param {string} block
+ * @returns {string}
+ */
+function placeWords(block) {
+  const text = wordsOf(block.replace(ANCHORS, (anchor) => (/\sdata-note=/.test(anchor) ? "" : anchor)))
+    .replace(/\s+/g, " ")
+    .trim();
+  return WORDS.test(text) ? text : "";
+}
+
+/**
+ * The first words of a text, held to the cap: whole when they fit, otherwise
+ * cut at the last space before the cap and closed with an ellipsis. A text
+ * that has no space to cut at in the cap's second half - an unspaced script,
+ * one endless token - is cut at the cap itself, never inside a surrogate
+ * pair.
+ *
+ * @param {string} words collapsed and trimmed
+ * @returns {string}
+ */
+function firstWords(words) {
+  if (words.length <= PLACE_TITLE_CAP) return words;
+  const room = PLACE_TITLE_CAP - 1;
+  let cut = words.slice(0, room);
+  if (/[\uD800-\uDBFF]$/.test(cut)) cut = cut.slice(0, -1);
+  const space = cut.lastIndexOf(" ");
+  if (words[room] !== " " && space >= room / 2) cut = cut.slice(0, space);
+  return `${cut.replace(LOOSE_END, "")}…`;
+}
+
+/**
+ * How one stretch of a book is named in the places list (D271), and where
+ * its row lands: the first words standing in it, and the block they begin
+ * in - the landing shows the very words the row promised, which a leading
+ * picture's block would not. Words are collected across blocks until there
+ * are enough to recognize a place by (`PLACE_TITLE_MIN`). Null for a stretch
+ * without words - pictures only - which gets no row.
+ *
+ * @param {string[]} blocks the segment's stored blocks
+ * @returns {{ title: string, blockIndex: number } | null}
+ */
+export function placeTitle(blocks) {
+  let words = "";
+  let blockIndex = -1;
+  for (const [index, block] of blocks.entries()) {
+    const text = placeWords(block);
+    if (text.length === 0) continue;
+    if (blockIndex === -1) blockIndex = index;
+    words = words.length === 0 ? text : `${words} ${text}`;
+    if (words.length >= PLACE_TITLE_MIN) break;
+  }
+  return blockIndex === -1 ? null : { title: firstWords(words), blockIndex };
+}
+
+/**
+ * How far into the book a stretch begins, in whole percent - the arithmetic
+ * of `overallPercent` (`lib/reader/position.js`) for a reading that stands
+ * at the stretch's first line, so the number on a place's row and the one
+ * the reading list shows after landing there are one number.
+ *
+ * @param {number} segmentIndex
+ * @param {number} segmentCount
+ * @returns {number} 0-100
+ */
+export function placePercent(segmentIndex, segmentCount) {
+  if (!Number.isFinite(segmentIndex) || !Number.isFinite(segmentCount) || segmentCount <= 0) return 0;
+  return Math.min(100, Math.max(0, Math.round((segmentIndex / segmentCount) * 100)));
+}
+
+/**
+ * One stretch's row in the places list, or null when it holds no words.
+ * Flat on purpose (`level: 1`): places are not a hierarchy.
+ *
+ * @param {string[]} blocks the segment's stored blocks
+ * @param {number} segmentIndex
+ * @param {number} segmentCount
+ * @returns {PlaceEntry | null}
+ */
+export function placeEntry(blocks, segmentIndex, segmentCount) {
+  const named = placeTitle(blocks);
+  if (named === null) return null;
+  return {
+    title: named.title,
+    level: 1,
+    segmentIndex,
+    blockIndex: named.blockIndex,
+    percent: placePercent(segmentIndex, segmentCount),
+  };
+}
+
+/**
+ * Whether a row is a place rather than a chapter. The two travel in one
+ * list through everything that reads a table of contents; the two readers
+ * that must tell them apart - the dialog, which shows a place's percent,
+ * and the search, whose headings are chapters only - ask here.
+ *
+ * @param {TocEntry} entry
+ * @returns {entry is PlaceEntry}
+ */
+export function isPlace(entry) {
+  return "percent" in entry && typeof entry.percent === "number";
 }

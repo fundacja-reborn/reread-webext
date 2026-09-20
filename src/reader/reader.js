@@ -156,7 +156,14 @@ import { entryReader, listEntries, packArchive } from "./zip.js";
 /** @typedef {import("../lib/store/book.js").BookMeta} BookMeta */
 /** @typedef {import("../lib/store/articles-archive.js").PictureRef} PictureRef */
 import { packableBlocks } from "../lib/book/blocks.js";
-import { cappedToc, headingEntries, renderedEntries } from "../lib/book/toc.js";
+import {
+  cappedToc,
+  headingEntries,
+  isPlace,
+  placeEntry,
+  renderedEntries,
+  wantsPlaces,
+} from "../lib/book/toc.js";
 import {
   allBookPictures,
   allBookSegments,
@@ -719,13 +726,38 @@ function setKeepDeclined(url, declined) {
 /**
  * The table of contents of the document on screen (D116/D117) - a book's
  * stored, whole-book list, an article's map read straight off its rendered
- * blocks, empty for a document without headings. What the pagers' TOC
- * buttons and the menu row show themselves for and the dialog renders from;
- * follows `shown` the way the marks do.
+ * blocks, empty for a document without headings. For a long book without
+ * headings it holds the book's places instead (D271, `bookPlaces`) - rows of
+ * the same shape, told apart by `isPlace` where it matters. What the menu
+ * row shows itself for and the dialog renders from; follows `shown` the way
+ * the marks do.
  *
  * @type {import("../lib/book/toc.js").TocEntry[]}
  */
 let docToc = [];
+
+/**
+ * The places of the books without headings opened in this tab (D271): one
+ * row per stretch of the book, named by its first words. Built behind the
+ * reading the first time such a book is opened here and kept until the tab
+ * closes, so reading on into the next stretch finds the list at once.
+ * Nothing of it is stored - an empty `toc` on the book's row keeps meaning
+ * "scanned, no headings found". Keyed by `placesKey`, not by the id alone:
+ * a backup imported over an open tab may put another cut under the same id.
+ * An empty list is an answer too - a book with no words to name places by -
+ * and is kept so the scan is not run again at every turn.
+ *
+ * @type {Map<string, import("../lib/book/toc.js").PlaceEntry[]>}
+ */
+const bookPlaces = new Map();
+
+/**
+ * Books whose places are being read in this page - the same one-at-a-time
+ * guard the TOC scan has. Keyed like `bookPlaces`.
+ *
+ * @type {Set<string>}
+ */
+const placeScansRunning = new Set();
 
 /**
  * The rendered blocks an article's TOC entries index into - the dissolved
@@ -4425,7 +4457,22 @@ function openTocDialog() {
       row.type = "button";
       row.dataset["index"] = String(index);
       row.dataset["depth"] = String(entry.level - shallowest);
-      row.textContent = entry.title;
+      if (isPlace(entry)) {
+        // A place (D271): the first words standing there, and how far into
+        // the book that is - what a chapter's title says by itself. The
+        // words are the book's and may run the other way.
+        row.setAttribute("data-place", "");
+        const words = document.createElement("span");
+        words.className = "toc-words";
+        words.dir = "auto";
+        words.textContent = entry.title;
+        const percent = document.createElement("span");
+        percent.className = "toc-percent";
+        percent.textContent = t("reader_percent", entry.percent.toLocaleString());
+        row.append(words, percent);
+      } else {
+        row.textContent = entry.title;
+      }
       if (index === current) row.setAttribute("aria-current", "true");
       return row;
     }),
@@ -4506,14 +4553,87 @@ async function backfillToc(book) {
     const toc = cappedToc(entries);
     if (!(await setBookToc(book.id, toc))) return;
     if (shown !== null && shown.origin === "book" && shown.url === book.id) {
-      docToc = toc;
-      updateTocButtons();
+      // The scan may have found nothing to list - then the book is owed its
+      // places (D271), like any book without headings.
+      dressBookToc(book, toc);
     }
   } catch {
     // A closed database or a torn book: no TOC today, another try at the
     // next open.
   } finally {
     tocScansRunning.delete(book.id);
+  }
+}
+
+/**
+ * What a book's places are remembered under: the id, and the three numbers
+ * that change when the text under an id does.
+ *
+ * @param {import("../lib/store/book.js").BookMeta} book
+ * @returns {string}
+ */
+function placesKey(book) {
+  return `${book.id}|${book.segmentCount}|${book.totalChars}|${book.addedAt}`;
+}
+
+/**
+ * The contents of a book on screen, from its row: its chapters - or, for a
+ * book kept in more than one stretch whose text has no headings to list,
+ * its places (D271, `wantsPlaces`). Places already read in this tab stand
+ * at once; otherwise the chapters' (empty) list stands, the menu's row
+ * stays hidden, and `readPlaces` brings the list in behind the reading.
+ *
+ * @param {import("../lib/store/book.js").BookMeta} book
+ * @param {import("../lib/book/toc.js").TocEntry[] | null} toc the book's
+ *   table as it stands now - the row's, or the one a scan just wrote
+ */
+function dressBookToc(book, toc) {
+  docToc = toc ?? [];
+  if (wantsPlaces(toc, book.segmentCount)) {
+    const known = bookPlaces.get(placesKey(book));
+    if (known === undefined) void readPlaces(book);
+    else if (known.length > 1) docToc = known;
+  }
+  updateTocButtons();
+}
+
+/**
+ * Reads the places of a book without headings (D271): every stretch fetched
+ * once, as the TOC scan fetches them, and only its first words kept - so a
+ * long book never stands whole in memory. It starts in the page's first
+ * quiet moment, because the open it follows still has a text to lay out and
+ * a position to land on; each fetch after that is an await, and the page
+ * keeps breathing between them. A stretch without words (pictures only)
+ * gets no row, and fewer than two rows are no list to move about by.
+ *
+ * @param {import("../lib/store/book.js").BookMeta} book
+ */
+async function readPlaces(book) {
+  const key = placesKey(book);
+  if (placeScansRunning.has(key)) return;
+  placeScansRunning.add(key);
+  try {
+    await quietMoment();
+    /** @type {import("../lib/book/toc.js").PlaceEntry[]} */
+    const places = [];
+    for (let index = 0; index < book.segmentCount; index += 1) {
+      const segment = await getBookSegment(book.id, index);
+      // A torn segment reads as absent; the list keeps what is readable.
+      const place = segment === null ? null : placeEntry(segment.blocks, index, book.segmentCount);
+      if (place !== null) places.push(place);
+    }
+    bookPlaces.set(key, places);
+    // Still this book on screen, in whichever of its stretches by now - and
+    // still without chapters of its own to show.
+    if (places.length > 1 && shown !== null && shown.origin === "book" && shown.url === book.id && docToc.length < 2) {
+      docToc = places;
+      updateTocButtons();
+    }
+  } catch {
+    // A closed database or a torn book: no places today, another try at the
+    // next open - nothing was remembered.
+  } finally {
+    placeScansRunning.delete(key);
   }
 }
 
@@ -4677,8 +4797,7 @@ async function openBook(id, wanted, target) {
   const frame = bookFrame({ index, count: book.segmentCount });
   showSegmentNav({ index, count: book.segmentCount });
   showBookNote(frame.head ? book : null);
-  docToc = book.toc ?? [];
-  updateTocButtons();
+  dressBookToc(book, book.toc);
   // A row from before the TOC existed is owed its scan (D116) - behind the
   // reading, never in its way.
   if (book.toc === null) void backfillToc(book);
@@ -9154,7 +9273,10 @@ markReadEndButton?.addEventListener("click", () => void onMarkReadPress());
 configureDocSearch({
   doc: () => shown,
   root: contentRoot,
-  toc: () => docToc,
+  // Chapters only: a place (D271) is a stretch of the book named by its
+  // first words, and over a group of hits it would be the division we keep
+  // to ourselves, said in another dress.
+  toc: () => docToc.filter((entry) => !isPlace(entry)),
   onJump: (hit, folded) => {
     if (shown === null) return;
     /** @type {SearchTarget} */
