@@ -1201,9 +1201,16 @@ a.row-link:focus-visible {
   min-height: var(--ui-control);
   /* Out to the card's own edges and back in again, so a choice is as wide as
      the rows above it: the press, and the wash under a pointer, land on the
-     whole line rather than on the column of words. */
+     whole line rather than on the column of words.
+
+     The words begin where a dependent row's words do (Michał, 2026-09-20):
+     the choices belong to the name above them, and the indent says so - the
+     checkboxes' own column stays for settings that stand on their own, and a
+     circle lined up with a box read as one of them. Measured before taking
+     it: the longest choice wraps onto the same two lines with the indent as
+     without, at 393px and at the 329px a Pixel reads this page at. */
   margin-inline: calc(var(--row-pad-x) * -1);
-  padding-inline: var(--row-pad-x);
+  padding-inline: calc(var(--row-pad-x) + var(--row-indent)) var(--row-pad-x);
   cursor: pointer;
 }
 

@@ -173,7 +173,14 @@ describe("the settings page's type", () => {
     // both the circle and the words, and reaches the card's own edges.
     assert.match(choice, /min-height: var\(--ui-control\)/, "a choice is under the touch floor");
     assert.match(choice, /margin-inline: calc\(var\(--row-pad-x\) \* -1\)/, "a choice is narrower than the rows above it");
-    assert.match(choice, /padding-inline: var\(--row-pad-x\)/, "a choice's words do not line up with the rows above it");
+    // The words begin in the parent's text column, like a dependent row's
+    // (D265, §6.3): the choices belong to the name over them, and the
+    // checkboxes' column is left to the settings that stand on their own.
+    assert.match(
+      choice,
+      /padding-inline: calc\(var\(--row-pad-x\) \+ var\(--row-indent\)\) var\(--row-pad-x\)/,
+      "a choice stands in the checkboxes' own column, as if it were a setting of its own",
+    );
     // And the ring is the line's, drawn inside the card's edge like the rest.
     assert.match(
       css,
