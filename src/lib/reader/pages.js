@@ -720,3 +720,188 @@ export function turnMotion(how) {
   if (how.effect === "flash") return flashAllowed(how.reason, how.lastFlashAt, how.now) ? "flash" : "instant";
   return "smooth";
 }
+
+/**
+ * Scrolling past the end of the text (D275). A long book is rendered one
+ * stretch at a time, so in the scroll layout the window ends where the
+ * stretch does, in the middle of a chapter - and since D270 that border is
+ * said nowhere. What carries the reading over it is the gesture the reader
+ * is already making: at the text's very end, one more push the same way
+ * opens what follows; at its very beginning, one more pull opens what came
+ * before, at its end. The two quiet steps around the text stay as the
+ * accessible road (a screen reader, a dragged scrollbar, a switch device).
+ *
+ * The rule every input shares: **the gesture has to begin at the edge.** The
+ * push that arrives at the end of the text only arrives - a trackpad's
+ * momentum, a flung finger and a held key all run into the end from
+ * somewhere else, and none of them may throw the text over. Only a gesture
+ * that starts with the window already standing at the edge goes on. Reading
+ * by pages needs none of this: there a turn past a stretch's last page has
+ * opened the next one since D233.
+ */
+
+/** Where the window stands against the two ends of the text. */
+/** @typedef {"top" | "bottom" | "both" | null} WindowEdge */
+
+/**
+ * How near an end counts as standing at it, in CSS pixels. Scroll offsets
+ * are fractional on a dense screen (a Pixel's 2.625), and the last pixel is
+ * not always reachable.
+ */
+export const EDGE_SLACK = 2;
+
+/**
+ * How long a wheel has to be still before its next event begins a new
+ * gesture. A trackpad's momentum sends events tens of milliseconds apart
+ * for a second and more after the fingers lift; a hand that stopped and
+ * pushes again leaves a gap several times this long.
+ */
+export const EDGE_QUIET_MS = 300;
+
+/**
+ * How far a wheel has to push against the edge, in CSS pixels, summed over
+ * one gesture: more than one notch of a mouse wheel (about a hundred), so a
+ * single stray click of the wheel opens nothing, and what a deliberate
+ * two-finger push on a trackpad gives at once.
+ */
+export const EDGE_WHEEL_PX = 150;
+
+/**
+ * How far a finger has to travel against the edge, in CSS pixels - the
+ * length of a gesture that means to scroll, well past a tap's drift.
+ */
+export const EDGE_TOUCH_PX = 72;
+
+/** How much taller than wide a finger's path has to be to count as a scroll. */
+export const EDGE_TOUCH_AXIS = 1.5;
+
+/**
+ * How long after one carry the next may come: a stretch short enough to
+ * stand whole in the window is at both of its ends at once, and a run of
+ * presses must not leaf through several of them unseen.
+ */
+export const EDGE_COOLDOWN_MS = 600;
+
+/**
+ * @param {number} scrollY
+ * @param {number} viewportHeight
+ * @param {number} scrollHeight
+ * @returns {WindowEdge}
+ */
+export function windowEdge(scrollY, viewportHeight, scrollHeight) {
+  if (!Number.isFinite(scrollY) || !Number.isFinite(viewportHeight) || !Number.isFinite(scrollHeight)) return null;
+  const top = scrollY <= EDGE_SLACK;
+  const bottom = scrollY + viewportHeight >= scrollHeight - EDGE_SLACK;
+  if (top && bottom) return "both";
+  return top ? "top" : bottom ? "bottom" : null;
+}
+
+/**
+ * Whether the window stands at the end a turn pushes against.
+ *
+ * @param {WindowEdge} edge
+ * @param {"down" | "up"} turn
+ * @returns {boolean}
+ */
+export function atEdgeFor(edge, turn) {
+  return edge === "both" || edge === (turn === "down" ? "bottom" : "top");
+}
+
+/**
+ * A wheel event's vertical delta in CSS pixels. Firefox reports a mouse
+ * wheel in lines and, rarely, an engine reports pages; a trackpad and
+ * Chromium's wheel come in pixels already.
+ *
+ * @param {number} deltaY
+ * @param {number} deltaMode `WheelEvent.deltaMode`: 0 pixels, 1 lines, 2 pages
+ * @param {number} viewportHeight
+ * @returns {number}
+ */
+export function wheelPixels(deltaY, deltaMode, viewportHeight) {
+  if (!Number.isFinite(deltaY)) return 0;
+  if (deltaMode === 1) return deltaY * 32;
+  if (deltaMode === 2) return deltaY * viewportHeight;
+  return deltaY;
+}
+
+/**
+ * What the wheel's gesture in flight has come to: the end it began at, if
+ * it began at one; how far it has pushed against it; when its last event
+ * came.
+ *
+ * @typedef {{ against: "down" | "up" | null, sum: number, lastAt: number }} EdgeWheel
+ */
+
+/** @returns {EdgeWheel} */
+export function edgeWheelStart() {
+  return { against: null, sum: 0, lastAt: -Infinity };
+}
+
+/**
+ * One wheel event against the edge rule: the gesture's state after it, and
+ * the turn it has earned, if any. A gesture begins with the first event
+ * after a still moment; it counts only if the window stood at the end it
+ * pushes against at that moment; every further event the same way adds to
+ * the push, an event the other way (or a window that has moved off the
+ * edge) ends the gesture's claim, and the turn comes when the push reaches
+ * the threshold - once, after which the rest of the gesture is nobody's.
+ *
+ * The edge is asked for through a callback and at most once an event, and
+ * not at all in the middle of a gesture that began elsewhere: measuring the
+ * document on every wheel event of every scroll would be a cost paid for
+ * nothing.
+ *
+ * @param {EdgeWheel} state
+ * @param {{ delta: number, now: number, lastTurnAt: number }} event `delta`
+ *   in CSS pixels, down positive
+ * @param {() => WindowEdge} edgeOf
+ * @returns {{ state: EdgeWheel, turn: "down" | "up" | null }}
+ */
+export function edgeWheel(state, event, edgeOf) {
+  const { delta, now, lastTurnAt } = event;
+  if (delta === 0) return { state: { ...state, lastAt: now }, turn: null };
+  const way = delta > 0 ? "down" : "up";
+  let { against, sum } = state;
+
+  if (now - state.lastAt >= EDGE_QUIET_MS) {
+    // A new gesture: it counts if it begins at the end it pushes against.
+    against = atEdgeFor(edgeOf(), way) ? way : null;
+    sum = 0;
+  } else if (against !== null && (way !== against || !atEdgeFor(edgeOf(), against))) {
+    // Turned round, or the window moved off the edge: not this gesture.
+    against = null;
+    sum = 0;
+  }
+  if (against === null) return { state: { against, sum, lastAt: now }, turn: null };
+
+  sum += Math.abs(delta);
+  if (sum < EDGE_WHEEL_PX || now - lastTurnAt < EDGE_COOLDOWN_MS) {
+    return { state: { against, sum, lastAt: now }, turn: null };
+  }
+  return { state: { against: null, sum: 0, lastAt: now }, turn: against };
+}
+
+/**
+ * The turn a lifted finger has earned, or null. The finger landed with the
+ * window standing at an end (`startedAt`), travelled far enough and mostly
+ * vertically - up to go on, down to go back, the way the text would have
+ * moved under it - alone on the glass, and the window still stands at that
+ * end. A fling that ran into the end began somewhere else; a sideways drag
+ * is the phrase selection's (D80); two fingers are a pinch.
+ *
+ * @param {object} swipe
+ * @param {WindowEdge} swipe.startedAt where the window stood when the finger landed
+ * @param {WindowEdge} swipe.edge where it stands now
+ * @param {number} swipe.dx the finger's travel, CSS pixels
+ * @param {number} swipe.dy down positive
+ * @param {boolean} swipe.alone whether no other finger joined
+ * @param {number} swipe.now
+ * @param {number} swipe.lastTurnAt
+ * @returns {"down" | "up" | null}
+ */
+export function edgeSwipe({ startedAt, edge, dx, dy, alone, now, lastTurnAt }) {
+  if (!alone || now - lastTurnAt < EDGE_COOLDOWN_MS) return null;
+  if (Math.abs(dy) < EDGE_TOUCH_PX || Math.abs(dy) < Math.abs(dx) * EDGE_TOUCH_AXIS) return null;
+  const turn = dy < 0 ? "down" : "up";
+  return atEdgeFor(startedAt, turn) && atEdgeFor(edge, turn) ? turn : null;
+}

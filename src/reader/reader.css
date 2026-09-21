@@ -2110,6 +2110,21 @@ a.marks-act {
   display: none;
 }
 
+/* Scrolled, a pull past the beginning of a book's text opens what came
+   before it (D275, reader.js) - the very gesture that reloads the page in a
+   phone's browser. Over a book the window's overscroll is kept to itself:
+   `contain` leaves the platform's own stretch or glow at the edge and takes
+   away only what is handed on past the page - which is what pull-to-refresh
+   is, in Chromium and in Firefox for Android alike (Gecko's
+   `CanOverscrollUpwards` asks `OverscrollBehaviorAllowsHandoff`). On the
+   root, which is what the viewport reads, and on the body for the engines
+   that read it there. Not read by pages, where the window does not follow
+   the finger at all. */
+:root:not([data-reader-layout="paged"]):has(#article[data-book-place]:not([hidden])),
+:root:not([data-reader-layout="paged"]):has(#article[data-book-place]:not([hidden])) body {
+  overscroll-behavior-y: contain;
+}
+
 /* Past its beginning a book's text simply goes on: the title block is the
    book's head, worn once (`data-book-place`, reader.js). Taken away whole
    rather than clipped out of sight: a clipped box is still a block of the
