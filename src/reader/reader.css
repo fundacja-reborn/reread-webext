@@ -3414,6 +3414,31 @@ body.reader:has(#mark-bar:not([hidden])) {
   height: 1rem;
 }
 
+/* A phone's rounded corners, in full screen (Michał's report from a Pixel,
+   2026-09-21: the glyph and the percent "trochę przycięte" by the screen's
+   corner). In a tab the browser's bars and the system's own strip stand
+   between the page and the glass's corners; in full screen the page is the
+   whole glass, and the foot's two things stand exactly where the corners
+   are cut away. No engine says how round a screen is - the safe area
+   speaks of cutouts and bars, never of corners - so the two are moved by a
+   fixed step where the page has the whole screen of a device held in the
+   hand: toward the middle, the button to the right and the count to the
+   left, never upward (Michał's call - a taller strip costs the page a line
+   of text, and a step sideways costs it nothing). At 2.75rem in from the
+   window's side and the strip's own 0.2rem above its foot, the glyph's box
+   is whole under a corner of up to some 63px of radius and its ink up to
+   77px - the arithmetic is in the test - where 1.5rem kept the ink whole
+   only up to 51px, which a Pixel 8a is past. One number moves both: the
+   row's sides and the button's place are counted from the same inset. A
+   window whose column already stands further in - a tablet - keeps the
+   column's edge. A coarse pointer, so an e-ink reader (square corners, and
+   it answers "fine") and a laptop keep the row under the text's edges. */
+@media (pointer: coarse) {
+  :root:fullscreen .page-footer {
+    --page-foot-inset: max(2.75rem, calc(max(0px, (100% - var(--reader-measure, 65ch)) / 2) + 1.5rem));
+  }
+}
+
 /* With the count's setting off the strip is the phone's safe area alone,
    and the button goes with the line it stood on - taken away whole, so no
    key and no screen reader finds a control that cannot be seen. The menu's

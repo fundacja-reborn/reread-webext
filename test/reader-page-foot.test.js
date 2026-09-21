@@ -171,6 +171,38 @@ describe("the way to the contents in the page's foot, and the contents as a shee
     assert.match(styles, /--page-foot-air: 0\.5rem;/);
   });
 
+  it("moves the glyph and the count in from a phone's rounded corners in full screen - sideways, never upward", async () => {
+    // Michał's report from a Pixel, 2026-09-21: both "trochę przycięte" by
+    // the screen's corner. No engine says how round a screen is, so the two
+    // are moved by a fixed step where the page has the whole screen of a
+    // device held in the hand - toward the middle, his call: a taller strip
+    // would cost the page a line of text, a step sideways costs nothing.
+    const styles = await source("reader/reader.css");
+    const moved = /@media \(pointer: coarse\) \{\s*:root:fullscreen \.page-footer \{\s*--page-foot-inset: max\((\d+(?:\.\d+)?)rem, calc\(max\(0px, \(100% - var\(--reader-measure, 65ch\)\) \/ 2\) \+ 1\.5rem\)\);\s*\}\s*\}/.exec(styles);
+    assert.ok(moved !== null, "the foot stands in the corners of a phone's screen in full screen");
+    // Nothing of the strip's height moves with it: the pages are cut as in a tab.
+    assert.doesNotMatch(styles, /:root:fullscreen[^{]*\.page-footer \{[^}]*(?:min-height|padding-bottom)/, "the strip grows in full screen and takes the page's last line");
+    assert.doesNotMatch(styles, /:root:fullscreen \.page-foot-toc \{/, "the button is lifted in full screen");
+    // The arithmetic the step was chosen by: a point `side` in from the
+    // window's side and `foot` above its foot is whole under a corner of
+    // radius r when (r - side)^2 + (r - foot)^2 <= r^2. The glyph's box
+    // stands 0.2rem above the foot; its ink begins 2.2px in and 3.35px up
+    // from the box's corner (the lowest bullet of the list glyph).
+    const REM = 16;
+    const foot = 0.2 * REM;
+    const whole = (/** @type {number} */ radius, /** @type {number} */ side, /** @type {number} */ up) =>
+      (radius - side) ** 2 + (radius - up) ** 2 <= radius ** 2;
+    const side = Number(moved[1]) * REM;
+    assert.equal(whole(60, side, foot), true, "a corner of 60px cuts into the glyph's box");
+    assert.equal(whole(75, side + 2.2, foot + 3.35), true, "a corner of 75px cuts into the glyph's ink");
+    // What was reported: at 1.5rem the ink is cut by a corner of some 58px,
+    // which is about what a Pixel 8a has - the fixture proves something.
+    assert.equal(whole(58, 1.5 * REM + 2.2, foot + 3.35), false, "the old step would have been enough - the fixture proves nothing");
+    // One number moves both: the row's sides and the button's place.
+    assert.match(ruleOf(styles, ':root[data-reader-page-number="true"] .page-footer'), /padding: 0\.2rem var\(--page-foot-inset\) /);
+    assert.match(ruleOf(styles, ".page-foot-toc"), /inset-inline-start: calc\(var\(--page-foot-inset\) - 1rem\);/);
+  });
+
   it("opens the contents on a press that was meant, and shows both doors over the same documents", async () => {
     const reader = await source("reader/reader.js");
     const doors = bodyOf(reader, "updateTocButtons");
