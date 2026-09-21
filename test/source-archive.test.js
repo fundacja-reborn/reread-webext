@@ -60,6 +60,7 @@ describe("the sources that go to the reviewer", () => {
       "src/manifest.json",
       "tools/build.mjs",
       "tools/manifest-target.mjs",
+      "tools/package-files.mjs",
       "tools/check.sh",
       // The engine is not downloadable at build time by design: it is in the
       // repository, checksums beside it.

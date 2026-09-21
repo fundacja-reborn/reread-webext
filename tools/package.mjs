@@ -109,9 +109,11 @@ content script cannot be an ES module in either browser, so its imports have to
 be resolved before the browser sees the file. Nothing is minified, nothing is
 transpiled down, and every bundle ships with a source map carrying its own
 sources - the package therefore contains the code as it was written. HTML, CSS,
-_locales and icons are copied unchanged; tools/manifest-target.mjs patches
-src/manifest.json for the target browser (the differences are listed in one
-function there).
+the _locales catalogues and icons are copied unchanged, file by file and never
+a folder at a time (the lists are in tools/package-files.mjs and
+tools/manifest-target.mjs), so the package holds tracked files only;
+tools/manifest-target.mjs also patches src/manifest.json for the target browser
+(the differences are listed in one function there).
 
 Third-party code
 ----------------
