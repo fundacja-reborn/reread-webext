@@ -1336,6 +1336,13 @@
       "percent": { "content": "$1", "example": "34" }
     }
   },
+  "reader_percent": {
+    "message": "$PERCENT$%",
+    "description": "A bare percent of a whole book: how far into the book a place stands (the contents of a book without chapter headings), how far the reading has come (the foot of a page over a book).",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_book_earlier": {
     "message": "Earlier text",
     "description": "Over the first line of a long book's text when it is scrolled, not read by pages: the step back to the text before what is on screen. Named for the reading - the book is never said to be in parts."

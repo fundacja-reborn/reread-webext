@@ -1528,6 +1528,12 @@
       "percent": { "content": "$1", "example": "34" }
     }
   },
+  "reader_percent": {
+    "message": "$PERCENT$%",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_book_earlier": { "message": "Попередній текст" },
   "reader_book_onward": { "message": "Читати далі" },
   "reader_book_toc": { "message": "Зміст" },

@@ -2200,6 +2200,33 @@ a.marks-act {
   font-weight: 600;
 }
 
+/* A place in a book without headings (D271): the first words standing
+   there, and on the right how far into the book that is - what a chapter's
+   title says by itself and first words cannot. The words are the book's and
+   keep the reading face of the row; the number is ours and wears the
+   interface's, muted, in figures of one width so a column of them stands
+   straight. Baselines, because the two differ in size. */
+.toc-rows button[data-place] {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.toc-words {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: start;
+}
+
+.toc-percent {
+  flex: none;
+  color: var(--page-muted);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
 /* --- search in the document (D119): the TOC dialog's dress on a form and
    a list of hits --- */
 
