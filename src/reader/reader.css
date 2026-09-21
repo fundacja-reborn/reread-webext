@@ -3414,6 +3414,31 @@ body.reader:has(#mark-bar:not([hidden])) {
   height: 1rem;
 }
 
+/* A phone's rounded corners, in full screen (Michał's report from a Pixel,
+   2026-09-21: the glyph and the percent "trochę przycięte" by the screen's
+   corner). In a tab the browser's bars and the system's own strip stand
+   between the page and the glass's corners; in full screen the page is the
+   whole glass, and the foot's two things stand exactly where the corners
+   are cut away. No engine says how round a screen is - the safe area
+   speaks of cutouts and bars, never of corners - so the two are lifted by a
+   fixed step where the page has the whole screen of a device held in the
+   hand: at 0.8rem above the window's foot and 1.5rem in from its side, a
+   corner of up to some 60px of radius leaves them whole, which is past any
+   phone's. The strip grows by the same step, so the pages are cut above it
+   as they are above everything that stands at the foot; the button's reach
+   grows with it. A coarse pointer, so an e-ink reader (square corners, and
+   it answers "fine") and a laptop keep the strip as it was. */
+@media (pointer: coarse) {
+  :root:fullscreen[data-reader-page-number="true"] .page-footer {
+    min-height: calc(2rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  :root:fullscreen .page-foot-toc {
+    padding-bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* With the count's setting off the strip is the phone's safe area alone,
    and the button goes with the line it stood on - taken away whole, so no
    key and no screen reader finds a control that cannot be seen. The menu's

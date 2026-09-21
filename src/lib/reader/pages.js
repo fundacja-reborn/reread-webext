@@ -489,11 +489,25 @@ export const PRESS_HOLD_MS = 1000;
  * (D278) - the contents' button in the page's foot strip. That strip is
  * where the thumb holding a phone rests, which is why no tap there turns a
  * page (`TAP_DEAD_FOOT`); a button put there is pressed by the same
- * accidents, and they carry the same signature. So a touch has to be what a
- * press is - still, a fingertip's contact, alone, and not lying there - and
- * nothing else is asked of it: where it landed is the button's own
- * business. A mouse and a pen aim, and a press with no pointer behind it (a
- * key, a screen reader) was asked for by name; all three are meant.
+ * accidents. What tells them from a press is asked here - and only what
+ * does: the touch was alone, and it did not lie there. A hand shifting its
+ * grip puts two contacts down together; the thumb that holds the device
+ * lies on the glass for as long as the page is read. A mouse and a pen aim,
+ * and a press with no pointer behind it (a key, a screen reader) was asked
+ * for by name; all three are meant.
+ *
+ * Neither the contact's size nor its travel is asked, though a tap that
+ * turns a page answers for both (`tapIntent`). The first release asked, and
+ * on a phone the button opened the contents once or twice and then never
+ * again until the page was loaded anew (Michał's report from a Pixel,
+ * 2026-09-21): a button in the corner of a phone held in one hand is
+ * pressed with that hand's thumb - the widest contact a hand makes, well
+ * past a fingertip's - and the size test only begins to answer once the
+ * device's numbers have been measured over a session's first touches
+ * (`blobTrusted`), so the first presses passed and every later one was
+ * refused. A wide contact is how a button in a corner is pressed; and how
+ * far a touch may roll and still be a tap is the browser's to say, which
+ * has said it by the time there is a press to ask about.
  *
  * @param {TapSignature | null} tap the pointer that lifted just before the
  *   press, or null when none did
@@ -502,9 +516,7 @@ export const PRESS_HOLD_MS = 1000;
 export function meantPress(tap) {
   if (tap === null || tap.pointerType !== "touch") return true;
   if (tap.otherPointers.some((at) => Math.abs(at - tap.downAt) <= TAP_ALONE_MS)) return false;
-  if (tap.upAt - tap.downAt >= PRESS_HOLD_MS) return false;
-  if (Math.hypot(tap.dx, tap.dy) >= TAP_DRIFT) return false;
-  return Math.max(tap.width ?? 0, tap.height ?? 0) < TAP_BLOB;
+  return tap.upAt - tap.downAt < PRESS_HOLD_MS;
 }
 
 /**

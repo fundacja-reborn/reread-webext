@@ -171,6 +171,31 @@ describe("the way to the contents in the page's foot, and the contents as a shee
     assert.match(styles, /--page-foot-air: 0\.5rem;/);
   });
 
+  it("lifts the glyph and the count out of a phone's rounded corners in full screen", async () => {
+    // Michał's report from a Pixel, 2026-09-21: both "trochę przycięte" by
+    // the screen's corner. No engine says how round a screen is, so the two
+    // are lifted by a fixed step where the page has the whole screen of a
+    // device held in the hand.
+    const styles = await source("reader/reader.css");
+    const lifted = /@media \(pointer: coarse\) \{\s*:root:fullscreen\[data-reader-page-number="true"\] \.page-footer \{\s*min-height: calc\(2rem \+ env\(safe-area-inset-bottom, 0px\)\);\s*padding-bottom: calc\((\d+(?:\.\d+)?)rem \+ env\(safe-area-inset-bottom, 0px\)\);\s*\}\s*:root:fullscreen \.page-foot-toc \{\s*padding-bottom: calc\((\d+(?:\.\d+)?)rem \+ env\(safe-area-inset-bottom, 0px\)\);/.exec(styles);
+    assert.ok(lifted !== null, "the foot stands in the corners of a phone's screen in full screen");
+    assert.equal(lifted[1], lifted[2], "the glyph and the count are lifted by two different steps");
+    // The arithmetic the step was chosen by: a point `side` in from the
+    // window's side and `foot` above its foot is whole under a corner of
+    // radius r when (r - side)^2 + (r - foot)^2 <= r^2. Sixty CSS pixels is
+    // past any phone's corner; the step before the fix (0.2rem) was not
+    // enough for forty.
+    const REM = 16;
+    const side = 1.5 * REM;
+    const whole = (/** @type {number} */ radius, /** @type {number} */ foot) =>
+      (radius - side) ** 2 + (radius - foot) ** 2 <= radius ** 2;
+    assert.equal(whole(60, Number(lifted[1]) * REM), true, "a corner of 60px cuts into the glyph");
+    assert.equal(whole(40, 0.2 * REM), false, "the step before the fix would have been enough - the fixture proves nothing");
+    // The strip's own rules stay as they were: outside full screen, and on a
+    // device that answers "fine", nothing costs the page a pixel.
+    assert.match(ruleOf(styles, ':root[data-reader-page-number="true"] .page-footer'), /min-height: calc\(1\.4rem \+ env\(safe-area-inset-bottom, 0px\)\);/);
+  });
+
   it("opens the contents on a press that was meant, and shows both doors over the same documents", async () => {
     const reader = await source("reader/reader.js");
     const doors = bodyOf(reader, "updateTocButtons");

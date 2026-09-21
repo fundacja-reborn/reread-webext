@@ -9116,10 +9116,10 @@ segmentOnwardButton?.addEventListener("click", () => {
 
 // The contents' button in the page's foot (D278). The foot is where the
 // hand that holds a phone rests - no tap there turns a page, for that
-// reason - so a touch has to look like a press to open the sheet: still, a
-// fingertip's contact, alone, and lifted within a second (`meantPress`). A
-// press with no pointer behind it - a key, a screen reader - says so itself
-// (`detail` of zero) and is never asked.
+// reason - so a touch has to look like a press to open the sheet: alone, and
+// lifted within a second (`meantPress`; never its size - the corner is
+// pressed with a thumb). A press with no pointer behind it - a key, a screen
+// reader - says so itself (`detail` of zero) and is never asked.
 footToc?.addEventListener("click", (event) => {
   if (!meantPress(event.detail === 0 ? null : lastTap())) return;
   openTocDialog();

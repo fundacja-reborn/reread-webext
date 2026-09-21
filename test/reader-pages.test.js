@@ -505,30 +505,44 @@ describe("tapIntent (D250)", () => {
 });
 
 describe("meantPress (D278)", () => {
-  /** A fingertip's tap on the contents' button: the window's bottom-left corner, inside both dead strips. */
+  /** A press on the contents' button: the window's bottom-left corner, inside both dead strips. */
   const corner = { x: 14, y: 730 };
+  /** The same press as the hand that holds a phone makes it: with the thumb, wide and rolling a little. */
+  const thumb = { ...corner, width: 46, height: 52, dx: 7, dy: -6 };
 
   it("takes a tap where no tap turns a page - the button stands in the dead foot", () => {
     assert.equal(tapIntent(tap(corner)), null);
     assert.equal(meantPress(tap(corner)), true);
   });
 
-  it("refuses the thumb that holds the device: long on the glass, sliding, wide, or beside another", () => {
-    // A slow, careful press is meant - longer than a tap that turns a page
-    // may last - and the thumb that lies there for the whole page is not.
-    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + TAP_HOLD_MS + 200 })), true);
-    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + PRESS_HOLD_MS - 1 })), true);
-    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + PRESS_HOLD_MS })), false);
-    assert.equal(meantPress(tap({ ...corner, upAt: 9000 })), false);
-    assert.equal(meantPress(tap({ ...corner, dx: TAP_DRIFT, dy: 0 })), false);
-    assert.equal(meantPress(tap({ ...corner, width: TAP_BLOB, height: 12 })), false);
-    assert.equal(meantPress(tap({ ...corner, otherPointers: [1000 + TAP_ALONE_MS] })), false);
-    // A thumb resting since the page opened does not stop a deliberate tap.
-    assert.equal(meantPress(tap({ ...corner, otherPointers: [200] })), true);
+  it("takes the thumb's press: a corner of a phone held in one hand is pressed with the widest contact a hand makes", () => {
+    // Michał's report from a Pixel, 2026-09-21: the contents opened once or
+    // twice and then never again until the page was loaded anew.
+    assert.ok(thumb.width >= TAP_BLOB && Math.hypot(thumb.dx, thumb.dy) >= TAP_DRIFT, "the fixture is no longer what a page turn would refuse");
+    assert.equal(tapIntent(tap({ ...thumb, x: 330, y: 400 })), null);
+    assert.equal(meantPress(tap(thumb)), true);
   });
 
-  it("does not ask a contact's size of a device whose numbers say nothing", () => {
-    assert.equal(meantPress(tap({ ...corner, width: null, height: null })), true);
+  it("answers the same before and after the device's contact sizes are trusted", () => {
+    // The size is null until a session's first touches have been measured
+    // (`blobTrusted`), and the contact's own number from then on. A rule
+    // that read it opened the contents for the first presses only.
+    const early = meantPress(tap({ ...thumb, width: null, height: null }));
+    const late = meantPress(tap(thumb));
+    assert.equal(early, true);
+    assert.equal(late, early);
+  });
+
+  it("refuses the hand that holds the device: a contact lying on the glass, or landing beside another", () => {
+    // A slow, careful press is meant - longer than a tap that turns a page
+    // may last - and the thumb that lies there for the whole page is not.
+    assert.equal(meantPress(tap({ ...thumb, upAt: 1000 + TAP_HOLD_MS + 200 })), true);
+    assert.equal(meantPress(tap({ ...thumb, upAt: 1000 + PRESS_HOLD_MS - 1 })), true);
+    assert.equal(meantPress(tap({ ...thumb, upAt: 1000 + PRESS_HOLD_MS })), false);
+    assert.equal(meantPress(tap({ ...thumb, upAt: 9000 })), false);
+    assert.equal(meantPress(tap({ ...thumb, otherPointers: [1000 + TAP_ALONE_MS] })), false);
+    // A thumb resting since the page opened does not stop a deliberate press.
+    assert.equal(meantPress(tap({ ...thumb, otherPointers: [200] })), true);
   });
 
   it("takes every press of a mouse or a pen, and one with no pointer behind it", () => {
