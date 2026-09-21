@@ -44,7 +44,15 @@ import { packArchive } from "./zip.js";
  * The file under construction, whichever kind: the parts go in one at a
  * time, and the file comes out at the end.
  *
- * @typedef {{ part: (root: Element) => void, finish: () => Promise<ExportedDocument> }} DocumentWriter
+ * A book that has a table of contents hands each part the rows that land
+ * in it (D277): the file then lists what the reader lists, chapters named
+ * by the file the book came from included. The plain-text page has no
+ * contents to list and takes no rows.
+ *
+ * @typedef {{
+ *   part: (root: Element, rows?: import("../lib/store/epub-file.js").PartRow[]) => void,
+ *   finish: () => Promise<ExportedDocument>,
+ * }} DocumentWriter
  */
 
 /**
@@ -116,13 +124,20 @@ async function exportBook(id, format) {
           },
           book.title,
         );
+  // The table the book's row carries, where it carries one: the file's own
+  // (D277) or the headings' (D116), either way what the reader lists. A row
+  // still owed its scan, or scanned and empty, leaves the writer to read
+  // the headings off the text as it goes - as it does for an article.
+  const toc = book.toc !== null && book.toc.length > 0 ? book.toc : null;
   for (const [at, segment] of segments.entries()) {
     if (at > 0) await yieldToUi();
     // A book's pictures are addressed inside its archive (D183), and the
     // stored address is whole already - resolved against the root, as on
     // screen; its links, where a Markdown text left any (D230), resolve
     // against no address and stand only when absolute.
-    writer.part(rebuilt(segment.blocks.join(""), { baseUrl: NO_BASE, archive: "" }));
+    const root = rebuilt(segment.blocks.join(""), { baseUrl: NO_BASE, archive: "" });
+    if (toc === null) writer.part(root);
+    else writer.part(root, toc.filter((entry) => entry.segmentIndex === at));
   }
   return writer.finish();
 }
@@ -164,7 +179,7 @@ function markdownWriter(meta, title) {
 function epubWriter(meta, title) {
   const book = epubDocument(meta);
   return {
-    part: (root) => book.part(root),
+    part: (root, rows) => book.part(root, rows),
     finish: async () => {
       // The writer's own type on the archive: what the browser is handed
       // is a book file, whatever the ZIP library calls its output.

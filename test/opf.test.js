@@ -75,6 +75,8 @@ describe("opfPackage", () => {
       author: "Bram Stoker",
       lang: "en",
       spineHrefs: ["ch2.xhtml", "ch1.xhtml"],
+      navHref: null,
+      ncxHref: null,
     });
   });
 
@@ -104,7 +106,47 @@ describe("opfPackage", () => {
       author: null,
       lang: null,
       spineHrefs: ["only.xhtml"],
+      navHref: null,
+      ncxHref: null,
     });
+  });
+
+  /** A manifest that names the book's own contents both ways, as a book of the third edition does. */
+  const items = [
+    el("item", { id: "c1", href: "xhtml/ch1.xhtml", "media-type": "application/xhtml+xml" }),
+    el("item", {
+      id: "nav",
+      href: "xhtml/nav.xhtml",
+      "media-type": "application/xhtml+xml",
+      properties: "scripted nav",
+    }),
+    el("item", { id: "ncx", href: "toc.ncx", "media-type": "application/x-dtbncx+xml" }),
+  ];
+
+  it("names the navigation document by its property, among others it may carry", () => {
+    const pkg = el("package", {}, [el("manifest", {}, items), el("spine", { toc: "ncx" }, [el("itemref", { idref: "c1" })])]);
+    assert.equal(opfPackage(pkg).navHref, "xhtml/nav.xhtml");
+    // The navigation document is no spine entry for being named here.
+    assert.deepEqual(opfPackage(pkg).spineHrefs, ["xhtml/ch1.xhtml"]);
+  });
+
+  it("names the NCX the spine points at", () => {
+    const other = el("item", { id: "old", href: "old.ncx", "media-type": "application/x-dtbncx+xml" });
+    const pkg = el("package", {}, [
+      el("manifest", {}, [other, ...items]),
+      el("spine", { toc: "ncx" }, [el("itemref", { idref: "c1" })]),
+    ]);
+    assert.equal(opfPackage(pkg).ncxHref, "toc.ncx");
+  });
+
+  it("finds the NCX by its media type when the spine forgot to point", () => {
+    const pkg = el("package", {}, [el("manifest", {}, items), el("spine", {}, [el("itemref", { idref: "c1" })])]);
+    assert.equal(opfPackage(pkg).ncxHref, "toc.ncx");
+  });
+
+  it("finds the NCX by its media type when the spine points at nothing the manifest holds", () => {
+    const pkg = el("package", {}, [el("manifest", {}, items), el("spine", { toc: "gone" }, [el("itemref", { idref: "c1" })])]);
+    assert.equal(opfPackage(pkg).ncxHref, "toc.ncx");
   });
 });
 

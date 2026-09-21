@@ -78,7 +78,21 @@ const URL_ATTRIBUTES = new Set(["href", "cite"]);
  * are kept in; what no book ever gets is a relative address resolved
  * against anything.
  *
- * @typedef {{ baseUrl: string, pictures?: Pictures, archive?: string }} RebuildOptions
+ * `trace` is told what became of every source element, the moment the walk
+ * meets it and before anything inside it is rebuilt: the element built for
+ * it, or null for one that was dropped, unwrapped, or a picture not kept.
+ * It is how a book's import follows the targets of the file's own table of
+ * contents through the rebuild (D277, `lib/book/nav.js`) - an `id` is the
+ * first thing this walk takes off, so where an element went can only be
+ * told from here. The walk tells and nothing more: what is built, and from
+ * which list, is decided exactly as without a listener.
+ *
+ * @typedef {{
+ *   baseUrl: string,
+ *   pictures?: Pictures,
+ *   archive?: string,
+ *   trace?: (source: Element, rebuilt: Element | null) => void,
+ * }} RebuildOptions
  */
 
 /**
@@ -123,21 +137,32 @@ function appendNode(node, into, target, options) {
   const element = /** @type {Element} */ (node);
 
   const decision = decide(element.tagName);
-  if (decision === "drop") return;
+  if (decision === "drop") {
+    options.trace?.(element, null);
+    return;
+  }
   // The element goes, its children stay. That is what keeps an article whose
   // paragraphs sit inside <article>, <section> or somebody's own custom tag.
   if (decision === "unwrap") {
+    options.trace?.(element, null);
     appendChildren(element, into, target, options);
     return;
   }
   if (decision === "image") {
-    appendPicture(element, into, target, options);
+    // Built first and told after, in two statements: an optional call does
+    // not evaluate its arguments when nobody listens, and the picture must
+    // stand either way.
+    const picture = appendPicture(element, into, target, options);
+    options.trace?.(element, picture);
     return;
   }
 
   const name = element.tagName.toLowerCase();
   const rebuilt = target.createElement(name);
   copyAttributes(element, rebuilt, name, options.baseUrl);
+  // Told before the children are walked, so that a listener hears of the
+  // elements in document order - the outer one first.
+  options.trace?.(element, rebuilt);
   appendChildren(element, rebuilt, target, options);
   into.appendChild(rebuilt);
 }
@@ -155,16 +180,17 @@ function appendNode(node, into, target, options) {
  * @param {Element} into
  * @param {Document} target
  * @param {RebuildOptions} options
+ * @returns {Element | null} the picture as it stands, or null when none does
  */
 function appendPicture(source, into, target, options) {
   const pictures = options.pictures;
-  if (pictures === undefined) return;
+  if (pictures === undefined) return null;
   const written = source.getAttribute("src") ?? source.getAttribute(SOURCE_ATTRIBUTE);
   const src =
     options.archive === undefined
       ? safeSrc(written, options.baseUrl)
       : (archiveSrc(written, options.archive) ?? safeSrc(written, NO_BASE));
-  if (src === null) return;
+  if (src === null) return null;
 
   const rebuilt = target.createElement("img");
   rebuilt.setAttribute(SOURCE_ATTRIBUTE, src);
@@ -178,6 +204,7 @@ function appendPicture(source, into, target, options) {
     }
   }
   into.appendChild(rebuilt);
+  return rebuilt;
 }
 
 /**
