@@ -473,6 +473,12 @@
       "pages": { "content": "$2", "example": "48" }
     }
   },
+  "reader_page_book_percent": {
+    "message": "$PERCENT$ % des Buchs",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_page_prev": { "message": "Vorherige Seite" },
   "reader_page_next": { "message": "Nächste Seite" },
   "reader_panel_more": { "message": "Mehr anzeigen" },
@@ -1664,7 +1670,7 @@
 
   "options_page_number": { "message": "Seitenzahl zeigen" },
   "options_page_number_hint": {
-    "message": "Die aktuelle Seite und die Gesamtzahl, zum Beispiel 3 / 12, am unteren Fensterrand."
+    "message": "Die aktuelle Seite und die Gesamtzahl, zum Beispiel 3 / 12, am unteren Fensterrand. In einem langen Buch wird dort angezeigt, wie viel des Buchs gelesen ist, in Prozent - zum Beispiel 12 %."
   },
 
   "options_paged_heading": { "message": "Ansicht Seiten" },

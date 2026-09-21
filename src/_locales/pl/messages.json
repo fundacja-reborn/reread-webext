@@ -663,6 +663,12 @@
       "pages": { "content": "$2", "example": "48" }
     }
   },
+  "reader_page_book_percent": {
+    "message": "$PERCENT$% książki",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_page_prev": { "message": "Poprzednia strona" },
   "reader_page_next": { "message": "Następna strona" },
   "reader_panel_more": { "message": "Pokaż więcej" },
@@ -2360,7 +2366,7 @@
 
   "options_page_number": { "message": "Pokazuj numer strony" },
   "options_page_number_hint": {
-    "message": "Numer bieżącej strony i liczba wszystkich, na przykład 3 / 12, u dołu okna."
+    "message": "Numer bieżącej strony i liczba wszystkich, na przykład 3 / 12, u dołu okna. W długiej książce jest tam procent przeczytanej książki, na przykład 12%."
   },
 
   "options_paged_heading": { "message": "Układ „Strony”" },

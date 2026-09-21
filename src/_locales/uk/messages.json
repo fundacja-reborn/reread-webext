@@ -663,6 +663,12 @@
       "pages": { "content": "$2", "example": "48" }
     }
   },
+  "reader_page_book_percent": {
+    "message": "$PERCENT$% книги",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "12" }
+    }
+  },
   "reader_page_prev": { "message": "Попередня сторінка" },
   "reader_page_next": { "message": "Наступна сторінка" },
   "reader_panel_more": { "message": "Показати більше" },
@@ -2360,7 +2366,7 @@
 
   "options_page_number": { "message": "Показувати номер сторінки" },
   "options_page_number_hint": {
-    "message": "Поточна сторінка та загальна кількість, наприклад 3 / 12, унизу вікна."
+    "message": "Поточна сторінка та загальна кількість, наприклад 3 / 12, унизу вікна. У довгій книзі там показано, скільки книги прочитано, у відсотках - наприклад 12%."
   },
 
   "options_paged_heading": { "message": "Вигляд Сторінки" },
