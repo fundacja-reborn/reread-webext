@@ -22,6 +22,7 @@ import {
   edgeTurn,
   edgeZone,
   flashAllowed,
+  meantPress,
   onPage,
   pageAt,
   pagePercent,
@@ -499,6 +500,38 @@ describe("tapIntent (D250)", () => {
     // The thumb that has been holding the device since the page opened is
     // not a second point of a grip: it must not stop a deliberate tap.
     assert.equal(tapIntent(tap({ otherPointers: [200] })), "down");
+  });
+});
+
+describe("meantPress (D278)", () => {
+  /** A fingertip's tap on the contents' button: the window's bottom-left corner, inside both dead strips. */
+  const corner = { x: 14, y: 730 };
+
+  it("takes a tap where no tap turns a page - the button stands in the dead foot", () => {
+    assert.equal(tapIntent(tap(corner)), null);
+    assert.equal(meantPress(tap(corner)), true);
+  });
+
+  it("refuses the thumb that holds the device: long on the glass, sliding, wide, or beside another", () => {
+    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + TAP_HOLD_MS - 1 })), true);
+    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + TAP_HOLD_MS })), false);
+    assert.equal(meantPress(tap({ ...corner, dx: TAP_DRIFT, dy: 0 })), false);
+    assert.equal(meantPress(tap({ ...corner, width: TAP_BLOB, height: 12 })), false);
+    assert.equal(meantPress(tap({ ...corner, otherPointers: [1000 + TAP_ALONE_MS] })), false);
+    // A thumb resting since the page opened does not stop a deliberate tap.
+    assert.equal(meantPress(tap({ ...corner, otherPointers: [200] })), true);
+  });
+
+  it("does not ask a contact's size of a device whose numbers say nothing", () => {
+    assert.equal(meantPress(tap({ ...corner, width: null, height: null })), true);
+  });
+
+  it("takes every press of a mouse or a pen, and one with no pointer behind it", () => {
+    // A pen never turns a page, but it presses a button like any hand.
+    assert.equal(meantPress(tap({ ...corner, pointerType: "pen", upAt: 9000 })), true);
+    assert.equal(meantPress(tap({ ...corner, pointerType: "mouse", upAt: 9000, dx: 40 })), true);
+    // A key, a screen reader, a switch: asked for by name.
+    assert.equal(meantPress(null), true);
   });
 });
 

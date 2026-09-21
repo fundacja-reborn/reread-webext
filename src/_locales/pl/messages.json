@@ -2366,7 +2366,7 @@
 
   "options_page_number": { "message": "Pokazuj numer strony" },
   "options_page_number_hint": {
-    "message": "Numer bieżącej strony i liczba wszystkich, na przykład 3 / 12, u dołu okna. W długiej książce jest tam procent przeczytanej książki, na przykład 12%."
+    "message": "Numer bieżącej strony i liczba wszystkich, na przykład 3 / 12, u dołu okna. W długiej książce jest tam procent przeczytanej książki, na przykład 12%. Gdy tekst ma spis treści, jest tam też przycisk „Spis treści”."
   },
 
   "options_paged_heading": { "message": "Układ „Strony”" },

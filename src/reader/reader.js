@@ -107,6 +107,7 @@ import {
   edgeWheel,
   edgeWheelStart,
   edgeZone,
+  meantPress,
   onPage,
   pageAt,
   pageFootCount,
@@ -389,10 +390,13 @@ const speechBar = document.getElementById("speech-bar");
 // The paged layout's pieces of chrome (D233, D238): the paper over the cut
 // line at the foot of a page and over its head, the foot's strip with the
 // page count, the count's second home in the bar, and the count as a
-// screen reader hears it.
+// screen reader hears it. In the foot's strip since D278: the count's own
+// element, and the button that opens the contents.
 const pageCurtain = document.getElementById("page-curtain");
 const pageHead = document.getElementById("page-head");
 const pageFooter = document.getElementById("page-footer");
+const footCount = document.getElementById("page-foot-count");
+const footToc = document.getElementById("page-foot-toc");
 const pageCount = document.getElementById("page-count");
 const pageLive = document.getElementById("page-live");
 // The line of ink on the page's edge while a stretched range waits there
@@ -2850,7 +2854,7 @@ function refreshCurtain() {
     counted.kind === "percent"
       ? t("reader_percent", counted.percent.toLocaleString())
       : `${counted.page.toLocaleString()} / ${counted.pages.toLocaleString()}`;
-  if (pageFooter.textContent !== said) pageFooter.textContent = said;
+  if (footCount !== null && footCount.textContent !== said) footCount.textContent = said;
   if (pageCount !== null) {
     pageCount.hidden = settings.reader.pageNumber;
     if (pageCount.textContent !== said) pageCount.textContent = said;
@@ -4623,13 +4627,18 @@ function showBookNote(book) {
 }
 
 /**
- * The door to the table of contents - the menu's row (D117), in the stuck
- * bar, where it stays in reach however far the text has gone - shown only
- * over a document that has one. The pagers carried an icon for it too until
- * D270 took the pagers away.
+ * The doors to the table of contents, shown only over a document that has
+ * one: the menu's row (D117), in the stuck bar, where it stays in reach
+ * however far the text has gone, and the button in the page's foot (D278),
+ * which is there with the bar folded away - read by pages, with the count
+ * shown. The button stands out of the strip's flow, so showing it re-cuts
+ * nothing. The pagers carried an icon for the contents too until D270 took
+ * the pagers away.
  */
 function updateTocButtons() {
-  if (navToc !== null) navToc.hidden = docToc.length === 0;
+  const none = docToc.length === 0;
+  if (navToc !== null) navToc.hidden = none;
+  if (footToc !== null) footToc.hidden = none;
 }
 
 /**
@@ -9016,6 +9025,15 @@ segmentOnwardButton?.addEventListener("click", () => {
   turnSegment(1);
 });
 
+// The contents' button in the page's foot (D278). The foot is where the
+// hand that holds a phone rests - no tap there turns a page, for that
+// reason - so a touch has to carry a tap's signature to open the sheet
+// (`meantPress`). A press with no pointer behind it - a key, a screen
+// reader - says so itself (`detail` of zero) and is never asked.
+footToc?.addEventListener("click", (event) => {
+  if (!meantPress(event.detail === 0 ? null : lastTap())) return;
+  openTocDialog();
+});
 tocCloseButton?.addEventListener("click", () => closeTocDialog());
 // To a click the backdrop is the dialog element itself - everything inside
 // is covered by the header and the rows, which carry the padding.

@@ -2269,6 +2269,65 @@ a.marks-act {
   font-variant-numeric: tabular-nums;
 }
 
+/* --- the contents as a sheet (D278) --- */
+
+/* The contents stand at the window's start edge, the window's height: a
+   book's own table runs to sixty rows and more (D277), and the box in the
+   middle of the window showed a dozen of them. By its id and not by the
+   class - the search and the footnote wear `.toc-dialog` too, and stay
+   boxes. Still the engine's modal dialog, so the top layer, the focus trap,
+   Esc and the way back to the opener are what they were; only where it
+   stands is said here (the engine centres a modal with `margin: auto`
+   between two zero insets, and caps both its sizes). `100dvh`, because a
+   box measured in `vh` runs under Android's toolbar. On a wide window the
+   sheet does not reach the text's column at all, and the page being read
+   stays in sight beside its contents. */
+#toc-dialog {
+  inset-block: 0;
+  inset-inline: 0 auto;
+  margin: 0;
+  width: min(26rem, calc(100vw - 3rem));
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  border: none;
+  border-inline-end: 1px solid var(--page-line);
+  border-radius: 0;
+}
+
+/* Under a phone's cutout in full screen, and over its gesture bar: the
+   sheet is the window's height, so both of the screen's own strips fall
+   inside it. */
+#toc-dialog .toc-head {
+  padding-top: calc(0.6rem + var(--safe-top, 0px));
+}
+
+#toc-dialog .toc-rows {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* The sheet comes in from the edge it stands at, once, on a screen that
+   draws motion well. Not on e-ink paper, where the theme stops every
+   animation (page.css), and not for a reader who asked the system for
+   stillness; it leaves in one frame everywhere, as every panel here does. */
+@media (prefers-reduced-motion: no-preference) {
+  #toc-dialog[open] {
+    animation: contents-sheet-in 140ms ease-out;
+  }
+}
+
+#toc-dialog:dir(rtl) {
+  --contents-sheet-from: 100%;
+}
+
+@keyframes contents-sheet-in {
+  from {
+    transform: translateX(var(--contents-sheet-from, -100%));
+  }
+}
+
 /* --- search in the document (D119): the TOC dialog's dress on a form and
    a list of hits --- */
 
@@ -3254,10 +3313,16 @@ body.reader:has(#mark-bar:not([hidden])) {
   overflow: hidden;
   margin: 0;
   padding: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.8rem;
-  line-height: 1.25;
-  text-align: center;
+  /* A row as wide as the text's column (D278): the contents' button under
+     the column's first letter, the count under its last. The strip keeps
+     the body's face and size for one reason - `ch` is read in them, so the
+     measure here is the measure the column is cut to - and the two things
+     in the row wear the interface's themselves. A flex row has no strut, so
+     the reading size above adds nothing to the strip's height. */
+  --page-foot-inset: max(1.5rem, calc((100% - var(--reader-measure, 65ch)) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   color: var(--page-muted);
   background: var(--page-bg);
   pointer-events: none;
@@ -3268,11 +3333,67 @@ body.reader:has(#mark-bar:not([hidden])) {
    not a control - so the strip costs the page as little as a line can.
    The floor is the line's own height with the air, so the strip stands as
    tall before the count is written as after, and the band measured on
-   the first cut is the band of every cut. */
+   the first cut is the band of every cut. Nothing is clipped while it
+   stands: the button's reach goes a little above the strip (below). */
 :root[data-reader-page-number="true"] .page-footer {
   height: auto;
   min-height: calc(1.4rem + env(safe-area-inset-bottom, 0px));
-  padding: 0.2rem 0.6rem calc(0.2rem + env(safe-area-inset-bottom, 0px));
+  overflow: visible;
+  padding: 0.2rem var(--page-foot-inset) calc(0.2rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* The count itself, at the row's end: information, in the muted voice. */
+.page-foot-count {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The way to the contents (D278), at the row's start: the glyph the size of
+   the count's line and in its muted voice, a door beside information
+   rather than a control asking to be pressed. Its reach is the strip and
+   the air above it (`--page-foot-air`) and never a line of the text: a
+   taller target would lie over the first word of the page's last line,
+   which is a word somebody may want to select. Wider than tall for the
+   same reason - the width is free. Out of the strip's flow, so the strip is
+   as tall with the button as without, and the pages are cut the same. The
+   strip lets no pointer through; the button does. */
+.page-foot-toc {
+  position: absolute;
+  bottom: 0;
+  inset-inline-start: calc(var(--page-foot-inset) - 1rem);
+  box-sizing: border-box;
+  width: 3rem;
+  height: calc(100% + var(--page-foot-air, 0.5rem));
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 calc(0.2rem + env(safe-area-inset-bottom, 0px));
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  pointer-events: auto;
+}
+
+.page-foot-toc:hover,
+.page-foot-toc:focus-visible {
+  color: var(--page-fg);
+}
+
+.page-foot-toc .reader-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* With the count's setting off the strip is the phone's safe area alone,
+   and the button goes with the line it stood on - taken away whole, so no
+   key and no screen reader finds a control that cannot be seen. The menu's
+   row is the way to the contents then, as it always is. */
+:root:not([data-reader-page-number="true"]) .page-foot-toc {
+  display: none;
 }
 
 /* The count's second home (D238): beside the brand in the bar, in the

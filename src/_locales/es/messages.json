@@ -1721,7 +1721,7 @@
 
   "options_page_number": { "message": "Mostrar el número de página" },
   "options_page_number_hint": {
-    "message": "La página actual y el total, por ejemplo 3 / 12, en la parte inferior de la ventana. En un libro largo es la parte del libro ya leída, en porcentaje - por ejemplo 12 %."
+    "message": "La página actual y el total, por ejemplo 3 / 12, en la parte inferior de la ventana. En un libro largo es la parte del libro ya leída, en porcentaje - por ejemplo 12 %. Cuando el texto tiene índice, el botón «Índice» también se muestra ahí."
   },
 
   "options_paged_heading": { "message": "Vista Páginas" },
