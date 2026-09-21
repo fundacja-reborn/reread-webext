@@ -88,7 +88,10 @@ describe("the page's foot (D238)", () => {
     // (D250): the count, the gesture that turns a page and the signal that
     // one has turned, in the order a page is read in.
     assert.match(markup, /id="paged-layout"[\s\S]*?<input type="checkbox" id="page-number"[\s\S]*?id="s-touchTurn"[\s\S]*?id="s-turnEffect"/, "the page-number row does not open the Pages layout's section");
-    assert.match(markup, /data-i18n="options_page_number">Show the page number</, "the row's name is not the catalogue's");
+    // Named after the strip and not after the number (Michał, 2026-09-21):
+    // the strip holds a page number or a percent, and the contents' button,
+    // and a switch called "page number" said a third of that.
+    assert.match(markup, /data-i18n="options_page_number">Show the page footer</, "the row's name is not the catalogue's");
     // One sentence, and nothing folded behind it since Michał's smoke
     // (2026-09-19): what stood there - that the text reaches lower without
     // the count, and that a screen reader still reads it - is a detail about
@@ -107,7 +110,7 @@ describe("the page's foot (D238)", () => {
 
   it("is promised in the README as a setting, on by default (D249)", async () => {
     const readme = await source("../README.md");
-    assert.match(readme, /\*\*Show the page number\*\* under \*\*Pages layout\*\* in the settings, on by default/, "the README still promises a quiet foot the reader no longer has");
+    assert.match(readme, /\*\*Show the page footer\*\* under \*\*Pages layout\*\* in the settings, on by default/, "the README still promises a quiet foot the reader no longer has");
     assert.match(readme, /the page being read keeps its first line and only its last lines go behind the bar/, "the README does not say what a bar does to the page");
   });
 });

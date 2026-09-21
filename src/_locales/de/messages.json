@@ -1668,9 +1668,9 @@
   },
 
 
-  "options_page_number": { "message": "Seitenzahl zeigen" },
+  "options_page_number": { "message": "Fußzeile zeigen" },
   "options_page_number_hint": {
-    "message": "Die aktuelle Seite und die Gesamtzahl, zum Beispiel 3 / 12, am unteren Fensterrand. In einem langen Buch wird dort angezeigt, wie viel des Buchs gelesen ist, in Prozent - zum Beispiel 12 %. Hat der Text ein Inhaltsverzeichnis, wird dort auch die Schaltfläche „Inhalt“ angezeigt."
+    "message": "Eine Zeile am unteren Fensterrand mit der aktuellen Seite und der Gesamtzahl, zum Beispiel 3 / 12. In einem langen Buch wird dort angezeigt, wie viel des Buchs gelesen ist, in Prozent - zum Beispiel 12 %. Hat der Text ein Inhaltsverzeichnis, wird dort auch die Schaltfläche „Inhalt“ angezeigt."
   },
 
   "options_paged_heading": { "message": "Ansicht Seiten" },

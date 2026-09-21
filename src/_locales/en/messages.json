@@ -2067,9 +2067,9 @@
   },
 
 
-  "options_page_number": { "message": "Show the page number" },
+  "options_page_number": { "message": "Show the page footer" },
   "options_page_number_hint": {
-    "message": "The current page and how many there are, for example 3 / 12, at the foot of the window. In a long book it is how much of the book you have read, in percent - for example 12%. When the text has a table of contents, the \"Contents\" button is shown there too."
+    "message": "A line at the foot of the window with the current page and how many there are, for example 3 / 12. In a long book it shows how much of the book you have read, in percent - for example 12%. When the text has a table of contents, the \"Contents\" button is shown there too."
   },
 
   "options_paged_heading": { "message": "Pages layout" },
