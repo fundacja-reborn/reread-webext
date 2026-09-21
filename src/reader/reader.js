@@ -323,6 +323,12 @@ const navMarks = document.getElementById("nav-marks");
 const navVocabulary = document.getElementById("nav-vocabulary");
 const navSettings = document.getElementById("nav-settings");
 const navPictures = document.getElementById("nav-pictures");
+// The acts on the document itself, in the menu as well (D272): the read mark
+// and Delete of the rows around the article, where a long text keeps them in
+// reach - a book wears those rows only at its beginning and its end (D270).
+const navMarkRead = document.getElementById("nav-mark-read");
+const navMarkReadLabel = document.getElementById("nav-mark-read-label");
+const navDelete = document.getElementById("nav-delete");
 const navFullscreen = document.getElementById("nav-fullscreen");
 const fullscreenTool = document.getElementById("fullscreen");
 /**
@@ -5111,6 +5117,9 @@ function leaveDocView() {
   // action rows for the same reason.
   if (navExportEpub !== null) navExportEpub.hidden = true;
   if (navExportMarkdown !== null) navExportMarkdown.hidden = true;
+  // And so are the document's two acts in the menu (D272).
+  if (navMarkRead !== null) navMarkRead.hidden = true;
+  if (navDelete !== null) navDelete.hidden = true;
   showSegmentNav(null);
   showBookNote(null);
   docToc = [];
@@ -6067,7 +6076,9 @@ function stopMarkSpeech() {
  * @returns {string}
  */
 function deleteTitle(button) {
-  if (button === removeButton || button === removeEndButton) return titleElement?.textContent ?? "";
+  if (button === removeButton || button === removeEndButton || button === navDelete) {
+    return titleElement?.textContent ?? "";
+  }
   // A quote row's acts carry their document's title themselves (D150): the
   // row names it in a detail line, not in a button of its own.
   const own = button.getAttribute("data-title");
@@ -6101,6 +6112,14 @@ function disarmDelete() {
     armed.style.removeProperty("min-width");
     armed.textContent = label;
     armed.setAttribute("aria-label", label);
+    return;
+  }
+  // The menu's row (D272) stands down to its own words, which say what is
+  // deleted from where - among the menu's rows a bare verb would not - and
+  // are its accessible name as they stand.
+  if (armed === navDelete) {
+    armed.textContent = t("reader_menu_delete");
+    armed.removeAttribute("aria-label");
     return;
   }
   // Every other Delete stands down to the same pair of words - the bare verb
@@ -7237,6 +7256,8 @@ async function refreshActions() {
     if (picturesOffer !== null) picturesOffer.hidden = true;
     if (navExportEpub !== null) navExportEpub.hidden = true;
     if (navExportMarkdown !== null) navExportMarkdown.hidden = true;
+    if (navMarkRead !== null) navMarkRead.hidden = true;
+    if (navDelete !== null) navDelete.hidden = true;
     return;
   }
 
@@ -7303,6 +7324,23 @@ async function refreshActions() {
     button.hidden = row === null || (button === markReadEndButton && !lastPart);
     button.textContent = label;
     button.setAttribute("aria-pressed", String(read));
+  }
+
+  // The same two acts in the menu (D272), over every document the list
+  // holds and wherever in it the reading stands: the rows around a book's
+  // text show only at its beginning and its end (D270), and the middle of a
+  // long article is a long scroll from either row. Drawn here with the rows
+  // they repeat, so the three places cannot disagree.
+  if (navMarkRead !== null) {
+    navMarkRead.hidden = row === null;
+    if (navMarkReadLabel !== null) navMarkReadLabel.textContent = label;
+    navMarkRead.setAttribute("aria-pressed", String(read));
+  }
+  if (navDelete !== null) {
+    navDelete.hidden = row === null;
+    navDelete.removeAttribute("data-armed");
+    navDelete.textContent = t("reader_menu_delete");
+    navDelete.removeAttribute("aria-label");
   }
 
   refreshPicturesRow(target, row);
@@ -7630,11 +7668,16 @@ async function onRemovePress(button) {
     // of verb and question runs longer now differs by catalogue ("Usuń" asks
     // "Na pewno?", "Supprimer" asks "Sûr ?"), so the width is held as
     // min-width, anchored on the left edge the row aligns to: the button
-    // never shrinks, and can only grow rightward.
-    button.style.minWidth = `${button.offsetWidth}px`;
+    // never shrinks, and can only grow rightward. The menu's row (D272) is
+    // as wide as the menu whatever it says, and holds nothing.
+    if (button !== navDelete) button.style.minWidth = `${button.offsetWidth}px`;
     armDelete(button);
     return;
   }
+
+  // The confirmed press from the menu leaves the document, and the menu
+  // with it: the list must not open under a panel about a text that is gone.
+  if (button === navDelete) closePanels();
 
   try {
     if (target.origin === "book") await deleteBook(target.url);
@@ -9263,6 +9306,12 @@ for (const button of [removeButton, removeEndButton]) {
 }
 markReadButton?.addEventListener("click", () => void onMarkReadPress());
 markReadEndButton?.addEventListener("click", () => void onMarkReadPress());
+// The menu's two acts on the document (D272) are the buttons' own handlers.
+// Neither press puts the menu away: the read mark's changed row is its
+// report, and Delete's first press turns the row into the question that the
+// second press - on the same spot - answers.
+navMarkRead?.addEventListener("click", () => void onMarkReadPress());
+navDelete?.addEventListener("click", () => void onRemovePress(navDelete));
 
 // Search in the open document (D119). The module keeps the dialog, the scan
 // and the held results; this page owns the landing, which is the quotes' and

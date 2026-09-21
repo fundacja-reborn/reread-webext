@@ -544,8 +544,9 @@
       -->
       <!-- The rows run from the nearest to the farthest (D117, D235): first
            what acts inside the open text (its map, its search, its quotes),
-           then what acts on the document as a whole (its pictures, the two
-           files it can be written out as), then the window (full screen),
+           then what acts on the document as a whole (its read mark, its
+           pictures, the two files it can be written out as, and last its
+           deletion - D272), then the window (full screen),
            then the doors - this extension's own rooms (the phrases the
            reading feeds, the list) and the one door out of it - and the
            settings last, the door every menu keeps at the bottom. The rows
@@ -569,6 +570,29 @@
              document's own quotes; over the list, everybody's. Like the
              list row it hides in the room it names. -->
         <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
+        <!-- The read mark of the document on screen (D272): the act of the
+             button over the title and under the last line, in the bar that
+             is always in reach. A long book wears those buttons only at its
+             beginning and its end (D270), and an article's are a long
+             scroll away from its middle; the menu is one place to learn for
+             both. Over every document that is in the reading list; hidden
+             over a page not saved yet, the list and the highlights page.
+             The words are the button's own and are set by script (a book's
+             name the book); the check shows while the mark is set. The row
+             keeps the menu open: the changed row is the report. -->
+        <button id="nav-mark-read" type="button" aria-pressed="false" hidden>
+          <svg class="reader-icon nav-check" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M3.4 8.6l3 3 6.2-6.8"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span id="nav-mark-read-label">Mark as read</span>
+        </button>
         <!-- The article's pictures (D145): the one row that reaches the
              network. Over a saved article whose text refers to pictures it
              offers to fetch them; while it fetches it is the progress and
@@ -604,6 +628,17 @@
           <span id="nav-export-markdown-hint" class="nav-hint" data-i18n="reader_export_markdown_hint">
             A plain-text file with headings and links, for notes and other apps.
           </span>
+        </button>
+        <!-- Deleting the document on screen (D272), the last row of the
+             document's group - the act that cannot be taken back stands
+             after the ones that can. The same two presses on one spot as
+             every Delete here: the first turns the row into the question,
+             the second deletes and leads to the list, and any step away
+             stands the question down. So the first press must not put the
+             menu away. The row says what is deleted from where, which a
+             bare "Delete" in a menu that also removes pictures would not. -->
+        <button id="nav-delete" type="button" data-i18n="reader_menu_delete" hidden>
+          Delete from the reading list
         </button>
         <!-- The whole screen for the page (D180). Firefox for Android folds
              its address bar only under a finger scrolling down, brings it

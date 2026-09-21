@@ -713,6 +713,10 @@
   },
   "reader_save": { "message": "Save to reading list" },
   "reader_delete_confirm": { "message": "Sure?" },
+  "reader_menu_delete": {
+    "message": "Delete from the reading list",
+    "description": "The reader menu's row that deletes the open document (an article or a book) from the offline reading list. Pressed once it turns into the question (reader_delete_confirm); the second press deletes."
+  },
   "reader_delete_aria": {
     "message": "Delete the article $TITLE$",
     "description": "Accessible name of a row's Delete button - a bare \"Delete\" in a list of fifty names nothing.",
