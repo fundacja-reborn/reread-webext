@@ -15,6 +15,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
 import { TARGETS, TARGET_STATIC_FILES, forTarget } from "./manifest-target.mjs";
+import { STATIC_FILES, VENDOR_FILES, localeCatalogues } from "./package-files.mjs";
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SRC = join(ROOT, "src");
@@ -38,48 +39,6 @@ const ENTRY_POINTS = [
  * package has no reason to carry a file nothing in it ever opens.
  */
 const CHROMIUM_ENTRY_POINTS = ["offscreen/engine-host.js"];
-
-/**
- * Copied through untouched, relative to `src/`. The highlight stylesheet is
- * here rather than in a bundle on purpose: it is what the extension does to
- * somebody else's page, and it should be readable as one short file.
- */
-const STATIC_FILES = [
-  "options/options.html",
-  "options/options.css",
-  "popup/index.html",
-  "popup/popup.css",
-  "reader/reader.html",
-  "reader/reader.css",
-  "vocab/vocab.html",
-  "vocab/vocab.css",
-  "content/highlight.css",
-  "assets/page.css",
-  "_locales",
-];
-
-/**
- * Third-party code, relative to the repository root, copied in rather than
- * bundled. The licence and the note about where each came from travel with
- * them: MPL-2.0 and Apache-2.0 both ask for the first, and an unexplained
- * five-megabyte blob inside an extension is exactly what the second answers.
- *
- * Copied, not bundled, for a reason that outlives convenience: the file that
- * ships has to have the same SHA-256 as the file the upstream project
- * published, and anything esbuild touches no longer does.
- */
-const VENDOR_FILES = [
-  "vendor/bergamot/bergamot-translator-worker.js",
-  "vendor/bergamot/bergamot-translator-worker.wasm",
-  "vendor/bergamot/LICENSE",
-  "vendor/bergamot/README.md",
-  "vendor/readability/Readability.js",
-  "vendor/readability/LICENSE",
-  "vendor/readability/README.md",
-  "vendor/fflate/browser.js",
-  "vendor/fflate/LICENSE",
-  "vendor/fflate/README.md",
-];
 
 /**
  * @param {Target} target
@@ -120,8 +79,12 @@ async function build(target, watch) {
   };
 
   const copyStatic = async () => {
-    for (const file of [...STATIC_FILES, ...TARGET_STATIC_FILES[target]]) {
-      await cp(join(SRC, file), join(out, file), { recursive: true });
+    // File by file, never a folder at a time: see `package-files.mjs` for what
+    // a folder's copy once carried into the package.
+    const named = [...STATIC_FILES, ...TARGET_STATIC_FILES[target], ...(await localeCatalogues(SRC))];
+    for (const file of named) {
+      await mkdir(dirname(join(out, file)), { recursive: true });
+      await cp(join(SRC, file), join(out, file));
     }
     for (const file of VENDOR_FILES) {
       await mkdir(dirname(join(out, file)), { recursive: true });
