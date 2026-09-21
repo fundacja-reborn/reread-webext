@@ -27,9 +27,15 @@
  * remains is the link's text. Deliberate, not incidental: the brief puts
  * links-as-mechanism (the book's own TOC page, cross-references) out of
  * scope, and a book is prose to read, not a page to leave. The reader's
- * table of contents (D116) is not these links: it is built here from the
- * h1-h3 blocks as segments are written - the same headings the segmenter
- * cuts before - and stored on the book row.
+ * table of contents is not these links. It is the file's own table where
+ * the file has one (D277): the navigation document or the NCX is read
+ * before the spine, each row's target is followed through the rebuild of
+ * the chapter it points into, and the row is stored as the `(segment,
+ * block)` its target landed on (`lib/book/nav.js` holds the rules and the
+ * road; nothing of it rides in the markup). A file without a table worth
+ * the name gets the one read off the h1-h3 blocks as segments are written
+ * (D116) - the same headings the segmenter cuts before. Either way the list
+ * is stored on the book row, in one shape.
  *
  * Pictures stay (D183; they fell out with the allowed list until then).
  * A chapter's `<img>` keeps its address as a path inside the archive
@@ -52,7 +58,17 @@
  * nothing left to follow, so the text has to ride along now.
  */
 
-import { packableBlocks } from "../lib/book/blocks.js";
+import { markedBlocks } from "../lib/book/blocks.js";
+import {
+  importedToc,
+  landedToc,
+  navDocumentRows,
+  ncxRows,
+  preferredRows,
+  rowCarrier,
+  rowTargets,
+  rowTracer,
+} from "../lib/book/nav.js";
 import { cleanNoteText, internalTarget, isNoteref } from "../lib/book/notes.js";
 import {
   containerOpfPath,
@@ -65,6 +81,7 @@ import {
 import { framedPictureHref, packedChars } from "../lib/book/pictures.js";
 import { BOOK_CUT_VERSION, isHeadingTag, segmenter } from "../lib/book/segment.js";
 import { buildArticle } from "../lib/reader/article.js";
+import { decide } from "../lib/reader/sanitize.js";
 import { bookRecord } from "../lib/store/book.js";
 import { deleteBook, putBook } from "../lib/store/books.js";
 import { partWriter } from "./book-parts.js";
@@ -197,6 +214,80 @@ function framePictures(chapter) {
 }
 
 /**
+ * The file's own table of contents (D277), read before the spine so that
+ * its targets can be followed as the chapters go by: the rows, and where
+ * each points, by archive path. The navigation document is read first and
+ * the NCX only when that names no table (`preferredRows`), so a book of the
+ * third edition costs one parse. A list the XML parser refuses - an entity
+ * the file never declared is the usual reason - gets the HTML parser, which
+ * refuses nothing; `nav.js` reads what either makes of it.
+ *
+ * Whatever goes wrong here costs the book its chapters' names and nothing
+ * else: the answer is then no rows, and the headings of the text stand in
+ * as they did before.
+ *
+ * @param {ReturnType<typeof opfPackage>} pkg
+ * @param {string} baseDir the package's directory
+ * @param {(path: string) => Uint8Array | null} entry
+ * @returns {{
+ *   rows: import("../lib/book/nav.js").NavRow[],
+ *   targets: Map<string, import("../lib/book/nav.js").RowTarget[]>,
+ * }}
+ */
+function fileContents(pkg, baseDir, entry) {
+  /**
+   * @param {string | null} href as the package names the list
+   * @param {(root: Element) => import("../lib/book/nav.js").NavRow[]} read
+   */
+  const list = (href, read) => {
+    const path = href === null ? null : resolveZipPath(baseDir, href);
+    const bytes = path === null ? null : entry(path);
+    if (path === null || bytes === null) return null;
+    const text = decodeXml(bytes);
+    const doc = parseXml(text) ?? new DOMParser().parseFromString(text, "text/html");
+    return { path, rows: read(doc.documentElement) };
+  };
+
+  try {
+    const nav = list(pkg.navHref, navDocumentRows);
+    let chosen = nav;
+    if (nav === null || nav.rows.length < 2) {
+      const ncx = list(pkg.ncxHref, ncxRows);
+      if (ncx !== null && (nav === null || preferredRows(nav.rows, ncx.rows) === ncx.rows)) chosen = ncx;
+    }
+    if (chosen !== null) return { rows: chosen.rows, targets: rowTargets(chosen.rows, chosen.path) };
+  } catch (error) {
+    console.warn("re/read: the book's own table of contents could not be read - its headings stand in", error);
+  }
+  return { rows: [], targets: new Map() };
+}
+
+/**
+ * The element a row of the contents points at inside a chapter: the one
+ * with that `id`, or - in a file old enough - the anchor with that `name`.
+ * Nothing for a fragment the chapter does not hold, and nothing for the
+ * body itself or anything outside it: all three mean the chapter's start.
+ *
+ * A target inside something the rebuild drops whole - a caption in a frame,
+ * a fallback inside an `object` - is never met by the walk, which does not
+ * look into what it drops; the dropped element is met, and it stands where
+ * its inside stood, so it is the one answered.
+ *
+ * @param {Document} chapter parsed, inert
+ * @param {string} fragment
+ * @returns {Element | null}
+ */
+function targetElement(chapter, fragment) {
+  const found = chapter.getElementById(fragment) ?? chapter.getElementsByName(fragment)[0] ?? null;
+  if (found === null || found === chapter.body || !chapter.body.contains(found)) return null;
+  let target = found;
+  for (let node = found.parentElement; node !== null && node !== chapter.body; node = node.parentElement) {
+    if (decide(node.tagName) === "drop") target = node;
+  }
+  return target;
+}
+
+/**
  * The whole import of one file. Progress is reported once per segment
  * written and once per picture kept - not per block, not per chapter -
  * which is deliberately coarse: every report is a repaint, and on e-ink a
@@ -300,6 +391,10 @@ export async function importEpub(file, onProgress) {
       progress.segments = written;
       onProgress({ ...progress });
     });
+    // The file's own table of contents (D277), and its rows on their way
+    // to the blocks they land on.
+    const contents = fileContents(pkg, baseDir, entry);
+    const carrier = rowCarrier();
 
     for (const href of pkg.spineHrefs) {
       await yieldToUi();
@@ -320,18 +415,36 @@ export async function importEpub(file, onProgress) {
       // framed pictures out of their frames.
       annotateNoterefs(chapter, path, readNoteDoc);
       framePictures(chapter);
+      // The rows of the file's contents that point into this chapter
+      // (D277), by the element each points at - looked up here, after the
+      // frames were replaced, so that every element named is one the rebuild
+      // will meet. A row that names the whole file, or a fragment the file
+      // does not hold, begins where the chapter does.
+      /** @type {Map<Element, number[]>} */
+      const wanted = new Map();
+      /** @type {number[]} */
+      const atStart = [];
+      for (const { row, fragment } of contents.targets.get(path) ?? []) {
+        const found = fragment === null ? null : targetElement(chapter, fragment);
+        if (found === null) atStart.push(row);
+        else wanted.set(found, [...(wanted.get(found) ?? []), row]);
+      }
+      const tracer = /** @type {ReturnType<typeof rowTracer<Element, Element>>} */ (rowTracer(wanted));
       // Pictures kept, addressed by their path in the archive, resolved
       // against this chapter's directory (D183).
       const rebuilt = buildArticle(chapter.body, document, {
         baseUrl: "",
         pictures: true,
         archive: opfDirectory(path),
+        trace: tracer.trace,
       });
-      // `packableBlocks` rather than the root's children: EPUB chapters
+      carrier.arrive([...atStart, ...tracer.unmet()]);
+      // The dissolving walk rather than the root's children: EPUB chapters
       // usually wrap all their markup in one `<div>`, and packing that as a
       // single block would put a whole chapter in one segment and a
       // part-divider page in its own (see `lib/book/blocks.js`).
-      for (const block of packableBlocks(rebuilt)) {
+      for (const { block, rows } of markedBlocks(rebuilt, tracer.marks)) {
+        carrier.arrive(rows);
         // The block's pictures first, out of the archive and into the
         // database; what could not be kept has left the block by now.
         const pictures = await keeper.keep(block);
@@ -340,15 +453,20 @@ export async function importEpub(file, onProgress) {
         // nobody kept, or a spacer of non-breaking whitespace; the ones kept
         // are the scene break, which is its own meaning, and a picture
         // standing on its own.
+        // (A row of the contents that arrived at a block dropped here waits
+        // with the carrier for the next one kept.)
         if (text.trim().length === 0 && block.localName !== "hr" && pictures.length === 0) continue;
         await parts.write(
           packer.push({
             chars: packedChars(text.length, pictures.length),
             heading: isHeadingTag(block.localName),
-            payload: { html: block.outerHTML, pictures },
+            payload: { html: block.outerHTML, pictures, rows: carrier.land() },
           }),
         );
       }
+      // A target met after the chapter's last element belongs to whatever
+      // text comes next - the following chapter's first block.
+      carrier.arrive(tracer.trailing());
     }
     await parts.write(packer.finish());
 
@@ -360,7 +478,9 @@ export async function importEpub(file, onProgress) {
       segmentCount: parts.written(),
       totalChars: parts.totalChars(),
       addedAt: Date.now(),
-      toc: parts.toc(),
+      // The file's own table where it is one to move about by, the
+      // headings of the text otherwise (D277, `importedToc`).
+      toc: importedToc(landedToc(contents.rows, parts.places()), parts.toc()),
       pictures: keeper.summary(),
       cut: BOOK_CUT_VERSION,
       words: parts.words(),

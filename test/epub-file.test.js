@@ -318,6 +318,93 @@ describe("epubDocument", () => {
     assert.match(opf, /<itemref idref="text-1"\/>\n<itemref idref="text-2"\/>/);
   });
 
+  /** A book the rows of whose contents are handed in, part by part (D277). */
+  function bookWithRows(/** @type {import("../src/lib/store/epub-file.js").PictureRow[]} */ pictures = []) {
+    return epubDocument({
+      identifier: "urn:uuid:1",
+      title: "Na wschód od Edenu",
+      lang: "pl",
+      dir: null,
+      author: "John Steinbeck",
+      modifiedAt: 1000,
+      pictures: /** @type {any} */ (pictures),
+      contentsLabel: "Spis treści",
+    });
+  }
+
+  it("lists the rows a book's part is handed, at ids on the blocks they name - chapters set as plain paragraphs", () => {
+    const book = bookWithRows();
+    book.part(
+      tree(
+        el("div", {}, [
+          el("p", {}, [text("CZĘŚĆ PIERWSZA")]),
+          text("\n"),
+          el("p", {}, [text("ROZDZIAŁ 1")]),
+          el("p", {}, [text("Dolina rzeki Salinas.")]),
+        ]),
+      ),
+      [
+        { title: "CZĘŚĆ PIERWSZA", level: 1, blockIndex: 0 },
+        { title: "ROZDZIAŁ 1", level: 2, blockIndex: 1 },
+      ],
+    );
+    book.part(tree(el("div", {}, [el("p", {}, [text("Prose.")]), el("p", {}, [text("ROZDZIAŁ 2")])])), [
+      { title: "ROZDZIAŁ 2", level: 2, blockIndex: 1 },
+    ]);
+    const entries = book.entries();
+    // The text between two blocks is no block: the reader counts elements.
+    assert.match(
+      entryText(entries, "OEBPS/text-1.xhtml"),
+      /<p id="contents-1">CZĘŚĆ PIERWSZA<\/p>\n<p id="contents-2">ROZDZIAŁ 1<\/p><p>Dolina rzeki Salinas\.<\/p>/,
+    );
+    assert.match(entryText(entries, "OEBPS/text-2.xhtml"), /<p>Prose\.<\/p><p id="contents-1">ROZDZIAŁ 2<\/p>/);
+    assert.match(
+      entryText(entries, "OEBPS/nav.xhtml"),
+      /<ol>\n<li><a href="text-1\.xhtml#contents-1">CZĘŚĆ PIERWSZA<\/a><ol><li><a href="text-1\.xhtml#contents-2">ROZDZIAŁ 1<\/a><\/li><li><a href="text-2\.xhtml#contents-1">ROZDZIAŁ 2<\/a><\/li><\/ol><\/li>\n<\/ol>/,
+    );
+  });
+
+  it("lists the rows and not the headings where rows were handed in, and one id serves the rows that share a block", () => {
+    const book = bookWithRows();
+    book.part(tree(el("div", {}, [el("h2", {}, [text("PART ONE")]), el("h3", {}, [text("Not a row")]), el("p", {}, [text("Prose.")])])), [
+      { title: "Part One", level: 1, blockIndex: 0 },
+      { title: "1. The Missionary", level: 2, blockIndex: 0 },
+    ]);
+    book.part(tree(el("div", {}, [el("h2", {}, [text("A part with no rows")])])), []);
+    const entries = book.entries();
+    assert.match(entryText(entries, "OEBPS/text-1.xhtml"), /<h2 id="contents-1">PART ONE<\/h2><h3>Not a row<\/h3>/);
+    assert.match(entryText(entries, "OEBPS/text-2.xhtml"), /<h2>A part with no rows<\/h2>/);
+    const nav = entryText(entries, "OEBPS/nav.xhtml");
+    assert.match(nav, /<li><a href="text-1\.xhtml#contents-1">Part One<\/a><ol><li><a href="text-1\.xhtml#contents-1">1\. The Missionary<\/a><\/li><\/ol><\/li>/);
+    assert.doesNotMatch(nav, /Not a row|A part with no rows/);
+  });
+
+  it("puts a row's id on the picture it names, and on an empty block where the picture is gone", () => {
+    const book = bookWithRows([/** @type {any} */ (picture(0, "OEBPS/Images/cover.jpeg"))]);
+    book.part(
+      tree(
+        el("div", {}, [
+          el("img", { "data-src": "OEBPS/Images/cover.jpeg", alt: "Cover" }),
+          el("img", { "data-src": "OEBPS/Images/removed.jpeg" }),
+          el("p", {}, [text("Title page.")]),
+        ]),
+      ),
+      [
+        { title: "Cover", level: 1, blockIndex: 0 },
+        { title: "Frontispiece", level: 1, blockIndex: 1 },
+        { title: "Title", level: 1, blockIndex: 2 },
+      ],
+    );
+    const part = entryText(book.entries(), "OEBPS/text-1.xhtml");
+    assert.match(part, /<img src="images\/0\.jpg" alt="Cover" id="contents-1"\/><div id="contents-2"><\/div><p id="contents-3">Title page\.<\/p>/);
+  });
+
+  it("lists the document itself when none of the rows handed in found a block", () => {
+    const book = bookWithRows();
+    book.part(tree(el("div", {}, [el("p", {}, [text("Prose.")])])), [{ title: "Torn", level: 1, blockIndex: 7 }]);
+    assert.match(entryText(book.entries(), "OEBPS/nav.xhtml"), /<ol>\n<li><a href="text-1\.xhtml">Na wschód od Edenu<\/a><\/li>\n<\/ol>/);
+  });
+
   it("writes the pictures the text asks for as files, and drops a picture the database lacks", () => {
     const entries = articleEntries(
       el("div", {}, [

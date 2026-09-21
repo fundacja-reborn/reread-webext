@@ -50,13 +50,70 @@ function isWrapper(element) {
  * @returns {Generator<Element>}
  */
 export function* packableBlocks(root) {
+  yield* dissolved(root, null);
+}
+
+/**
+ * The walk itself, with one thing said on the way: every wrapper dissolved,
+ * the moment before the blocks it held are handed over.
+ *
+ * @param {Element} root
+ * @param {((wrapper: Element) => void) | null} onWrapper
+ * @returns {Generator<Element>}
+ */
+function* dissolved(root, onWrapper) {
   for (const child of Array.from(root.childNodes)) {
     if (child.nodeType !== ELEMENT_NODE) continue;
     const element = /** @type {Element} */ (child);
     if (element.localName === "div" && isWrapper(element)) {
-      yield* packableBlocks(element);
+      if (onWrapper !== null) onWrapper(element);
+      yield* dissolved(element, onWrapper);
     } else {
       yield element;
     }
+  }
+}
+
+/**
+ * The same blocks, each with the rows of the book's own contents that land
+ * on it (D277, `lib/book/nav.js`). The import marks a row on the rebuilt
+ * element its target became; the block it lands on is the one that element
+ * stands in - the element itself, when it is a block - and a mark on a
+ * wrapper this walk dissolves passes to the first block the wrapper held,
+ * which is where the wrapper began. Rows come out in document order, as
+ * the marks went in.
+ *
+ * @param {Element} root the rebuilt chapter, as `buildArticle` returned it
+ * @param {Map<Element, number[]>} marks rebuilt elements and the rows marked on them
+ * @returns {Generator<{ block: Element, rows: number[] }>}
+ */
+export function* markedBlocks(root, marks) {
+  /** @type {number[]} */
+  let fromWrappers = [];
+  const blocks = dissolved(root, (wrapper) => {
+    fromWrappers.push(...(marks.get(wrapper) ?? []));
+  });
+  for (const block of blocks) {
+    const rows = fromWrappers;
+    fromWrappers = [];
+    // Nothing marked, nothing to look for: the common chapter costs no walk.
+    if (marks.size > 0) collectMarks(block, marks, rows);
+    yield { block, rows };
+  }
+}
+
+/**
+ * The rows marked on an element and on everything inside it, in document
+ * order.
+ *
+ * @param {Element} element
+ * @param {Map<Element, number[]>} marks
+ * @param {number[]} into
+ */
+function collectMarks(element, marks, into) {
+  const rows = marks.get(element);
+  if (rows !== undefined) into.push(...rows);
+  for (const child of Array.from(element.childNodes)) {
+    if (child.nodeType === ELEMENT_NODE) collectMarks(/** @type {Element} */ (child), marks, into);
   }
 }

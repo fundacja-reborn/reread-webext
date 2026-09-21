@@ -1,8 +1,9 @@
 /**
  * The EPUB a document travels out in (D229): one saved article or one
  * imported book as a book file an e-reader opens - the text as the reader
- * shows it, the pictures the database keeps with it, the headings as the
- * table of contents. Nothing here reads a database or a DOM: the reader
+ * shows it, the pictures the database keeps with it, and for a table of
+ * contents the headings - or, for a book that has a table already, that
+ * table (D277). Nothing here reads a database or a DOM: the reader
  * page parses the stored copy and rebuilds it through the allowed list,
  * the road every render takes, and hands the rebuilt tree in part by part
  * (`src/reader/export-doc.js`); this module writes the files the archive
@@ -271,14 +272,25 @@ export function modifiedStamp(at) {
 /**
  * What a walk over one part carries: the pictures by address, the ones the
  * text turned out to ask for (only those are written), the headings met so
- * far, and the footnotes to stand at the part's end.
+ * far - or null when the part's rows of the contents were handed in and
+ * the headings are not what is listed - the footnotes to stand at the
+ * part's end, and an id waiting for the next element written (`anchored`).
  *
  * @typedef {{
  *   files: Map<string, PictureFile>,
  *   used: Set<string>,
- *   headings: Array<{ level: 1 | 2 | 3, title: string, id: string }>,
+ *   headings: Array<{ level: 1 | 2 | 3, title: string, id: string }> | null,
  *   notes: string[],
+ *   anchor: string | null,
  * }} PartContext
+ */
+
+/**
+ * A row of the contents a book already has (D277), as the part it lands in
+ * is told of it: the words, the depth, and which of the part's top-level
+ * blocks it stands on - the `blockIndex` of the book's own `TocEntry`.
+ *
+ * @typedef {{ title: string, level: 1 | 2 | 3, blockIndex: number }} PartRow
  */
 
 /**
@@ -287,8 +299,17 @@ export function modifiedStamp(at) {
  * trees standing at once - and the entries come out at the end. The
  * caller adds at least one part; a package with none names no text.
  *
+ * The contents are the headings met on the way, unless the caller hands a
+ * part its rows (D277): a book whose table came from the file it was
+ * imported from lists chapters whose titles are plain paragraphs, which no
+ * walk for headings would find - and what the reader shows as the book's
+ * contents is what the file should hold. A part written with rows gives the
+ * blocks they name an id apiece and lists those; its headings get none,
+ * being listed already or not at all. The caller hands rows to every part
+ * of a book or to none.
+ *
  * @param {EpubMeta} meta
- * @returns {{ part: (root: ExportNode) => void, entries: () => ArchiveEntry[] }}
+ * @returns {{ part: (root: ExportNode, rows?: PartRow[]) => void, entries: () => ArchiveEntry[] }}
  */
 export function epubDocument(meta) {
   /** @type {Map<string, PictureFile>} */
@@ -306,16 +327,16 @@ export function epubDocument(meta) {
   const nav = [];
 
   return {
-    part(root) {
+    part(root, rows) {
       const name = `text-${parts.length + 1}.xhtml`;
       /** @type {PartContext} */
-      const context = { files, used, headings: [], notes: [] };
+      const context = { files, used, headings: rows === undefined ? [] : null, notes: [], anchor: null };
       let body = "";
       if (parts.length === 0 && typeof meta.source === "string") body += headBlock(meta.title, meta.source);
-      body += writeChildren(root, context);
+      body += rows === undefined ? writeChildren(root, context) : writeBlocks(root, rows, name, context, nav);
       body += notesBlock(context.notes);
       parts.push({ name, xhtml: partDocument(meta, body) });
-      for (const heading of context.headings) {
+      for (const heading of context.headings ?? []) {
         nav.push({ level: heading.level, title: heading.title, href: `${name}#${heading.id}` });
       }
     },
@@ -369,11 +390,68 @@ function writeChildren(node, context) {
 }
 
 /**
+ * A part's top-level blocks with the rows of the contents that stand on
+ * them (D277): a block a row names is written with an id, and the row is
+ * listed at that id. The blocks are counted the way the reader counts them
+ * when a row is pressed - the root's element children, in order. A block
+ * that writes no element to carry the id - a picture the database no
+ * longer holds - leaves an empty `div` to carry it, so the row still leads
+ * to where the block stood.
+ *
+ * @param {ExportNode} root
+ * @param {PartRow[]} rows the rows that land in this part
+ * @param {string} name the part's file name
+ * @param {PartContext} context
+ * @param {NavEntry[]} nav where the rows are listed
+ * @returns {string}
+ */
+function writeBlocks(root, rows, name, context, nav) {
+  let out = "";
+  let blockIndex = -1;
+  let anchors = 0;
+  for (const child of childrenOf(root)) {
+    if (isElement(child)) blockIndex += 1;
+    const landing = isElement(child) ? rows.filter((row) => row.blockIndex === blockIndex) : [];
+    if (landing.length === 0) {
+      out += writeNode(child, context);
+      continue;
+    }
+    anchors += 1;
+    const id = `contents-${anchors}`;
+    context.anchor = id;
+    const written = writeNode(child, context);
+    if (context.anchor !== null) {
+      context.anchor = null;
+      out += `<div id="${id}"></div>`;
+    }
+    out += written;
+    for (const row of landing) nav.push({ level: row.level, title: row.title, href: `${name}#${id}` });
+  }
+  return out;
+}
+
+/**
+ * The id waiting for the next element written, as the attribute it becomes -
+ * taken once, by whichever element is written first.
+ *
+ * @param {PartContext} context
+ * @returns {string} what follows the element's other attributes, leading space included
+ */
+function anchored(context) {
+  if (context.anchor === null) return "";
+  const id = context.anchor;
+  context.anchor = null;
+  return ` id="${xmlAttribute(id)}"`;
+}
+
+/**
  * One node as XHTML. The sanitizer's four answers again: a dropped element
  * writes nothing, an unwrapped one its children, a picture what
  * `writePicture` decides, a kept one itself with the attributes its own
  * list names. A footnote marker becomes a noteref, a heading gets the id
- * its row of the contents points at.
+ * its row of the contents points at - and where the contents were handed
+ * in instead (`writeBlocks`), the first element written takes the id that
+ * is waiting.
  *
  * @param {ExportNode} node
  * @param {PartContext} context
@@ -393,12 +471,12 @@ function writeNode(node, context) {
     if (note !== null) {
       context.notes.push(note);
       const id = `note-${context.notes.length}`;
-      return `<a epub:type="noteref" href="#${id}"${writeAttributes(node, name, ["href"])}>${writeChildren(node, context)}</a>`;
+      return `<a epub:type="noteref" href="#${id}"${writeAttributes(node, name, ["href"])}${anchored(context)}>${writeChildren(node, context)}</a>`;
     }
   }
 
-  let attributes = writeAttributes(node, name, []);
-  if (isHeadingTag(name)) {
+  let attributes = writeAttributes(node, name, []) + anchored(context);
+  if (context.headings !== null && isHeadingTag(name)) {
     const title = tocTitle(textOf(node));
     if (title !== null) {
       const id = `heading-${context.headings.length + 1}`;
@@ -452,7 +530,7 @@ function writePicture(node, context) {
   if (src === null || file === undefined) return "";
   context.used.add(src);
   const alt = attributeOf(node, "alt") ?? "";
-  return `<img src="${xmlAttribute(file.name)}" alt="${xmlAttribute(alt)}"${writeAttributes(node, "img", ["alt"])}/>`;
+  return `<img src="${xmlAttribute(file.name)}" alt="${xmlAttribute(alt)}"${writeAttributes(node, "img", ["alt"])}${anchored(context)}/>`;
 }
 
 /**

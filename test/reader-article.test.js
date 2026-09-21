@@ -364,6 +364,52 @@ describe("a book's pictures in the rebuild (D183)", () => {
   });
 });
 
+describe("the rebuild told to a listener (D277)", () => {
+  /**
+   * What `trace` heard, as the source's tag and what was built for it.
+   *
+   * @param {object} source
+   * @param {import("../src/lib/reader/article.js").Pictures | undefined} pictures
+   */
+  function traced(source, pictures) {
+    /** @type {string[]} */
+    const heard = [];
+    const built = buildArticle(
+      /** @type {Element} */ (/** @type {unknown} */ (source)),
+      /** @type {Document} */ (/** @type {unknown} */ (fakeDocument())),
+      {
+        baseUrl: BASE,
+        pictures,
+        trace: (from, to) => heard.push(`${from.tagName.toLowerCase()}>${to === null ? "-" : to.tagName.toLowerCase()}`),
+      },
+    );
+    return { heard, serialized: serialize(built) };
+  }
+
+  const source = el("body", {}, [
+    el("section", { id: "part" }, [
+      el("h2", { id: "title" }, [text("A heading")]),
+      el("p", {}, [text("Some "), el("em", {}, [text("emphasis")])]),
+    ]),
+    el("script", {}, [el("b", {}, [text("never met")])]),
+    el("img", { src: "https://cdn.test/photo.jpg" }),
+    el("img", { src: "data:image/png;base64,AAAA" }),
+  ]);
+
+  it("says what became of every element, in document order, the outer one first", () => {
+    assert.deepEqual(traced(source, true).heard, ["section>-", "h2>h2", "p>p", "em>em", "script>-", "img>img", "img>-"]);
+  });
+
+  it("says nothing was built for a picture when the caller keeps none", () => {
+    assert.deepEqual(traced(source, undefined).heard.slice(-2), ["img>-", "img>-"]);
+  });
+
+  it("builds exactly what it builds without a listener", () => {
+    assert.equal(traced(source, true).serialized, rebuildWith(source, true));
+    assert.equal(traced(source, undefined).serialized, rebuildWith(source, undefined));
+  });
+});
+
 describe("the allow list itself", () => {
   it("answers one of three things about an element", () => {
     assert.equal(decide("P"), "keep");

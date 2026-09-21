@@ -76,14 +76,25 @@ export function containerOpfPath(containerRoot) {
   return null;
 }
 
+/** What an EPUB 2 package calls its table of contents, the NCX. */
+const NCX_TYPE = "application/x-dtbncx+xml";
+
 /**
- * What of the OPF this extension reads: three metadata strings and the spine
- * as hrefs, in reading order. EPUB 2 and 3 come through the same walk.
+ * What of the OPF this extension reads: three metadata strings, the spine
+ * as hrefs, in reading order, and where the book keeps its own table of
+ * contents. EPUB 2 and 3 come through the same walk.
  *
  * The spine is `itemref`s resolved through the manifest, minus what is not
  * text to read: entries whose manifest item is missing or not XHTML, and
  * entries marked `linear="no"` - covers and inserts the spec itself says are
  * outside the reading order.
+ *
+ * The contents are named twice, because the two editions name them in two
+ * places: EPUB 3's navigation document is the manifest item whose
+ * `properties` say `nav`; EPUB 2's NCX is the item the spine's `toc`
+ * attribute points at - or, in a package that forgot the attribute, the
+ * one item of the NCX's media type. A book of the third edition usually
+ * carries both, and which one is read is `lib/book/nav.js`'s decision.
  *
  * @param {XmlEl} packageRoot
  * @returns {{
@@ -91,17 +102,26 @@ export function containerOpfPath(containerRoot) {
  *   author: string | null,
  *   lang: string | null,
  *   spineHrefs: string[],
+ *   navHref: string | null,
+ *   ncxHref: string | null,
  * }}
  */
 export function opfPackage(packageRoot) {
   /** @type {Map<string, { href: string, mediaType: string }>} */
   const manifest = new Map();
+  /** @type {string | null} */
+  let navHref = null;
+  /** @type {string | null} */
+  let typedNcxHref = null;
   for (const item of elements(packageRoot, "item")) {
     const id = item.getAttribute("id");
     const href = item.getAttribute("href");
     const mediaType = item.getAttribute("media-type") ?? "";
     if (typeof id === "string" && id.length > 0 && typeof href === "string" && href.length > 0) {
       manifest.set(id, { href, mediaType });
+      const properties = (item.getAttribute("properties") ?? "").split(/\s+/);
+      if (navHref === null && properties.includes("nav")) navHref = href;
+      if (typedNcxHref === null && mediaType === NCX_TYPE) typedNcxHref = href;
     }
   }
 
@@ -115,11 +135,17 @@ export function opfPackage(packageRoot) {
     if (item !== undefined && CONTENT_TYPES.has(item.mediaType)) spineHrefs.push(item.href);
   }
 
+  // The spine's own word for where the NCX is: an id into the manifest.
+  const spine = elements(packageRoot, "spine")[0];
+  const named = spine === undefined ? undefined : manifest.get(spine.getAttribute("toc") ?? "");
+
   return {
     title: firstText(packageRoot, "title"),
     author: firstText(packageRoot, "creator"),
     lang: firstText(packageRoot, "language"),
     spineHrefs,
+    navHref,
+    ncxHref: named?.href ?? typedNcxHref,
   };
 }
 
