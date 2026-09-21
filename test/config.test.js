@@ -4,6 +4,7 @@ import { afterEach, describe, it } from "node:test";
 import {
   BUBBLE_SCALE,
   DEFAULTS,
+  DEFAULT_LAYOUT,
   MEASURE,
   READER_DEFAULTS,
   READING_PACE,
@@ -11,6 +12,7 @@ import {
   TOUCH_TURN_WIDE,
   TTS_RATE,
   chosenPair,
+  effectiveLayout,
   effectiveLibraryCopy,
   effectiveReaderOnly,
   effectiveTouchTurn,
@@ -789,13 +791,32 @@ describe("the reader's appearance", () => {
     assert.deepEqual(withDefaults({ reader: "large" }).reader, READER_DEFAULTS);
   });
 
-  it("keeps a layout it knows and scrolls for one it does not", () => {
-    // The paged layout (D233) is a name with a rule under it; a profile from
-    // before the field, or with a name from a future version, scrolls.
+  it("keeps a layout it knows, and reads everything else as nobody having chosen (D279)", () => {
+    // The paged layout (D233) is a name with a rule under it. A profile from
+    // before the field, or with a name from a future version, has chosen
+    // nothing - a state of its own, the way the touch gesture's is.
     assert.equal(withDefaults({ reader: { layout: "paged" } }).reader.layout, "paged");
     assert.equal(withDefaults({ reader: { layout: "scroll" } }).reader.layout, "scroll");
-    assert.equal(withDefaults({ reader: { layout: "columns" } }).reader.layout, "scroll");
-    assert.equal(withDefaults({ reader: {} }).reader.layout, "scroll");
+    assert.equal(withDefaults({ reader: { layout: "columns" } }).reader.layout, null);
+    assert.equal(withDefaults({ reader: {} }).reader.layout, null);
+    assert.equal(READER_DEFAULTS.layout, null);
+  });
+
+  it("reads by pages while nobody has chosen, and keeps a choice either way (D279)", () => {
+    assert.equal(DEFAULT_LAYOUT, "paged");
+    assert.equal(effectiveLayout({ layout: null }), "paged");
+    assert.equal(effectiveLayout({ layout: "scroll" }), "scroll");
+    assert.equal(effectiveLayout({ layout: "paged" }), "paged");
+  });
+
+  it("writes nobody's choice back as nobody's choice, so a later default still reaches the profile (D279)", () => {
+    // Every write stores the whole config. A default written out as a name
+    // would be frozen into the profile at its first write - which is what
+    // made the flip to pages a decision that could only be taken once.
+    const stored = withDefaults(withDefaults({ reader: { theme: "dark" } }));
+    assert.equal(stored.reader.layout, null);
+    assert.equal(JSON.parse(JSON.stringify(stored)).reader.layout, null);
+    assert.equal(withDefaults(JSON.parse(JSON.stringify(stored))).reader.layout, null);
   });
 
   it("hides the page count at the foot only on a stored false (D238, D249)", () => {

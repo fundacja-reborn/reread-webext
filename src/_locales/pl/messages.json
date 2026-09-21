@@ -656,6 +656,10 @@
   "reader_layout": { "message": "Układ" },
   "reader_layout_scroll": { "message": "Przewijanie" },
   "reader_layout_paged": { "message": "Strony" },
+  "reader_layout_notice": {
+    "message": "Tekst jest podzielony na strony. Jeśli wolisz przewijanie, naciśnij tutaj „Przewijanie” albo wybierz je później w panelu Aa, w wierszu „Układ”.",
+    "description": "Shown once in the reader's notice, over a text read by pages, while nobody has chosen a layout yet (D279). The button under it wears reader_layout_scroll; closing the notice keeps the pages. Name the button, the Aa panel and its row the way the catalogue does."
+  },
   "reader_page_of": {
     "message": "Strona $PAGE$ z $PAGES$",
     "placeholders": {
@@ -2371,17 +2375,17 @@
 
   "options_paged_heading": { "message": "Układ „Strony”" },
   "options_paged_intro": {
-    "message": "Poniższe opcje działają w widoku czytania, gdy w panelu Aa ustawisz układ „Strony” zamiast „Przewijania”."
+    "message": "Poniższe opcje działają w widoku czytania w układzie „Strony”. Układ „Strony” jest domyślny; „Strony” albo „Przewijanie” wybierasz w panelu Aa."
   },
   "options_touch_turn": { "message": "Przewracanie stron dotykiem" },
   "options_touch_turn_zones": { "message": "Dotknięcie lewej lub prawej części ekranu" },
   "options_touch_turn_swipe": { "message": "Przesunięcie palcem" },
   "options_touch_turn_off": { "message": "Wyłączone" },
   "options_touch_turn_note_zones": {
-    "message": "Dotknięcie prawej jednej trzeciej ekranu – następna strona, lewej – poprzednia. Liczy się tylko krótkie, nieruchome dotknięcie z dala od krawędzi, więc kciuk trzymający urządzenie nie zmienia stron."
+    "message": "Dotknięcie prawej jednej trzeciej ekranu – następna strona, lewej – poprzednia. Liczy się tylko krótkie, nieruchome dotknięcie z dala od krawędzi, więc kciuk trzymający urządzenie nie zmienia stron. Przesunięcie palcem w górę albo w dół też zmienia stronę: w górę następna, w dół poprzednia."
   },
   "options_touch_turn_note_swipe": {
-    "message": "Przesunięcie palcem w lewo pokazuje następną stronę, w prawo poprzednią. Na telefonie nie zaczynaj od samej krawędzi ekranu – tam zaczyna się systemowy gest cofania; na czytniku e-ink krawędź zwykle działa."
+    "message": "Przesunięcie palcem w lewo albo w górę pokazuje następną stronę, w prawo albo w dół poprzednią. Na telefonie nie zaczynaj od samej krawędzi ekranu – tam zaczyna się systemowy gest cofania; na czytniku e-ink krawędź zwykle działa."
   },
   "options_touch_turn_note_off": {
     "message": "Dotyk nie przewraca stron. Zostają klawisze zmiany strony, strzałki i kółko myszy."

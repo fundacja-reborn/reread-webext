@@ -43,7 +43,11 @@ describe("the gesture that turns a page by touch (D250)", () => {
     // One door for both roads, and `off` leaves neither open.
     assert.match(tap, /if \(touchTurnNow\(\) !== "zones"\) return;/, "a tap turns the page under a setting that asks for a slide, or for nothing");
     assert.match(tap, /const turn = tapIntent\(tap\);/, "the tap is not read as a whole signature");
-    assert.match(reader, /if \(touchTurnNow\(\) === "swipe"\) \{\s*swipeTurn\(liftedTap, down\.target\);/, "the slide is not read at the lift, or is read under every setting");
+    // The drag up and down - a hand's scrolling habit - turns pages in both
+    // touch settings, the slide sideways in the swipe's own (D279); off
+    // leaves neither.
+    assert.match(reader, /const gesture = touchTurnNow\(\);\s*if \(gesture !== "off"\) swipeTurn\(liftedTap, down\.target, gesture === "swipe"\);/, "the swipe is not read at the lift, or the sideways slide is read under every setting");
+    assert.match(bodyOf(reader, "swipeTurn"), /const turn = swipeIntent\(tap, sideways\);/, "the setting does not reach the rule that reads the swipe");
     // The guards that were there before the signature was: the pen's tap is
     // the marker's, a room owns the window, and a press that had something
     // to close has done its work.

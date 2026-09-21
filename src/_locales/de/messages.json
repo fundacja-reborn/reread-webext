@@ -466,6 +466,10 @@
   "reader_layout": { "message": "Ansicht" },
   "reader_layout_scroll": { "message": "Scrollen" },
   "reader_layout_paged": { "message": "Seiten" },
+  "reader_layout_notice": {
+    "message": "Der Text ist in Seiten geteilt. Wenn Sie lieber scrollen, drücken Sie hier „Scrollen“ oder wählen Sie es später im Aa-Fenster in der Zeile „Ansicht“.",
+    "description": "Shown once in the reader's notice, over a text read by pages, while nobody has chosen a layout yet (D279). The button under it wears reader_layout_scroll; closing the notice keeps the pages. Name the button, the Aa panel and its row the way the catalogue does."
+  },
   "reader_page_of": {
     "message": "Seite $PAGE$ von $PAGES$",
     "placeholders": {
@@ -1675,17 +1679,17 @@
 
   "options_paged_heading": { "message": "Ansicht Seiten" },
   "options_paged_intro": {
-    "message": "Diese Optionen wirken in der Leseansicht, wenn Sie im Aa-Fenster die Ansicht Seiten statt Scrollen einstellen."
+    "message": "Diese Optionen wirken in der Leseansicht mit der Ansicht Seiten. Seiten ist die Voreinstellung; Seiten oder Scrollen wählen Sie im Aa-Fenster."
   },
   "options_touch_turn": { "message": "Seiten per Berührung umblättern" },
   "options_touch_turn_zones": { "message": "Tippen auf die linke oder rechte Seite des Bildschirms" },
   "options_touch_turn_swipe": { "message": "Finger zur Seite schieben" },
   "options_touch_turn_off": { "message": "Aus" },
   "options_touch_turn_note_zones": {
-    "message": "Ein Tippen auf das rechte Drittel des Bildschirms blättert zur nächsten Seite, auf das linke zur vorigen. Es zählt nur ein kurzes, ruhiges Tippen fern von den Rändern, damit ein haltender Daumen keine Seiten wechselt."
+    "message": "Ein Tippen auf das rechte Drittel des Bildschirms blättert zur nächsten Seite, auf das linke zur vorigen. Es zählt nur ein kurzes, ruhiges Tippen fern von den Rändern, damit ein haltender Daumen keine Seiten wechselt. Den Finger nach oben oder unten schieben blättert ebenfalls: nach oben zur nächsten Seite, nach unten zur vorigen."
   },
   "options_touch_turn_note_swipe": {
-    "message": "Den Finger nach links schieben zeigt die nächste Seite, nach rechts die vorige. Auf dem Telefon nicht am äußersten Bildschirmrand beginnen - dort liegt die Zurück-Geste des Systems; auf einem E-Ink-Reader klappt der Rand meist."
+    "message": "Den Finger nach links oder nach oben schieben zeigt die nächste Seite, nach rechts oder nach unten die vorige. Auf dem Telefon nicht am äußersten Bildschirmrand beginnen - dort liegt die Zurück-Geste des Systems; auf einem E-Ink-Reader klappt der Rand meist."
   },
   "options_touch_turn_note_off": {
     "message": "Berührung blättert keine Seiten um. Die Bild-Tasten, die Pfeiltasten und das Mausrad tun es weiterhin."

@@ -508,10 +508,10 @@ export function meantPress(tap) {
 }
 
 /**
- * How far sideways a swipe has to travel to turn the page, and how much
- * more sideways than up or down it has to be. A gesture that has to move is
- * the one input a resting hand cannot make by accident, which is why it is
- * the default where a hand wraps around the screen (`effectiveTouchTurn`).
+ * How far a swipe has to travel to turn the page, and how much further
+ * along its own axis than across it. A gesture that has to move is the one
+ * input a resting hand cannot make by accident, which is why it is the
+ * default where a hand wraps around the screen (`effectiveTouchTurn`).
  */
 export const SWIPE_MIN = 40;
 export const SWIPE_AXIS = 2;
@@ -522,14 +522,34 @@ export const SWIPE_AXIS = 2;
  * limit - a gesture that held first belongs to the selection, which claims
  * it before this is ever asked.
  *
+ * Upward turns on too, and downward back (D279): the drag a hand makes to
+ * scroll a text. Read by pages the window does not follow the finger, and a
+ * reader who has scrolled every text they ever read drags upward out of
+ * habit and gets nothing - so the habit is answered with what it was
+ * reaching for, the text that comes next. That drag is asked for in both
+ * touch settings, the thirds' included: it cannot be made by a hand at rest,
+ * which is the one thing the thirds were chosen against. The sideways slide
+ * stays the swipe setting's own (`sideways`).
+ *
+ * A finger's only. A mouse that travels with its button down is drawing a
+ * selection - across a line, or down a paragraph - and has a wheel and keys
+ * to turn pages with; until D279 a sideways mouse drag in a narrow window
+ * turned the page under the selection it had just made.
+ *
+ * A travel that is neither mostly sideways nor mostly up or down is nobody's.
+ *
  * @param {TapSignature} tap
+ * @param {boolean} [sideways] whether the slide to the left and right turns
+ *   pages too - the swipe setting - or only the drag up and down
  * @returns {import("./paging.js").PageTurn | null}
  */
-export function swipeIntent(tap) {
-  if (!meansToTurn(tap)) return null;
-  if (Math.abs(tap.dx) < SWIPE_MIN) return null;
-  if (Math.abs(tap.dx) <= SWIPE_AXIS * Math.abs(tap.dy)) return null;
-  return tap.dx < 0 ? "down" : "up";
+export function swipeIntent(tap, sideways = true) {
+  if (tap.pointerType !== "touch" || !meansToTurn(tap)) return null;
+  const across = Math.abs(tap.dx);
+  const along = Math.abs(tap.dy);
+  if (sideways && across >= SWIPE_MIN && across > SWIPE_AXIS * along) return tap.dx < 0 ? "down" : "up";
+  if (along >= SWIPE_MIN && along > SWIPE_AXIS * across) return tap.dy < 0 ? "down" : "up";
+  return null;
 }
 
 /** How many contacts are measured before the blob test is trusted or dropped. */

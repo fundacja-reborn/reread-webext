@@ -497,6 +497,10 @@
   "reader_layout": { "message": "Vista" },
   "reader_layout_scroll": { "message": "Desplazamiento" },
   "reader_layout_paged": { "message": "Páginas" },
+  "reader_layout_notice": {
+    "message": "El texto está dividido en páginas. Si prefieres el desplazamiento, pulsa aquí «Desplazamiento» o elígelo más tarde en el panel Aa, en la fila «Vista».",
+    "description": "Shown once in the reader's notice, over a text read by pages, while nobody has chosen a layout yet (D279). The button under it wears reader_layout_scroll; closing the notice keeps the pages. Name the button, the Aa panel and its row the way the catalogue does."
+  },
   "reader_page_of": {
     "message": "Página $PAGE$ de $PAGES$",
     "placeholders": {
@@ -1726,17 +1730,17 @@
 
   "options_paged_heading": { "message": "Vista Páginas" },
   "options_paged_intro": {
-    "message": "Estas opciones funcionan en la vista de lectura cuando en el panel Aa eliges la vista Páginas en lugar de Desplazamiento."
+    "message": "Estas opciones funcionan en la vista de lectura con la vista Páginas. Páginas es la vista predeterminada; eliges Páginas o Desplazamiento en el panel Aa."
   },
   "options_touch_turn": { "message": "Pasar páginas con el dedo" },
   "options_touch_turn_zones": { "message": "Tocar el lado izquierdo o derecho de la pantalla" },
   "options_touch_turn_swipe": { "message": "Deslizar el dedo hacia el lado" },
   "options_touch_turn_off": { "message": "Desactivado" },
   "options_touch_turn_note_zones": {
-    "message": "Tocar el tercio derecho de la pantalla pasa a la página siguiente; el tercio izquierdo, a la anterior. Solo cuenta un toque breve e inmóvil lejos de los bordes, para que un pulgar que sujeta el dispositivo no cambie de página."
+    "message": "Tocar el tercio derecho de la pantalla pasa a la página siguiente; el tercio izquierdo, a la anterior. Solo cuenta un toque breve e inmóvil lejos de los bordes, para que un pulgar que sujeta el dispositivo no cambie de página. Deslizar el dedo hacia arriba o hacia abajo también pasa la página: hacia arriba la siguiente, hacia abajo la anterior."
   },
   "options_touch_turn_note_swipe": {
-    "message": "Deslizar el dedo hacia la izquierda muestra la página siguiente; hacia la derecha, la anterior. En un teléfono no empieces justo en el borde de la pantalla: ahí empieza el gesto de volver del sistema; en un lector de tinta electrónica el borde suele funcionar."
+    "message": "Deslizar el dedo hacia la izquierda o hacia arriba muestra la página siguiente; hacia la derecha o hacia abajo, la anterior. En un teléfono no empieces justo en el borde de la pantalla: ahí empieza el gesto de volver del sistema; en un lector de tinta electrónica el borde suele funcionar."
   },
   "options_touch_turn_note_off": {
     "message": "El dedo no pasa páginas. Las teclas de página, las flechas y la rueda del ratón siguen haciéndolo."

@@ -646,6 +646,10 @@
   "reader_layout": { "message": "Layout" },
   "reader_layout_scroll": { "message": "Scroll" },
   "reader_layout_paged": { "message": "Pages" },
+  "reader_layout_notice": {
+    "message": "The text is divided into pages. To read by scrolling instead, press \"Scroll\" here, or choose it later in the Aa panel, in the \"Layout\" row.",
+    "description": "Shown once in the reader's notice, over a text read by pages, while nobody has chosen a layout yet (D279). The button under it wears reader_layout_scroll; closing the notice keeps the pages. Name the button, the Aa panel and its row the way the catalogue does."
+  },
   "reader_page_of": {
     "message": "Page $PAGE$ of $PAGES$",
     "description": "The paged layout's footer, for a screen reader: the page on screen out of how many the text on screen holds at the current settings.",
@@ -2074,17 +2078,17 @@
 
   "options_paged_heading": { "message": "Pages layout" },
   "options_paged_intro": {
-    "message": "These work in the reading view when the Aa panel's layout is set to Pages instead of Scroll."
+    "message": "These work in the reading view when its layout is Pages. Pages is the default; you choose Pages or Scroll in the Aa panel."
   },
   "options_touch_turn": { "message": "Turning pages by touch" },
   "options_touch_turn_zones": { "message": "Tap the left or right side of the screen" },
   "options_touch_turn_swipe": { "message": "Slide a finger sideways" },
   "options_touch_turn_off": { "message": "Off" },
   "options_touch_turn_note_zones": {
-    "message": "A tap in the right third of the screen turns to the next page, in the left third to the previous one. Only a short, still tap away from the edges counts, so a thumb holding the device changes no pages."
+    "message": "A tap in the right third of the screen turns to the next page, in the left third to the previous one. Only a short, still tap away from the edges counts, so a thumb holding the device changes no pages. Sliding a finger up or down turns the page too: up shows the next page, down the previous one."
   },
   "options_touch_turn_note_swipe": {
-    "message": "Sliding a finger left shows the next page, right the previous one. On a phone, do not start at the very edge of the screen - that is where the system's own back gesture begins; on an e-ink reader the edge usually works."
+    "message": "Sliding a finger left or up shows the next page, right or down the previous one. On a phone, do not start at the very edge of the screen - that is where the system's own back gesture begins; on an e-ink reader the edge usually works."
   },
   "options_touch_turn_note_off": {
     "message": "Touch turns no pages at all. The page keys, the arrow keys and the mouse wheel still do."

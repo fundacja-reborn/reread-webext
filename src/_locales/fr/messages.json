@@ -497,6 +497,10 @@
   "reader_layout": { "message": "Affichage" },
   "reader_layout_scroll": { "message": "Défilement" },
   "reader_layout_paged": { "message": "Pages" },
+  "reader_layout_notice": {
+    "message": "Le texte est divisé en pages. Si vous préférez le défilement, appuyez ici sur « Défilement » ou choisissez-le plus tard dans le panneau Aa, à la ligne « Affichage ».",
+    "description": "Shown once in the reader's notice, over a text read by pages, while nobody has chosen a layout yet (D279). The button under it wears reader_layout_scroll; closing the notice keeps the pages. Name the button, the Aa panel and its row the way the catalogue does."
+  },
   "reader_page_of": {
     "message": "Page $PAGE$ sur $PAGES$",
     "placeholders": {
@@ -1760,17 +1764,17 @@
 
   "options_paged_heading": { "message": "Affichage Pages" },
   "options_paged_intro": {
-    "message": "Ces options agissent dans la vue lecture lorsque, dans le panneau Aa, l'affichage est réglé sur Pages au lieu de Défilement."
+    "message": "Ces options agissent dans la vue lecture lorsque l'affichage est Pages. Pages est le réglage par défaut ; vous choisissez Pages ou Défilement dans le panneau Aa."
   },
   "options_touch_turn": { "message": "Tourner les pages au toucher" },
   "options_touch_turn_zones": { "message": "Toucher le côté gauche ou droit de l'écran" },
   "options_touch_turn_swipe": { "message": "Glisser le doigt sur le côté" },
   "options_touch_turn_off": { "message": "Désactivé" },
   "options_touch_turn_note_zones": {
-    "message": "Un toucher sur le tiers droit de l'écran passe à la page suivante, sur le tiers gauche à la précédente. Seul compte un toucher bref et immobile, loin des bords, pour qu'un pouce qui tient l'appareil ne change pas de page."
+    "message": "Un toucher sur le tiers droit de l'écran passe à la page suivante, sur le tiers gauche à la précédente. Seul compte un toucher bref et immobile, loin des bords, pour qu'un pouce qui tient l'appareil ne change pas de page. Glisser le doigt vers le haut ou vers le bas tourne aussi la page : vers le haut la suivante, vers le bas la précédente."
   },
   "options_touch_turn_note_swipe": {
-    "message": "Glisser le doigt vers la gauche montre la page suivante, vers la droite la précédente. Sur un téléphone, ne commencez pas tout au bord de l'écran : c'est là que commence le geste de retour du système ; sur une liseuse, le bord fonctionne en général."
+    "message": "Glisser le doigt vers la gauche ou vers le haut montre la page suivante, vers la droite ou vers le bas la précédente. Sur un téléphone, ne commencez pas tout au bord de l'écran : c'est là que commence le geste de retour du système ; sur une liseuse, le bord fonctionne en général."
   },
   "options_touch_turn_note_off": {
     "message": "Le toucher ne tourne aucune page. Les touches de page, les flèches et la molette continuent de le faire."
