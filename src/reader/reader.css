@@ -3420,22 +3420,22 @@ body.reader:has(#mark-bar:not([hidden])) {
    between the page and the glass's corners; in full screen the page is the
    whole glass, and the foot's two things stand exactly where the corners
    are cut away. No engine says how round a screen is - the safe area
-   speaks of cutouts and bars, never of corners - so the two are lifted by a
+   speaks of cutouts and bars, never of corners - so the two are moved by a
    fixed step where the page has the whole screen of a device held in the
-   hand: at 0.8rem above the window's foot and 1.5rem in from its side, a
-   corner of up to some 60px of radius leaves them whole, which is past any
-   phone's. The strip grows by the same step, so the pages are cut above it
-   as they are above everything that stands at the foot; the button's reach
-   grows with it. A coarse pointer, so an e-ink reader (square corners, and
-   it answers "fine") and a laptop keep the strip as it was. */
+   hand: toward the middle, the button to the right and the count to the
+   left, never upward (Michał's call - a taller strip costs the page a line
+   of text, and a step sideways costs it nothing). At 2.75rem in from the
+   window's side and the strip's own 0.2rem above its foot, the glyph's box
+   is whole under a corner of up to some 63px of radius and its ink up to
+   77px - the arithmetic is in the test - where 1.5rem kept the ink whole
+   only up to 51px, which a Pixel 8a is past. One number moves both: the
+   row's sides and the button's place are counted from the same inset. A
+   window whose column already stands further in - a tablet - keeps the
+   column's edge. A coarse pointer, so an e-ink reader (square corners, and
+   it answers "fine") and a laptop keep the row under the text's edges. */
 @media (pointer: coarse) {
-  :root:fullscreen[data-reader-page-number="true"] .page-footer {
-    min-height: calc(2rem + env(safe-area-inset-bottom, 0px));
-    padding-bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
-  }
-
-  :root:fullscreen .page-foot-toc {
-    padding-bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
+  :root:fullscreen .page-footer {
+    --page-foot-inset: max(2.75rem, calc(max(0px, (100% - var(--reader-measure, 65ch)) / 2) + 1.5rem));
   }
 }
 
