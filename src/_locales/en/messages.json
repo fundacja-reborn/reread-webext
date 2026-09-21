@@ -1289,14 +1289,6 @@
     "message": "Book",
     "description": "The quiet tag on a book's row in the reading list."
   },
-  "reader_book_part_of": {
-    "message": "Part $PART$ of $PARTS$",
-    "description": "A book's place: the segment on screen (or the one reading stopped in) out of how many the book holds.",
-    "placeholders": {
-      "part": { "content": "$1", "example": "3" },
-      "parts": { "content": "$2", "example": "12" }
-    }
-  },
   "reader_words_one": {
     "message": "$COUNT$ word",
     "placeholders": { "count": { "content": "$1", "example": "1" } }
@@ -1414,6 +1406,13 @@
     "placeholders": {
       "at": { "content": "$1", "example": "12" },
       "total": { "content": "$2", "example": "80" }
+    }
+  },
+  "reader_search_scanned": {
+    "message": "Searched $PERCENT$% of the book.",
+    "description": "The status line of the search dialog while a book is being scanned: how much of the whole book has been read through so far, in whole percent.",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "19" }
     }
   },
   "reader_search_in_titles": {

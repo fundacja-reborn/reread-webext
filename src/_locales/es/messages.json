@@ -1023,13 +1023,6 @@
   "reader_transfer_link": { "message": "Importar y exportar (copia de seguridad o EPUB)" },
   "reader_transfer_accepts": { "message": "La importación lee el archivo que se le da: una copia de seguridad de re/read (.zip - o los antiguos archivos .json de la lista y de los resaltados), un libro electrónico (.epub) o un texto Markdown (.md)." },
   "reader_book_label": { "message": "Libro" },
-  "reader_book_part_of": {
-    "message": "Parte $PART$ de $PARTS$",
-    "placeholders": {
-      "part": { "content": "$1", "example": "3" },
-      "parts": { "content": "$2", "example": "12" }
-    }
-  },
   "reader_words_one": {
     "message": "$COUNT$ palabra",
     "placeholders": { "count": { "content": "$1", "example": "1" } }
@@ -1110,6 +1103,12 @@
     "placeholders": {
       "at": { "content": "$1", "example": "12" },
       "total": { "content": "$2", "example": "80" }
+    }
+  },
+  "reader_search_scanned": {
+    "message": "Buscado en el $PERCENT$ % del libro.",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "19" }
     }
   },
   "reader_search_in_titles": { "message": "En los títulos" },

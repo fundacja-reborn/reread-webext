@@ -2227,8 +2227,11 @@ a.marks-act {
   margin: 0.6rem 1rem 0;
 }
 
-/* A part heading between rows: where a book's hits cross into another part
-   or chapter. Quiet - the rows under it are the news. */
+/* A quiet heading between rows: a chapter's title where a book's hits cross
+   into another chapter, and the two group names of the list's search. The
+   rows under it are the news. The class keeps the name it was given when
+   the heading still named a part of a book (D270): it is a selector a
+   reader's own CSS may stand on (D176). */
 .search-part {
   margin: 0.7rem 0 0;
   font-size: 0.85rem;

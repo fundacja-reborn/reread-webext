@@ -9,7 +9,7 @@
  *
  * The scan never touches the page's own render until the jump: an article
  * is read off its rendered blocks (the same `prosePieces` walk the marks
- * anchor into), a book segment by segment from the database - the part on
+ * anchor into), a book segment by segment from the database - the one on
  * screen included, one uniform loop instead of two code paths. Between
  * segments the loop yields (the fetch is an await), so a long book scans
  * with the page still breathing, and a scan whose dialog closed or whose
@@ -25,10 +25,11 @@ import { prosePieces } from "../content/scan.js";
 import { plural, t } from "../lib/i18n.js";
 import {
   DOC_HIT_CAP,
-  chapterOf,
+  chapterHeadings,
   foldQuery,
   hitsInText,
   isSearchableQuery,
+  scanPercent,
   snippetAround,
 } from "../lib/reader/search.js";
 import { getBookSegment } from "../lib/store/books.js";
@@ -141,7 +142,8 @@ export function closeDocSearch() {
 
 /**
  * Forgets the held search - the document it was about has left the screen.
- * A book turning its own parts keeps it: the hits are the whole book's.
+ * A book reading on into its next stretch keeps it: the hits are the whole
+ * book's.
  */
 export function resetDocSearch() {
   scanEpoch += 1;
@@ -216,8 +218,12 @@ export function collectHits(text, segmentIndex, block, folded, into, cap) {
 /**
  * Runs one search over the document on screen and renders what it found.
  * A book is scanned segment by segment from the database - the one on
- * screen included, one loop for every part; an article (saved or live) is
- * read off its rendered blocks, which are the only copy a live page has.
+ * screen included, one loop for the whole book; an article (saved or live)
+ * is read off its rendered blocks, which are the only copy a live page has.
+ * While a book's scan runs the status line says how much of the book has
+ * been read through, in percent - never which of the stretches it is kept
+ * in is being read, because that division is ours and is said nowhere
+ * (D270).
  *
  * @param {string} query as typed
  */
@@ -242,7 +248,7 @@ async function runSearch(query) {
   if (doc.origin === "book") {
     for (let index = 0; index < doc.segmentCount; index += 1) {
       sayStatus(
-        t("reader_book_part_of", [(index + 1).toLocaleString(), doc.segmentCount.toLocaleString()]),
+        t("reader_search_scanned", [scanPercent(index, doc.segmentCount).toLocaleString()]),
       );
       const segment = await getBookSegment(doc.url, index);
       if (turn !== scanEpoch) return;
@@ -275,8 +281,10 @@ async function runSearch(query) {
 
 /**
  * The held search on screen, in one replaceChildren: the count (or the
- * no-hits sentence) in the status line, then the rows - with a quiet part
- * heading wherever a book's hits cross into another part or chapter.
+ * no-hits sentence) in the status line, then the rows - with a quiet
+ * heading wherever a book's hits cross into another chapter
+ * (`chapterHeadings`: the chapter's own title and nothing else; hits before
+ * the first heading, and a book without a table, stand without one).
  * Article hits carry no headings: an article's TOC indexes the dissolved
  * walk, not the block order the hits speak, and the list is one text's
  * hits in reading order anyway.
@@ -299,22 +307,16 @@ function renderResults() {
 
   /** @type {Element[]} */
   const built = [];
-  let lastLabel = "";
+  const headings = book === null ? [] : chapterHeadings(toc, held.hits);
   held.hits.forEach((hit, index) => {
-    if (book !== null) {
-      const chapter = chapterOf(toc, hit.segmentIndex, hit.block);
-      const part = t("reader_book_part_of", [
-        (hit.segmentIndex + 1).toLocaleString(),
-        book.segmentCount.toLocaleString(),
-      ]);
-      const label = chapter === null ? part : `${part} - ${chapter.title}`;
-      if (label !== lastLabel) {
-        const heading = document.createElement("p");
-        heading.className = "search-part";
-        heading.textContent = label;
-        built.push(heading);
-        lastLabel = label;
-      }
+    const chapter = headings[index] ?? null;
+    if (chapter !== null) {
+      const heading = document.createElement("p");
+      heading.className = "search-part";
+      // A chapter's title is somebody's text and may run the other way.
+      heading.dir = "auto";
+      heading.textContent = chapter;
+      built.push(heading);
     }
     const row = document.createElement("button");
     row.type = "button";
