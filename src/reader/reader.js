@@ -260,6 +260,7 @@ import {
   rangeWithin,
 } from "./marks-view.js";
 import {
+  carryOnReading,
   configureReading,
   forgetReading,
   readingState,
@@ -1176,13 +1177,24 @@ function renderArticle(piece) {
   // Whatever was being read aloud was this element's previous contents, and
   // they are about to be replaced: the voice stops here rather than reading a
   // sentence of one article into another (D87). A quote a row's speaker was
-  // reading goes the same way - its page is leaving the screen.
-  forgetReading();
+  // reading goes the same way - its page is leaving the screen. The one
+  // render that does not end the reading is the one the voice asked for by
+  // reading a stretch of a long book to its end (D274): its bar stands
+  // through it, and the voice reads on once the text has landed.
+  const carried =
+    voiceCarry !== null &&
+    piece.origin === "book" &&
+    piece.url === voiceCarry.url &&
+    piece.segment?.index === voiceCarry.index;
+  forgetReading(carried);
   stopMarkSpeech();
   // The column breathes with the text size only under an article (see the
   // measure rules in reader.css); the attribute is which rule applies, and
-  // the room changing takes an open panel down with it (D253).
-  enterView("doc");
+  // the room changing takes an open panel down with it (D253). The render
+  // the voice asked for changes no room - the same book stays on screen -
+  // and nobody pressed anything: a sheet open under the listener's hand
+  // (the reading speed lives in one) is not taken away from it.
+  if (!carried) enterView("doc");
   // A different document never inherits the pen (D106) or the other one's
   // search (D119): both survive only a book turning its own parts - a
   // search's hits are the whole book's. The active mark and the paint go
@@ -5063,6 +5075,60 @@ function turnSegment(step) {
   if (next < 0 || next >= target.segmentCount) return;
   if (step < 0) void openBook(target.url, next, { end: true });
   else void openBook(target.url, next);
+}
+
+/**
+ * The stretch of a book the voice is waiting for (D274), from the moment it
+ * read the one before to its end until the open it asked for has settled:
+ * what `renderArticle` tells the carried render by. Null at every other
+ * moment, so no other render of any document is ever taken for it.
+ *
+ * @type {{ url: string, index: number } | null}
+ */
+let voiceCarry = null;
+
+/**
+ * The voice has come to the end of the text on screen (`onFinished`, D274).
+ * Over a long book that is the end of a stretch, not of the book - a border
+ * the listener was never told about (D270) - so the reading goes on into
+ * what follows: the text just heard is counted as finished, exactly as
+ * "Continue reading" under it counts it (D209); the next stretch opens at
+ * its first line, which read by pages is its first page shown as every
+ * landing is shown, with no turn signalled (D251 - nobody turned anything);
+ * and once it has laid out and landed the voice is told to read on.
+ *
+ * The answer to the voice is whether the text it waited for is what stands
+ * on the screen. An open that was overtaken - a row of the contents pressed
+ * in the gap, the way back to the list, the book deleted in another tab -
+ * answers no, and the reading ends where another document has not already
+ * ended it.
+ *
+ * @returns {boolean} whether there is more of this document, and it is on
+ *   its way
+ */
+function carryReadingOn() {
+  const target = shown;
+  if (target === null || target.origin !== "book") return false;
+  const next = target.segmentIndex + 1;
+  if (next >= target.segmentCount) return false;
+  countFinished();
+  const awaited = { url: target.url, index: next };
+  voiceCarry = awaited;
+  void openBook(target.url, next)
+    .catch(() => undefined)
+    .then(() => {
+      // A later carry has its own answer coming; this one is only ours to
+      // give while it is still the one awaited.
+      if (voiceCarry !== awaited) return;
+      voiceCarry = null;
+      carryOnReading(
+        shown !== null &&
+          shown.origin === "book" &&
+          shown.url === awaited.url &&
+          shown.segmentIndex === awaited.index,
+      );
+    });
+  return true;
 }
 
 /**
@@ -9407,6 +9473,8 @@ configureReading({
   // The same line for the one refusal that is ours, not the engine's (D155):
   // the device has voices, and none of them reads this language offline.
   onNoVoice: () => showNotice(t("speech_no_offline_voice")),
+  // The end of the text on screen is not the end of a long book (D274).
+  onFinished: carryReadingOn,
 });
 
 /**

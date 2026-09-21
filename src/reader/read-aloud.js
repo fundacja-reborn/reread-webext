@@ -35,6 +35,18 @@
  * flushes everything, so a phrase spoken from a bubble stops the article. That
  * reads as a pause here - the place is kept, the bar says Play - and starting
  * the article stops the bubble's voice the same way. One page, one voice.
+ *
+ * **The end of the text on screen is not always the end of the reading**
+ * (D274). A long book is rendered one stretch at a time - a division that is
+ * this extension's own and is said nowhere (D270) - so a voice that fell
+ * silent at the end of a stretch fell silent in the middle of a chapter, for
+ * a reason the listener was never told. When the voice comes to the end of
+ * the text it asks the page (`onFinished`); a page that has more of the same
+ * document brings it and says so (`carryOnReading`), and the voice reads on
+ * from the first sentence standing there. In between the reading *waits*
+ * (`carry`): the bar stays where it is, with Pause still under the thumb, and
+ * a pause, a stop or another document arriving in that gap is obeyed - the
+ * reading that carries on is never louder than the hand that stopped it.
  */
 
 import { supported, unregister } from "../content/highlighter.js";
@@ -89,6 +101,12 @@ const BAND = Object.freeze({ top: 0.12, bottom: 0.75, land: 0.3 });
  * @property {() => void} onNoVoice the device lists voices, but none reads
  *   the article's language offline (D155, `lib/tts.js`): nothing was started,
  *   and the reader is told why in the same words as `onFail`
+ * @property {() => boolean} [onFinished] the voice has come to the end of the
+ *   text on screen (D274). True when the page has more of the same document
+ *   and is bringing it: the reading then waits, its bar standing, until the
+ *   page answers through `carryOnReading`. False, or no hook at all, and the
+ *   reading is over - which is every article's answer, and a book's last
+ *   stretch's
  *
  * @typedef {"off" | "playing" | "paused"} ReadingState
  *
@@ -163,6 +181,18 @@ let pending = null;
 /** @type {ReadingState} */
 let state = "off";
 
+/**
+ * Set while the reading waits for the page to bring the next stretch of the
+ * document (D274), and null at every other moment: what the reading does once
+ * that text stands - reads on, or waits at its first sentence because pause
+ * was pressed in the gap. `state` says the same thing all along, so the bar
+ * never learns that there was a gap; what `carry` adds is that there is no
+ * text to speak from yet, which every road into the engine asks first.
+ *
+ * @type {"playing" | "paused" | null}
+ */
+let carry = null;
+
 /** @type {ReadingVoice} */
 let voice = { lang: "en", voiceURI: undefined, rate: 1 };
 
@@ -197,7 +227,9 @@ export function readingVoice(next) {
   const moved =
     next.lang !== voice.lang || next.voiceURI !== voice.voiceURI || next.rate !== voice.rate;
   voice = next;
-  if (moved && state === "playing") {
+  // Nothing is being said while the reading waits for its next text (D274):
+  // the new voice is simply the one that text will be read in.
+  if (moved && state === "playing" && carry === null) {
     within = spoken;
     hush();
     speakHere();
@@ -212,10 +244,60 @@ export function readingState() {
 /**
  * The article on screen is a different one now, or there is none. Everything
  * about the old one goes, silently: this is not somebody pressing stop.
+ *
+ * One render is not the end of the reading (D274): the one the voice itself
+ * asked for by reading a stretch of a long book to its end. The page says so
+ * (`carrying`), and while the reading is indeed waiting the map of the text
+ * that has gone is all that goes - the state, and the bar with it, stand
+ * until `carryOnReading`. Said of any other render the word changes nothing:
+ * a reading that is not waiting ends here as it always did.
+ *
+ * @param {boolean} [carrying] the text being rendered is the one the reading
+ *   waits for
  */
-export function forgetReading() {
-  stopReading();
+export function forgetReading(carrying = false) {
+  if (!(carrying && carry !== null)) stopReading();
   plan = null;
+}
+
+/**
+ * The page's answer to `onFinished` (D274): the next stretch of the document
+ * stands on the screen, laid out and landed on - or it could not be brought.
+ * The reading carries on from the first sentence standing under the fold,
+ * which over a text just opened is its first sentence (and never the book's
+ * title: past a book's beginning the head is not shown, and what is not
+ * shown measures as nothing). Paused in the gap, it takes its place there
+ * and stays paused - pressing pause is not asking to be read to later.
+ *
+ * Nothing at all unless the reading is waiting: a stop, or another document,
+ * in the gap has already had the last word.
+ *
+ * @param {boolean} ready whether the text the reading waited for is on screen
+ */
+export function carryOnReading(ready) {
+  if (carry === null) return;
+  const wanted = carry;
+  carry = null;
+  if (!ready || !canSpeak()) {
+    stopReading();
+    return;
+  }
+  if (!buildPlan()) {
+    // A stretch without a word in it - pictures and nothing else - is not
+    // the end of the book: the page is asked for what follows it.
+    finishReading();
+    return;
+  }
+  at = firstVisibleChunk();
+  within = firstVisibleOffset(at);
+  spoken = within;
+  if (wanted === "playing") {
+    speakHere();
+    return;
+  }
+  state = "paused";
+  markSentence();
+  announce();
 }
 
 /**
@@ -224,8 +306,23 @@ export function forgetReading() {
  */
 export function toggleReading() {
   if (state === "playing") pauseReading();
-  else if (state === "paused") speakHere();
+  else if (state === "paused") resumeReading();
   else startReading();
+}
+
+/**
+ * Play, pressed on a paused reading. While the reading waits for its next
+ * text (D274) there is nothing to speak from yet: the press only takes the
+ * pause back, and the text reads on when it arrives.
+ */
+function resumeReading() {
+  if (carry === null) {
+    speakHere();
+    return;
+  }
+  carry = "playing";
+  state = "playing";
+  announce();
 }
 
 /**
@@ -287,6 +384,9 @@ export function pauseReading() {
   if (state !== "playing") return;
   within = spoken;
   hush();
+  // In the gap between two stretches (D274) the pause is kept for the text
+  // on its way: it arrives paused.
+  if (carry !== null) carry = "paused";
   state = "paused";
   announce();
 }
@@ -299,8 +399,37 @@ export function stopReading() {
   at = 0;
   within = 0;
   spoken = 0;
+  // A reading that was waiting for its next text (D274) waits no more.
+  carry = null;
   state = "off";
   announce();
+}
+
+/**
+ * The voice has come to the end of the text on screen - it read the last
+ * sentence, or a skip stepped past it. The page is asked whether that is the
+ * end of the document (`onFinished`, D274). Over an article it is, and the
+ * reading is over exactly as before. Over a long book it may be the end of a
+ * stretch only: then nothing the reader can see changes - the state stands,
+ * playing or paused as it was, and the bar with it - and the reading waits
+ * for `carryOnReading`.
+ *
+ * `carry` is set before the page is asked, so whatever the page does in
+ * answering finds the reading already waiting; a page that stopped the
+ * reading from inside its answer has cleared it again, and is believed.
+ */
+function finishReading() {
+  // A start that found nothing to say was never a reading to carry on.
+  if (state === "off") return;
+  const wanted = state === "paused" ? "paused" : "playing";
+  hush();
+  clearMarks();
+  at = 0;
+  within = 0;
+  spoken = 0;
+  carry = wanted;
+  if (hooks?.onFinished?.() === true && carry !== null) return;
+  stopReading();
 }
 
 /**
@@ -316,14 +445,17 @@ export function stopReading() {
  * @param {number} step -1 or 1
  */
 export function skipSentence(step) {
-  if (plan === null || state === "off") return;
+  // No sentence to step from while the reading waits for its text (D274).
+  if (plan === null || state === "off" || carry !== null) return;
 
   const restart = step < 0 && spoken > 0;
   const next = restart ? at : at + step;
   if (next < 0 || next >= plan.chunks.length) {
-    // Past the last sentence is the end of the article, which is what the
-    // voice reaching it would say too. Before the first one, nothing moves.
-    if (next >= plan.chunks.length) stopReading();
+    // Past the last sentence is the end of the text, which is what the
+    // voice reaching it would say too - the end of the reading, or over a
+    // long book the way into what follows (D274). Before the first one,
+    // nothing moves.
+    if (next >= plan.chunks.length) finishReading();
     return;
   }
 
@@ -441,7 +573,9 @@ function speakHere() {
     within = 0;
   }
   if (queue.length === 0) {
-    stopReading();
+    // Nothing left to say: the end of the text, reached by a resume point on
+    // its very last character.
+    finishReading();
     return;
   }
   state = "playing";
@@ -576,7 +710,8 @@ function onEnd(handed) {
     within = 0;
     spoken = 0;
   } else {
-    stopReading();
+    // The last sentence of the text has been said.
+    finishReading();
     return;
   }
 
