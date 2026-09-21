@@ -43,6 +43,7 @@ import {
   SIZE,
   TTS_RATE,
   chosenPair,
+  effectiveLayout,
   effectiveTouchTurn,
   isAlign,
   isFont,
@@ -1028,19 +1029,81 @@ const SAMPLE_TITLES = 3;
 let noticeMark = null;
 
 /**
+ * What the notice's button offers when it is not a mark's removal: the way
+ * back to scrolling under the word about pages (D279), or nothing.
+ *
+ * @type {"layout" | null}
+ */
+let noticeOffer = null;
+
+/** Whether the stored settings have arrived - before that, `settings` is the defaults and says nothing about this profile. */
+let settingsAdopted = false;
+
+/**
  * @param {string} text
  */
 function showNotice(text) {
   if (notice === null || noticeText === null) return;
   noticeText.textContent = text;
   offerMarkRemoval(null);
+  // Whatever stood here leaves with its offer: a sentence about a failed
+  // write matters more than the word about pages, which comes back with the
+  // next text while it is still owed an answer.
+  noticeOffer = null;
   notice.hidden = false;
 }
 
 function hideNotice() {
   if (notice === null) return;
   notice.hidden = true;
+  noticeOffer = null;
   offerMarkRemoval(null);
+}
+
+/**
+ * The word about pages (D279), said over a text while nobody has chosen a
+ * layout: the text is read by pages - the default - and a reader who has
+ * always scrolled is told so where they are reading, with the way back one
+ * press away. The button stores `scroll`; closing the notice stores `paged`
+ * - an answer either way, so the word is said until it is answered and
+ * never after. A layout picked in the Aa panel, here or in another tab, is
+ * an answer too (`adoptConfig`). Nothing else is stored: the question is
+ * open exactly as long as the setting says nobody chose.
+ *
+ * Never over another sentence - a notice that stands is about something that
+ * went wrong - and never before the stored settings are in: until then
+ * `settings` is the defaults, whose `null` is nobody's answer in particular.
+ */
+function offerScrollLayout() {
+  if (notice === null || noticeText === null || noticeAct === null) return;
+  if (!settingsAdopted || settings.reader.layout !== null) return;
+  if (article === null || article.hidden || !notice.hidden) return;
+  noticeText.textContent = t("reader_layout_notice");
+  offerMarkRemoval(null);
+  noticeOffer = "layout";
+  const label = t("reader_layout_scroll");
+  noticeAct.removeAttribute("data-label");
+  noticeAct.removeAttribute("data-title");
+  noticeAct.style.removeProperty("min-width");
+  noticeAct.textContent = label;
+  noticeAct.setAttribute("aria-label", label);
+  noticeAct.hidden = false;
+  notice.hidden = false;
+}
+
+/**
+ * The answer to the word about pages, stored the way the Aa panel stores a
+ * layout. A write that fails leaves the question open, and the word comes
+ * back with the next text.
+ *
+ * @param {"scroll" | "paged"} layout
+ */
+async function answerLayout(layout) {
+  try {
+    adoptConfig(await writeConfig({ reader: { layout } }));
+  } catch {
+    // Nothing to say: the layout in force is still the one on screen.
+  }
 }
 
 /**
@@ -1301,6 +1364,8 @@ function renderArticle(piece) {
   marksShown = null;
   article.hidden = false;
   hideNotice();
+  // The word about pages, while it is owed an answer (D279).
+  offerScrollLayout();
 
   // The learning side back on the article, if a view moved it elsewhere
   // (D109), and the underlines found again now that there is different text
@@ -2066,7 +2131,7 @@ document.addEventListener(
 
 /** Whether the document on screen is being read by pages right now. */
 function paged() {
-  return settings.reader.layout === "paged" && article !== null && !article.hidden;
+  return effectiveLayout(settings.reader) === "paged" && article !== null && !article.hidden;
 }
 
 /**
@@ -2929,12 +2994,14 @@ const TURN_STOPS =
  *
  * @param {import("../lib/reader/pages.js").TapSignature} tap
  * @param {EventTarget | null} target what the pointer landed on
+ * @param {boolean} sideways whether the slide to the left and right turns
+ *   pages - the swipe setting - or only the drag up and down (D279)
  */
-function swipeTurn(tap, target) {
+function swipeTurn(tap, target, sideways) {
   if (!paged() || markerOn || pressHadWork || roomShown !== null || stretching) return;
   if (bubbleOpen()) return;
   if (target instanceof Element && target.closest(TURN_STOPS) !== null) return;
-  const turn = swipeIntent(tap);
+  const turn = swipeIntent(tap, sideways);
   if (turn !== null) turnPage(turn);
 }
 
@@ -3089,10 +3156,11 @@ document.addEventListener(
       otherPointers: pointerDowns.filter((one) => one.id !== event.pointerId).map((one) => one.at),
     };
     // The swipe is answered here, where the gesture actually ends; the tap
-    // waits for `reading.js` to say the press had nothing to put away.
-    if (touchTurnNow() === "swipe") {
-      swipeTurn(liftedTap, down.target);
-    }
+    // waits for `reading.js` to say the press had nothing to put away. The
+    // drag up and down - a hand's scrolling habit - turns pages in both
+    // touch settings, the slide sideways in the swipe's own (D279).
+    const gesture = touchTurnNow();
+    if (gesture !== "off") swipeTurn(liftedTap, down.target, gesture === "swipe");
   },
   { capture: true, passive: true },
 );
@@ -8078,7 +8146,9 @@ function applyAppearance(reader) {
   root.dataset["readerParagraphs"] = reader.paragraphs;
   // The layout (D233), stamped the same way: the stylesheet takes the
   // finger's scroll away under it, and the page table below answers to it.
-  root.dataset["readerLayout"] = reader.layout;
+  // The layout in force, that is - pages while nobody has chosen (D279).
+  const layout = effectiveLayout(reader);
+  root.dataset["readerLayout"] = layout;
   // Whether the page count stands at the foot (D238): the stylesheet gives
   // the foot its line under this, and the band ends above it either way.
   root.dataset["readerPageNumber"] = String(reader.pageNumber);
@@ -8124,7 +8194,7 @@ function applyAppearance(reader) {
     ["data-align", reader.align],
     ["data-hyphens", reader.hyphens],
     ["data-paragraphs", reader.paragraphs],
-    ["data-layout", reader.layout],
+    ["data-layout", layout],
     ["data-links", reader.links],
     ["data-marker-color", reader.markerColor],
   ];
@@ -8296,6 +8366,12 @@ function adoptConfig(config) {
     stopMarkSpeech();
   }
   applyAppearance(config.reader);
+  // The word about pages (D279) leaves the moment a layout is chosen - by
+  // its own button, in the Aa panel, in another tab - and is said now if the
+  // text stood up before the stored settings arrived.
+  settingsAdopted = true;
+  if (noticeOffer === "layout" && config.reader.layout !== null) hideNotice();
+  else offerScrollLayout();
   dressPage(config.customCss);
   applyUnderline(config);
   applySpeech();
@@ -8813,10 +8889,23 @@ marksTransferLink?.addEventListener("click", (event) => {
   marksExportButton?.focus({ preventScroll: true });
 });
 
-noticeClose?.addEventListener("click", () => hideNotice());
+// Closing the word about pages answers it (D279): the pages stay, by choice
+// from here on, and the word is not said again.
+noticeClose?.addEventListener("click", () => {
+  const answered = noticeOffer === "layout";
+  hideNotice();
+  if (answered) void answerLayout("paged");
+});
 
 noticeAct?.addEventListener("click", () => {
   if (noticeAct === null) return;
+  // The way back the word about pages offers: scrolling, stored as the
+  // hand's own choice.
+  if (noticeOffer === "layout") {
+    hideNotice();
+    void answerLayout("scroll");
+    return;
+  }
   if (noticeAct.hasAttribute("data-armed")) void removeNoticeMark();
   else {
     // The width held for "Sure?", the document-wide act's way: the question

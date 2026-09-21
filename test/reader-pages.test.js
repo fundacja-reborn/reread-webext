@@ -548,10 +548,37 @@ describe("swipeIntent (D250)", () => {
     assert.equal(swipeIntent(tap({ dx: SWIPE_MIN - 1, dy: 0 })), null);
   });
 
-  it("leaves a travel that was mostly up or down alone", () => {
+  it("leaves a travel that was neither sideways nor up or down alone", () => {
     assert.equal(swipeIntent(tap({ dx: -60, dy: 29 })), "down");
     assert.equal(swipeIntent(tap({ dx: -60, dy: 30 })), null);
     assert.equal(swipeIntent(tap({ dx: -60, dy: -100 })), null);
+    assert.equal(swipeIntent(tap({ dx: 45, dy: 45 })), null);
+  });
+
+  it("turns on with the drag that scrolls a text - upward - and back with the one downward (D279)", () => {
+    assert.equal(swipeIntent(tap({ dx: 0, dy: -SWIPE_MIN })), "down");
+    assert.equal(swipeIntent(tap({ dx: 0, dy: SWIPE_MIN })), "up");
+    assert.equal(swipeIntent(tap({ dx: 0, dy: -SWIPE_MIN + 1 })), null);
+    // A thumb's arc: mostly upward, a little sideways.
+    assert.equal(swipeIntent(tap({ dx: 29, dy: -60 })), "down");
+    assert.equal(swipeIntent(tap({ dx: 30, dy: -60 })), null);
+    // A long drag from the foot of the page to its head is still one turn's worth.
+    assert.equal(swipeIntent(tap({ dx: -12, dy: -520, y: 700, upAt: 1600 })), "down");
+  });
+
+  it("keeps the drag up and down where the thirds are the setting, and leaves the sideways slide to the swipe's", () => {
+    assert.equal(swipeIntent(tap({ dx: 0, dy: -80 }), false), "down");
+    assert.equal(swipeIntent(tap({ dx: 0, dy: 80 }), false), "up");
+    assert.equal(swipeIntent(tap({ dx: -80, dy: 0 }), false), null);
+    assert.equal(swipeIntent(tap({ dx: 80, dy: 0 }), false), null);
+  });
+
+  it("is a finger's gesture: a mouse that travels is drawing a selection", () => {
+    // Down a paragraph, or along a line - and the wheel and the keys turn
+    // pages for a mouse. A tap is another matter: a click turns like a tap.
+    assert.equal(swipeIntent(tap({ dx: 0, dy: 120, pointerType: "mouse" })), null);
+    assert.equal(swipeIntent(tap({ dx: -120, dy: 0, pointerType: "mouse" })), null);
+    assert.equal(tapIntent(tap({ pointerType: "mouse" })), "down");
   });
 
   it("asks nothing about the time, the size or the place it began", () => {

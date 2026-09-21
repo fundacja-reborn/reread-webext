@@ -3134,9 +3134,31 @@ body.reader:has(#mark-bar:not([hidden])) {
    `scrollTo` to a page's top (reader.js, `lib/reader/pages.js`) - but the
    finger and the wheel stop moving it: `hidden` rather than `clip`, because
    `clip` would take the programmatic scroll away with the rest. Only over
-   an article: the list views scroll as they always did. */
+   an article: the list views scroll as they always did.
+
+   The finger's drag is left to the page as well (D279): a drag up or down
+   turns the page, and it can only be read at the pointer's lift - which a
+   browser that takes the touch for a pan of its own never delivers (it
+   cancels the pointer instead). `pinch-zoom` keeps the one gesture a reader
+   may need for their eyes and hands the rest over; the boxes that scroll
+   within themselves - a wide table, the contents, a panel - keep their own
+   panning, because a touch is judged up to the nearest scroller and no
+   further. And no pull at the first page's head reloads the reader: a drag
+   downward there means "the page before", of which there is none. */
 :root[data-reader-layout="paged"]:has(body.reader #article:not([hidden])) {
   overflow: hidden;
+  touch-action: pinch-zoom;
+  overscroll-behavior: none;
+}
+
+/* The two boxes of a text that scroll sideways within themselves - code and
+   a wide table - keep that, and hand the drag up and down to the page like
+   the text around them (D279). A touch is judged up to the nearest
+   scroller, and these are scrollers: left alone, a drag upward that began
+   over a table would be the browser's to pan, inside a box that cannot go
+   up or down, and the page would not turn. */
+:root[data-reader-layout="paged"] #content :is(pre, table) {
+  touch-action: pan-x pinch-zoom;
 }
 
 /* A screen of room under the last line, so the last page's top can reach

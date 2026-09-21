@@ -72,14 +72,20 @@ export const CONFIG_KEY = "config";
  *   paragraph of prose but the one opening a section - after a heading or
  *   a rule - because a page's paragraphs come grouped in wrapper divs, and
  *   "the paragraph another one follows" left the first of each group flush.
- * @property {"scroll" | "paged"} layout Whether the article is read as one
- *   column the window scrolls through, or by pages (D233): the same column,
- *   moved only by whole pages - each beginning and ending with a whole line,
- *   the cut line at the foot hidden by a curtain, a page count at the foot
- *   of the window - and never by a finger or a wheel. Asked for from an
- *   e-ink panel, where a scroll is a smear and a page turn is one clean
- *   refresh; `scroll` is the default, the reader as it has always been.
- *   A name with a rule in the stylesheet and a table of page tops in
+ * @property {"scroll" | "paged" | null} layout Whether the article is read
+ *   as one column the window scrolls through, or by pages (D233): the same
+ *   column, moved only by whole pages - each beginning and ending with a
+ *   whole line, the cut line at the foot hidden by a curtain, a page count
+ *   at the foot of the window - and never by a finger or a wheel. Asked for
+ *   from an e-ink panel, where a scroll is a smear and a page turn is one
+ *   clean refresh. `null` is nobody having chosen, and then the text is
+ *   read by pages (`effectiveLayout`, D279): pages are what this reader is
+ *   built around by now, and a reader who never opens the Aa panel would
+ *   not have found them. Null rather than a stored name for the reason
+ *   `touchTurn` keeps one: every write stores the whole config, so a default
+ *   written as a name is frozen into every profile at its first write - a
+ *   choice nobody made, which no later default could reach. A name with a
+ *   rule in the stylesheet and a table of page tops in
  *   `lib/reader/pages.js` under it. Independent of the theme on purpose:
  *   pages are wanted on light paper and on dark, and a theme is colours.
  * @property {boolean} pageNumber Whether, read by pages, the page count
@@ -379,11 +385,32 @@ export function isParagraphs(value) {
 }
 
 /**
+ * A layout by name. Null - nobody having chosen - is not a name and never
+ * comes back from here; the reader asks `effectiveLayout` what to do then.
+ *
  * @param {unknown} value
- * @returns {value is ReaderConfig["layout"]}
+ * @returns {value is "scroll" | "paged"}
  */
 export function isLayout(value) {
   return typeof value === "string" && LAYOUTS.includes(value);
+}
+
+/**
+ * How a text is laid out while nobody has chosen (D279): by pages.
+ */
+export const DEFAULT_LAYOUT = "paged";
+
+/**
+ * How the text is laid out: the hand's choice, and with none the default.
+ * Asked wherever the layout is read - the stylesheet's attribute, the page
+ * table, the Aa panel's row - so that a stored null stays what it says, a
+ * choice not made yet, however often the config is written around it.
+ *
+ * @param {Pick<ReaderConfig, "layout">} reader
+ * @returns {"scroll" | "paged"}
+ */
+export function effectiveLayout(reader) {
+  return reader.layout ?? DEFAULT_LAYOUT;
 }
 
 /**
@@ -494,7 +521,7 @@ export const READER_DEFAULTS = Object.freeze({
   align: "left",
   hyphens: "none",
   paragraphs: "spaced",
-  layout: "scroll",
+  layout: null,
   pageNumber: true,
   touchTurn: null,
   turnEffect: "smooth",
@@ -621,7 +648,11 @@ function readerWithDefaults(stored) {
     align: isAlign(raw["align"]) ? raw["align"] : READER_DEFAULTS.align,
     hyphens: isHyphens(raw["hyphens"]) ? raw["hyphens"] : READER_DEFAULTS.hyphens,
     paragraphs: isParagraphs(raw["paragraphs"]) ? raw["paragraphs"] : READER_DEFAULTS.paragraphs,
-    layout: isLayout(raw["layout"]) ? raw["layout"] : READER_DEFAULTS.layout,
+    // Not a name means nobody has chosen (D279), a state of its own the way
+    // `touchTurn`'s is: it is written back as null by every write around it,
+    // so the default stays a default - and a profile from before the row
+    // existed, which holds no key at all, reads as exactly that.
+    layout: isLayout(raw["layout"]) ? raw["layout"] : null,
     // A stored switch wins either way (D238, D249), like the bubble's own
     // second layer above: the flip reaches the profiles that have never
     // written this field - which is what a default is - and leaves the ones
