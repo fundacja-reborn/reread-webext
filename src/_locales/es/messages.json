@@ -1719,7 +1719,7 @@
   },
 
 
-  "options_page_number": { "message": "Mostrar el pie de página" },
+  "options_page_number": { "message": "Mostrar el pie de página con el progreso de lectura" },
   "options_page_number_hint": {
     "message": "Una línea en la parte inferior de la ventana con la página actual y el total, por ejemplo 3 / 12. En un libro largo muestra la parte del libro ya leída, en porcentaje - por ejemplo 12 %. Cuando el texto tiene índice, el botón «Índice» también se muestra ahí."
   },

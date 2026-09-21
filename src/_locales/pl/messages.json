@@ -2364,7 +2364,7 @@
   },
 
 
-  "options_page_number": { "message": "Pokazuj stopkę strony" },
+  "options_page_number": { "message": "Pokazuj stopkę strony z postępem czytania" },
   "options_page_number_hint": {
     "message": "Pasek u dołu okna z numerem bieżącej strony i liczbą wszystkich, na przykład 3 / 12. W długiej książce jest tam procent przeczytanej książki, na przykład 12%. Gdy tekst ma spis treści, jest tam też przycisk „Spis treści”."
   },

@@ -1668,7 +1668,7 @@
   },
 
 
-  "options_page_number": { "message": "Fußzeile zeigen" },
+  "options_page_number": { "message": "Fußzeile mit Lesefortschritt zeigen" },
   "options_page_number_hint": {
     "message": "Eine Zeile am unteren Fensterrand mit der aktuellen Seite und der Gesamtzahl, zum Beispiel 3 / 12. In einem langen Buch wird dort angezeigt, wie viel des Buchs gelesen ist, in Prozent - zum Beispiel 12 %. Hat der Text ein Inhaltsverzeichnis, wird dort auch die Schaltfläche „Inhalt“ angezeigt."
   },

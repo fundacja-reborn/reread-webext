@@ -1753,7 +1753,7 @@
   },
 
 
-  "options_page_number": { "message": "Afficher le pied de page" },
+  "options_page_number": { "message": "Afficher le pied de page avec la progression de lecture" },
   "options_page_number_hint": {
     "message": "Une ligne en bas de la fenêtre avec la page en cours et le nombre total, par exemple 3 / 12. Dans un livre long, elle indique la part du livre déjà lue, en pourcentage - par exemple 12 %. Quand le texte a un sommaire, le bouton « Sommaire » y est affiché aussi."
   },
