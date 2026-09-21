@@ -139,10 +139,14 @@ describe("the way to the contents in the page's foot, and the contents as a shee
     // The row is as wide as the text's column: the measure the body is cut
     // to, read in the body's own face - which is why the strip itself wears
     // no face of its own - or the body's side padding on a narrow window.
-    assert.match(strip, /--page-foot-inset: max\(1\.5rem, calc\(\(100% - var\(--reader-measure, 65ch\)\) \/ 2\)\);/, "the row is not the column's width");
+    // The body is a border box the measure wide with its side padding
+    // inside it, so the text begins the padding in from where the measure
+    // does (measured in Chrome: text at 88px, the row's start at 88px).
+    assert.match(strip, /--page-foot-inset: calc\(max\(0px, \(100% - var\(--reader-measure, 65ch\)\) \/ 2\) \+ 1\.5rem\);/, "the row is not the column's width");
     assert.doesNotMatch(strip, /font-family|font-size/, "the strip reads `ch` in a face that is not the text's");
     const shared = await source("assets/page.css");
     assert.match(ruleOf(shared, "body"), /padding: 2\.5rem 1\.5rem 4rem;/, "the body's side padding is no longer what the foot's row counts");
+    assert.match(shared, /\n\* \{\s*box-sizing: border-box;/, "the body is no longer a border box, and the measure no longer holds its padding");
     const counted = ruleOf(styles, ':root[data-reader-page-number="true"] .page-footer');
     assert.match(counted, /overflow: visible;\s*padding: 0\.2rem var\(--page-foot-inset\) calc\(0\.2rem \+ env\(safe-area-inset-bottom, 0px\)\);/, "the row's sides are not the column's, or the button's reach is clipped");
   });

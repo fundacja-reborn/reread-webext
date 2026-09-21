@@ -3314,12 +3314,16 @@ body.reader:has(#mark-bar:not([hidden])) {
   margin: 0;
   padding: 0;
   /* A row as wide as the text's column (D278): the contents' button under
-     the column's first letter, the count under its last. The strip keeps
-     the body's face and size for one reason - `ch` is read in them, so the
-     measure here is the measure the column is cut to - and the two things
-     in the row wear the interface's themselves. A flex row has no strut, so
-     the reading size above adds nothing to the strip's height. */
-  --page-foot-inset: max(1.5rem, calc((100% - var(--reader-measure, 65ch)) / 2));
+     the column's first letter, the count under its last. The body is a
+     border box as wide as the measure, its side padding inside it, so the
+     text begins the padding in from where the measure does - or, on a
+     window narrower than the measure, the padding in from the window's
+     edge. The strip keeps the body's face and size for one reason - `ch`
+     is read in them, so the measure here is the measure the column is cut
+     to - and the two things in the row wear the interface's themselves. A
+     flex row has no strut, so the reading size above adds nothing to the
+     strip's height. */
+  --page-foot-inset: calc(max(0px, (100% - var(--reader-measure, 65ch)) / 2) + 1.5rem);
   display: flex;
   align-items: center;
   justify-content: flex-end;
