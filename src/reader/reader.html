@@ -1516,7 +1516,11 @@
         are built by script from the book's stored list - the titles are the
         book's own words and enter as text only. The dialog itself carries no
         padding; a click that reaches it hit the backdrop, which is how the
-        close-on-backdrop handler tells the two apart.
+        close-on-backdrop handler tells the two apart. Since D278 it stands
+        as a sheet at the window's start edge, the window's height (the
+        stylesheet, by this id): the same dialog, shown where a long table
+        has room. Two doors open it - the menu's row, and the button in the
+        page's foot.
       -->
       <dialog id="toc-dialog" class="toc-dialog" aria-labelledby="toc-title">
         <header class="toc-head">
@@ -1850,8 +1854,9 @@
       above: the page count in the interface face when the setting shows it
       (D238), the phone's safe area alone otherwise - the count is written
       either way and the stylesheet decides. Sized and filled by script,
-      never by markup. Hidden from the screen reader, which hears the count
-      from the live region below instead.
+      never by markup. The count is hidden from the screen reader, which
+      hears it from the live region below instead; the strip itself is not,
+      because since D278 it holds a control (see the foot below).
     -->
     <div id="page-curtain" class="page-curtain" hidden aria-hidden="true"></div>
     <!--
@@ -1878,7 +1883,41 @@
       script, taken down after its hold.
     -->
     <div id="page-flash" class="page-flash" hidden aria-hidden="true"></div>
-    <p id="page-footer" class="page-footer" hidden aria-hidden="true"></p>
+    <!--
+      The foot (D238), and in it since D278 the way to the contents: a small
+      button at the strip's start, the count at its end. The button is shown
+      over a document that has contents (the menu's row keeps the same
+      rule), and only while the strip stands at all - with the count's
+      setting off the stylesheet takes it away whole, out of the tab order
+      too. The words of the two are apart on purpose: the count is
+      information and the door beside it is an icon.
+    -->
+    <div id="page-footer" class="page-footer" hidden>
+      <button
+        type="button"
+        id="page-foot-toc"
+        class="page-foot-toc"
+        hidden
+        title="Contents"
+        data-i18n-title="reader_book_toc"
+        aria-label="Contents"
+        data-i18n-aria-label="reader_book_toc"
+      >
+        <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M6.5 4.25h7M6.5 8h7M6.5 11.75h7"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+          />
+          <circle cx="3.1" cy="4.25" r="0.9" fill="currentColor" />
+          <circle cx="3.1" cy="8" r="0.9" fill="currentColor" />
+          <circle cx="3.1" cy="11.75" r="0.9" fill="currentColor" />
+        </svg>
+      </button>
+      <span id="page-foot-count" class="page-foot-count" aria-hidden="true"></span>
+    </div>
     <!--
       The count as a screen reader hears it (D238): "Page 19 of 31", said
       politely on every turn, whether or not the eye is shown a count

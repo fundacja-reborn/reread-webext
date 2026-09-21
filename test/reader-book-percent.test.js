@@ -109,7 +109,7 @@ describe("the foot of the reader's page over a long book", () => {
     // The foot and the bar share one string; the live region has its own
     // words - "12% of the book" - because a bare number says nothing aloud.
     assert.match(curtain, /counted\.kind === "percent"\n\s+\? t\("reader_percent", counted\.percent\.toLocaleString\(\)\)/);
-    assert.match(curtain, /if \(pageFooter\.textContent !== said\) pageFooter\.textContent = said;/);
+    assert.match(curtain, /if \(footCount !== null && footCount\.textContent !== said\) footCount\.textContent = said;/);
     assert.match(curtain, /if \(pageCount\.textContent !== said\) pageCount\.textContent = said;/);
     assert.match(curtain, /\? t\("reader_page_book_percent", counted\.percent\.toLocaleString\(\)\)/);
     assert.match(curtain, /: t\("reader_page_of", \[counted\.page\.toLocaleString\(\), counted\.pages\.toLocaleString\(\)\]\);/);
