@@ -8,6 +8,7 @@ import {
   EDGE_TURN_REPEAT_MS,
   EDGE_ZONE_MIN,
   FLASH_GAP_MS,
+  PRESS_HOLD_MS,
   SWIPE_MIN,
   TAP_ALONE_MS,
   TAP_BLOB,
@@ -513,8 +514,12 @@ describe("meantPress (D278)", () => {
   });
 
   it("refuses the thumb that holds the device: long on the glass, sliding, wide, or beside another", () => {
-    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + TAP_HOLD_MS - 1 })), true);
-    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + TAP_HOLD_MS })), false);
+    // A slow, careful press is meant - longer than a tap that turns a page
+    // may last - and the thumb that lies there for the whole page is not.
+    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + TAP_HOLD_MS + 200 })), true);
+    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + PRESS_HOLD_MS - 1 })), true);
+    assert.equal(meantPress(tap({ ...corner, upAt: 1000 + PRESS_HOLD_MS })), false);
+    assert.equal(meantPress(tap({ ...corner, upAt: 9000 })), false);
     assert.equal(meantPress(tap({ ...corner, dx: TAP_DRIFT, dy: 0 })), false);
     assert.equal(meantPress(tap({ ...corner, width: TAP_BLOB, height: 12 })), false);
     assert.equal(meantPress(tap({ ...corner, otherPointers: [1000 + TAP_ALONE_MS] })), false);

@@ -475,15 +475,25 @@ export function tapIntent(tap) {
 }
 
 /**
+ * How long a finger may lie on a button and still have pressed it
+ * (`meantPress`). Longer than a tap that turns a page (`TAP_HOLD_MS`): a
+ * button is aimed at, and a slow, careful press on one is as meant as a
+ * quick one - refusing it would punish exactly the hand that needs the time.
+ * What this keeps out is the thumb that holds the device, which lies on the
+ * glass for as long as the page is read.
+ */
+export const PRESS_HOLD_MS = 1000;
+
+/**
  * Whether a press on a control that stands in the window's foot was meant
  * (D278) - the contents' button in the page's foot strip. That strip is
  * where the thumb holding a phone rests, which is why no tap there turns a
  * page (`TAP_DEAD_FOOT`); a button put there is pressed by the same
  * accidents, and they carry the same signature. So a touch has to be what a
- * tap is - brief, still, a fingertip's contact, alone - and nothing else is
- * asked of it: where it landed is the button's own business. A mouse and a
- * pen aim, and a press with no pointer behind it (a key, a screen reader)
- * was asked for by name; all three are meant.
+ * press is - still, a fingertip's contact, alone, and not lying there - and
+ * nothing else is asked of it: where it landed is the button's own
+ * business. A mouse and a pen aim, and a press with no pointer behind it (a
+ * key, a screen reader) was asked for by name; all three are meant.
  *
  * @param {TapSignature | null} tap the pointer that lifted just before the
  *   press, or null when none did
@@ -492,7 +502,7 @@ export function tapIntent(tap) {
 export function meantPress(tap) {
   if (tap === null || tap.pointerType !== "touch") return true;
   if (tap.otherPointers.some((at) => Math.abs(at - tap.downAt) <= TAP_ALONE_MS)) return false;
-  if (tap.upAt - tap.downAt >= TAP_HOLD_MS) return false;
+  if (tap.upAt - tap.downAt >= PRESS_HOLD_MS) return false;
   if (Math.hypot(tap.dx, tap.dy) >= TAP_DRIFT) return false;
   return Math.max(tap.width ?? 0, tap.height ?? 0) < TAP_BLOB;
 }
