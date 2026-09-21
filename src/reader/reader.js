@@ -2163,6 +2163,43 @@ function pageBand() {
   return { top, bottom: Math.max(top, band.bottom - pageFootAir()), floor: band.bottom };
 }
 
+/** The band's height last handed to the stylesheet, in whole pixels. */
+let pictureBand = -1;
+
+/**
+ * The tallest a picture may stand on a page: the band itself, handed to the
+ * stylesheet as `--page-band-h` (reader.css caps `img` and `video` by it).
+ * A picture is one line to the cutter, and a line taller than the band can
+ * only be cut at the page's edge - so a picture has to fit the band it is
+ * shown in, exactly, whatever that band is.
+ *
+ * The stylesheet's own arithmetic could not say it: its cap counted the
+ * window less the bar, and the band is shorter than that by the bookmark
+ * tab under the bar, the two margins and whatever stands at the foot - the
+ * count's strip, the voice's bar, the pen's. A cover sized by it came out
+ * some forty pixels taller than the page, and was cut in two at every
+ * window's height: cut from the head its last lines opened the next page,
+ * and cut back from the page being read (D238) its first lines stayed on
+ * the head's page and the rest opened mid-picture (Michał's report from the
+ * Boox and the emulator, 2026-09-21).
+ *
+ * Written only when the whole pixel moves: the pages are asked for on every
+ * scroll, and a custom property rewritten each time would restyle the
+ * document each time. Rounded down, so a picture at the cap still fits a
+ * band of a fractional height. A band of nothing is left to the
+ * stylesheet's fallback.
+ *
+ * @param {number} height the band's height, CSS pixels
+ * @returns {boolean} whether the cap moved, and the document with it
+ */
+function fitPictures(height) {
+  const whole = Math.floor(height);
+  if (whole <= 0 || whole === pictureBand) return false;
+  pictureBand = whole;
+  document.documentElement.style.setProperty("--page-band-h", `${whole}px`);
+  return true;
+}
+
 /**
  * The blocks of the flow between the stuck chrome and the document's end,
  * in order: everything under the page's box that stands in the flow - the
@@ -2447,6 +2484,12 @@ function pagesNow() {
     return kept;
   }
   pagesStale = false;
+  // With the cut and never before it: the pictures are held to the band the
+  // pages are about to be cut for - so nothing resizes under a finger, where
+  // the cut itself waits for the lift (above) - and the boxes measured next
+  // are the document laid out with them. The extent the table remembers is
+  // that document's too, or the next ask would find it changed and cut again.
+  const laidOut = fitPictures(height) ? document.documentElement.scrollHeight : extent;
   const blocks = flowBlocks();
   const scrolled = window.scrollY;
   const boxes = blocks.map((block) => {
@@ -2469,7 +2512,7 @@ function pagesNow() {
   pageTable = {
     tops,
     height,
-    extent,
+    extent: laidOut,
     epoch,
     blocks,
     boxes,

@@ -3090,13 +3090,26 @@ body.reader:has(#mark-bar:not([hidden])) {
 }
 
 /* A picture taller than a page fits one instead of being cut in two - what
-   every e-reader does with a plate. The cap is the band at its tallest
-   (the bar's own height under the window's), a little less for the footer;
-   a panel open over the text or a notice in the bar makes the band shorter
-   for as long as it stands, and a picture cut by that is cut like text. */
+   every e-reader does with a plate. The cap is the band itself, as the
+   script measures it and hands it over (`--page-band-h`, `fitPictures` in
+   reader.js): the strip between the bar with its tab and whatever stands at
+   the foot, less the page's two margins. It follows the band, so a picture
+   that filled the page gives way when the voice's or the pen's bar stands
+   up, instead of losing its last lines to the next page. The first cap
+   counted the window less the bar here, in the stylesheet, and came out
+   taller than the band by the tab, the margins and the foot - a cover was
+   cut in two at every window's height (Michał's report, 2026-09-21). Until
+   the script has measured, a cap that is safely under any band. */
 :root[data-reader-layout="paged"] #content :is(img, picture, video) {
-  max-height: calc(100dvh - var(--header-h) - 2.5rem);
+  max-height: var(--page-band-h, calc(100dvh - var(--header-h) - var(--foot-h) - 4rem));
   object-fit: contain;
+}
+
+/* A picture with a caption leaves the caption room on its page: three lines
+   of the text and the gap between the two. A longer caption goes on onto
+   the next page line by line, as text does. */
+:root[data-reader-layout="paged"] #content figure:has(figcaption) :is(img, video) {
+  max-height: calc(var(--page-band-h, calc(100dvh - var(--header-h) - var(--foot-h) - 4rem)) - 3lh - 0.6rem);
 }
 
 /* The curtain: the page's own paper over the foot of the window, from a
