@@ -179,12 +179,29 @@ function pagesBack(flow, linesOf, height, bottom, start) {
       const lines = linesOf(block.index);
       const line = lines.find((one) => one.top >= limit - EPS);
       if (line === undefined) {
-        // Every line stands above the edge and only the box's own foot
-        // reaches past it - or a block with no lines. One that fits a page
-        // moves whole onto the page before, and this page opens with the
-        // next block; one taller than a page is cut at the edge.
+        // No line begins on this page: every line stands above the edge and
+        // only the box's own foot reaches past it, or the edge runs through
+        // the block's last line - a picture, which is one line however tall
+        // - or through a block with no lines at all.
         const fits = block.bottom - block.top <= height + EPS;
-        top = (lines.length > 0 || fits) && opener !== null ? opener : limit;
+        if ((lines.length > 0 || fits) && opener !== null) {
+          // It moves whole onto the page before, and this page opens with
+          // the next block.
+          top = opener;
+        } else {
+          // Nothing else begins between the block and the page below, so
+          // the page holds what the edge runs through and nothing more: the
+          // block itself when it has no lines, its last line otherwise. One
+          // that fits a page opens this page whole - a band's worth from
+          // its top shows all of it, and what is left under it down to the
+          // page below is margin. Cut at the edge instead, the page opened
+          // a few pixels into a cover that filled the band, with the top of
+          // the picture left on the head's page (Michał's report,
+          // 2026-09-21). One taller than a page is cut at the edge, as the
+          // forward cut cuts it.
+          const held = lines.length === 0 ? block : (lines.find((one) => one.bottom > limit + EPS) ?? null);
+          top = held !== null && held.top < limit && held.bottom - held.top <= height + EPS ? held.top : limit;
+        }
       } else if (line.bottom >= bottom - EPS) {
         // The line found is the page's last and only - taller than the page.
         top = limit;
