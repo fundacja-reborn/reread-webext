@@ -8,10 +8,11 @@
  * is a door nobody uses. The rows are the same two the launcher bubble offers
  * on a phone and the popup offers everywhere, by other means.
  *
- * Pure: what the rows are, and which door a click on one means. Making them
- * is the background's business (`installMenus` takes the API as an argument,
- * so `node --test` can hand in a fake); the click handler and the rooms it
- * opens are in `index.js`.
+ * What the rows are, and which door a click on one means. Making them is the
+ * background's business (`installMenus` takes the API as an argument, so
+ * `node --test` can hand in a fake); the click handler and the rooms it opens
+ * are in `index.js`. The one thing kept here between calls is the run of
+ * `installMenus` in flight, so that two callers never make the rows twice.
  *
  * Both engines keep the rows once made - Firefox persists an event page's
  * menus and recreates them at startup, Chromium stores a service worker's -
@@ -75,12 +76,49 @@ export function menuItems() {
 }
 
 /**
- * Wipes and makes the rows.
+ * @typedef {Pick<NonNullable<WebExtBrowser["contextMenus"]>, "create" | "removeAll">} MenusApi
+ * the two calls this needs, so a test can hand in that much and no more
+ */
+
+/**
+ * The run in flight, which a second caller joins instead of starting its own.
  *
- * @param {Pick<NonNullable<WebExtBrowser["contextMenus"]>, "create" | "removeAll">} menus the two calls this needs, so a test can hand in that much and no more
+ * @type {Promise<void> | null}
+ */
+let installing = null;
+
+/**
+ * Wipes and makes the rows - once, however many callers ask while it runs.
+ *
+ * Two events ask for the rows, install and browser start, and one moment
+ * brings both into the same life of the background: the first start after the
+ * browser itself was updated. Chromium then sends every extension onInstalled
+ * with the reason `chrome_update` as it loads, and onStartup right after
+ * (`RuntimeAPI::OnExtensionLoaded`, `OnBackgroundHostStartup`); Firefox has
+ * `browser_update` for the same moment. Two runs of wipe-then-make interleave:
+ * both wipes are made before either is answered, so both sets of rows follow,
+ * and the second set is three "Cannot create item with duplicate id" errors on
+ * the extension's card - Brave showed exactly those three. The rows of both
+ * runs are the same rows, so one run answers both callers.
+ *
+ * A call that comes after a run has finished starts a new one: that is the
+ * update, and an update may have reworded a row.
+ *
+ * @param {MenusApi} menus
  * @returns {Promise<void>}
  */
-export async function installMenus(menus) {
+export function installMenus(menus) {
+  installing ??= wipeAndMake(menus).finally(() => {
+    installing = null;
+  });
+  return installing;
+}
+
+/**
+ * @param {MenusApi} menus
+ * @returns {Promise<void>}
+ */
+async function wipeAndMake(menus) {
   await menus.removeAll();
   for (const item of menuItems()) menus.create(item);
 }
