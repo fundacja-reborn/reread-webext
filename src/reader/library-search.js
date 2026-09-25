@@ -15,10 +15,11 @@
  * it simply reads as empty.
  *
  * Two groups answer one question two ways: rows whose own words (title,
- * site, author) carry the phrase show at once, before any content is read -
- * they cost nothing, the words are already in memory - and rows whose text
- * carries it follow batch by batch. A document may stand in both, which is
- * two true sentences, each under its own heading.
+ * site, author, and the reader's note on the document - D283) carry the
+ * phrase show at once, before any content is read - they cost one read of
+ * the light rows and one of the notes - and rows whose text carries it
+ * follow batch by batch. A document may stand in both, which is two true
+ * sentences, each under its own heading.
  *
  * Memory holds one document at a time and, of the results, only snippets
  * and anchors; the batch renders in one `replaceChildren` - the e-ink
@@ -38,6 +39,7 @@ import {
 } from "../lib/reader/search.js";
 import { allPositions, getArticle, listArticles } from "../lib/store/articles.js";
 import { getBookSegment, listBooks } from "../lib/store/books.js";
+import { allDocNotes } from "../lib/store/marks.js";
 import { Segment, listedRows } from "../lib/store/saved-article.js";
 import { collectHits, storedBlockText } from "./doc-search.js";
 import { articleEntry, bookEntry, searchableArticle } from "./list-view.js";
@@ -47,13 +49,16 @@ import { articleEntry, bookEntry, searchableArticle } from "./list-view.js";
 /**
  * One document of the scan's snapshot: what the walk needs to read it and
  * what its result row shows. `searchable` is the row's own words, the
- * filter's field (`searchableArticle`); `segments` is 1 for an article.
+ * filter's field (`searchableArticle`) - the note among them (D283), kept
+ * apart as `note` too, for the row to show when it is what the phrase
+ * stood in; `segments` is 1 for an article.
  *
  * @typedef {{
  *   kind: "article" | "book",
  *   url: string,
  *   title: string,
  *   searchable: string,
+ *   note?: string,
  *   detail: string,
  *   segments: number,
  * }} SearchDoc
@@ -171,14 +176,17 @@ export async function startLibrarySearch(query) {
  * @returns {Promise<SearchDoc[]>}
  */
 async function loadDocs() {
-  const [metas, books, positions] = await Promise.all([
+  // The notes with the rows (D283): a search is a press, and one read of
+  // the highlights store is the price of finding a document by its note.
+  const [metas, books, positions, notes] = await Promise.all([
     listArticles(),
     listBooks(),
     allPositions(),
+    allDocNotes().catch(() => new Map()),
   ]);
   const entries = [
-    ...metas.map((meta) => articleEntry(meta, positions.get(meta.url) ?? null)),
-    ...books.map((book) => bookEntry(book, positions.get(book.id) ?? null)),
+    ...metas.map((meta) => articleEntry(meta, positions.get(meta.url) ?? null, notes.get(meta.url))),
+    ...books.map((book) => bookEntry(book, positions.get(book.id) ?? null, notes.get(book.id))),
   ];
   const ordered = [...listedRows(entries, Segment.UNREAD), ...listedRows(entries, Segment.READ)];
   return ordered.map((entry) => ({
@@ -186,6 +194,7 @@ async function loadDocs() {
     url: entry.url,
     title: entry.title,
     searchable: searchableArticle(entry),
+    ...(entry.note === undefined ? {} : { note: entry.note }),
     detail: detailOf(entry),
     segments: entry.kind === "book" ? (entry.progress?.of ?? 1) : 1,
   }));
@@ -413,6 +422,18 @@ function docRow(doc, hits, folded, query) {
   detail.textContent = doc.detail;
 
   text.append(open, detail);
+
+  // An own-words row found by the reader's note shows it (D283), the
+  // list's own note line: the note is the part of the answer the row
+  // cannot otherwise show - decided by the same fold that put the row in
+  // its group, so the line and the group can never disagree. A text row
+  // has its snippets to explain itself.
+  if (hits === null && doc.note !== undefined && metaMatches(doc.note, folded)) {
+    const note = document.createElement("p");
+    note.className = "library-doc-note";
+    note.textContent = doc.note;
+    text.append(note);
+  }
 
   if (hits !== null) {
     const plan = snippetPlan(hits.length);

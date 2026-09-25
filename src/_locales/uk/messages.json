@@ -740,7 +740,7 @@
   },
   "reader_empty_all_read": { "message": "Читати більше нічого - усе збережене позначено прочитаним." },
   "reader_empty_none_read": { "message": "Ще нічого не позначено прочитаним." },
-  "reader_filter_placeholder": { "message": "Шукати за назвою чи сайтом" },
+  "reader_filter_placeholder": { "message": "Шукати за назвою, сайтом чи нотаткою" },
   "reader_filter_label": { "message": "Шукати у списку читання" },
   "reader_filter_no_match": {
     "message": "Жодна збережена стаття не відповідає «$QUERY$».",
@@ -1634,7 +1634,7 @@
       "percent": { "content": "$1", "example": "19" }
     }
   },
-  "reader_search_in_titles": { "message": "У заголовках" },
+  "reader_search_in_titles": { "message": "У заголовках і нотатках" },
   "reader_search_in_text": { "message": "У тексті" },
   "reader_search_more_hits_one": {
     "message": "і ще $COUNT$ збіг",

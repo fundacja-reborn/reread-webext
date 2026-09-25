@@ -550,7 +550,7 @@
   },
   "reader_empty_all_read": { "message": "Nichts mehr zu lesen - alles Gespeicherte ist als gelesen markiert." },
   "reader_empty_none_read": { "message": "Noch nichts ist als gelesen markiert." },
-  "reader_filter_placeholder": { "message": "Nach Titel oder Website suchen" },
+  "reader_filter_placeholder": { "message": "Nach Titel, Website oder Notiz suchen" },
   "reader_filter_label": { "message": "Die Leseliste durchsuchen" },
   "reader_filter_no_match": {
     "message": "Kein gespeicherter Artikel passt zu „$QUERY$“.",
@@ -1108,7 +1108,7 @@
       "percent": { "content": "$1", "example": "19" }
     }
   },
-  "reader_search_in_titles": { "message": "In Titeln" },
+  "reader_search_in_titles": { "message": "In Titeln und Notizen" },
   "reader_search_in_text": { "message": "Im Text" },
   "reader_search_more_hits_one": {
     "message": "und $COUNT$ weiterer Treffer",

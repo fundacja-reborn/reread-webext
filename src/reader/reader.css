@@ -1752,6 +1752,25 @@ body.reader:has(#library:not([hidden])) {
   font-size: 0.85rem;
 }
 
+/* The reader's note under a row the search found by it (D283): one line,
+   cut with an ellipsis - the row says which words matched, the note is
+   read whole on the document's highlights page - in the muted voice and
+   the interface face, behind the hairline the quote notes and the
+   snippets wear, so it reads as the reader's words about the row and not
+   as more of the detail. `nowrap` folds the note's own line breaks into
+   the one line. */
+.library-doc-note {
+  margin: 0.3rem 0 0;
+  padding-inline-start: 0.6rem;
+  border-inline-start: 2px solid var(--page-line);
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* The row answers the pointer and the keyboard as one thing: a wash from the
    theme's own ink, and for the keyboard a ring around the row rather than
    around the title's words - the target it marks is the cell. */

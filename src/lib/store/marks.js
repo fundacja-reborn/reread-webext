@@ -210,6 +210,45 @@ export async function allMarks() {
 }
 
 /**
+ * Every document's note and nothing else (D283) - the reading list's
+ * search reads these at a press, to find a document by the words its
+ * reader wrote about it. The same `getAll` as `allMarksRows` (IndexedDB
+ * hands out whole rows either way), but the marks are not narrowed: the
+ * list asks about no mark, and a library of many highlights should not
+ * pay for reading them all to answer a search over notes.
+ *
+ * @returns {Promise<Map<string, string>>} keyed by `docId`
+ */
+export async function allDocNotes() {
+  const rows = /** @type {unknown[]} */ (
+    await withLibrary("readonly", (stores) => promisify(stores.marks.getAll()))
+  );
+  return docNotesOf(rows);
+}
+
+/**
+ * The notes of the rows as they came back, narrowed by the note's own rule
+ * and no other: a row without a readable key or without a note has nothing
+ * to say here, whatever its marks hold. Pure, so the rule stands under
+ * `node --test`.
+ *
+ * @param {unknown[]} rows
+ * @returns {Map<string, string>} keyed by `docId`
+ */
+export function docNotesOf(rows) {
+  /** @type {Map<string, string>} */
+  const notes = new Map();
+  for (const row of rows) {
+    if (typeof row !== "object" || row === null) continue;
+    const { docId, note } = /** @type {Record<string, unknown>} */ (row);
+    if (typeof docId !== "string" || docId.length === 0) continue;
+    const words = asNote(note);
+    if (words !== undefined) notes.set(docId, words);
+  }
+  return notes;
+}
+
+/**
  * @param {unknown[]} rows
  * @returns {{ marks: Map<string, Mark[]>, notes: Map<string, string> }} both keyed by `docId`
  */
