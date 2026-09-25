@@ -141,7 +141,7 @@ describe("marksImportPlan", () => {
     assert.equal(plan.added, 2);
     assert.deepEqual(plan.missing, []);
     assert.deepEqual(plan.targets, [
-      { docId: ARTICLE.url, kind: "article", title: "Saved under another title", marks: ARTICLE.marks, added: 2 },
+      { docId: ARTICLE.url, kind: "article", title: "Saved under another title", marks: ARTICLE.marks, added: 2, noted: false },
     ]);
   });
 
@@ -294,5 +294,87 @@ describe("a book document addressed to one copy (D223)", () => {
     const read = fromMarksCopy(text);
     assert.equal(read.documents.length, 1);
     assert.equal("docId" in (read.documents[0] ?? {}), false);
+  });
+});
+
+describe("the note on a whole document in the file (D282)", () => {
+  /** @type {CopyDoc} */
+  const NOTED = {
+    kind: "article",
+    url: "https://example.com/noted",
+    title: "Noted",
+    note: "about the whole piece",
+    marks: [mark("a passage")],
+  };
+  /** @type {CopyDoc} */
+  const NOTE_ONLY = { kind: "book", title: "Unmarked", author: null, note: "read it twice", marks: [] };
+
+  it("writes the note beside the marks and reads it back - a document with only a note included", () => {
+    const { documents, invalid } = fromMarksCopy(toMarksCopy([NOTE_ONLY, NOTED]));
+    assert.equal(invalid, 0);
+    assert.deepEqual(documents, [NOTED, NOTE_ONLY]);
+  });
+
+  it("narrows a file's note through the mark's own door, and drops an entry with neither a mark nor a note", () => {
+    const text = JSON.stringify({
+      format: "reread-highlights",
+      version: 1,
+      documents: [
+        { kind: "article", url: "https://example.com/a", title: "A", marks: [], note: "  spaced  " },
+        { kind: "article", url: "https://example.com/b", title: "B", marks: [], note: "   " },
+        { kind: "book", title: "C", author: null, marks: [] },
+      ],
+    });
+    const { documents, invalid } = fromMarksCopy(text);
+    assert.deepEqual(
+      documents.map((doc) => [doc.title, doc.note]),
+      [["A", "spaced"]],
+    );
+    assert.equal(invalid, 2);
+  });
+
+  it("lands the file's note on a document without one, and never over a standing one", () => {
+    const kept = "https://example.com/kept";
+    const lib = library({
+      articles: [
+        { url: NOTED.url, title: "Noted" },
+        { url: kept, title: "Kept" },
+      ],
+      notes: new Map([[kept, "mine"]]),
+    });
+    const plan = marksImportPlan([NOTED, { ...NOTED, url: kept, marks: [] }], lib);
+    assert.equal(plan.notes, 1);
+    assert.deepEqual(
+      plan.targets.map((row) => [row.docId, row.note, row.noted, row.added]),
+      [[NOTED.url, "about the whole piece", true, 1]],
+    );
+  });
+
+  it("makes a note-only document a target of its own, and the same file twice adds no note", () => {
+    const books = [{ id: "b1", title: "Unmarked", author: null }];
+    const first = marksImportPlan([NOTE_ONLY], library({ books }));
+    assert.equal(first.notes, 1);
+    assert.equal(first.added, 0);
+    assert.deepEqual(
+      first.targets.map((row) => [row.docId, row.note, row.noted, row.added]),
+      [["b1", "read it twice", true, 0]],
+    );
+
+    const again = marksImportPlan([NOTE_ONLY], library({ books, notes: new Map([["b1", "read it twice"]]) }));
+    assert.equal(again.notes, 0);
+    assert.deepEqual(again.targets, []);
+  });
+
+  it("a target that gains marks keeps the note standing under it", () => {
+    const lib = library({
+      articles: [{ url: NOTED.url, title: "Noted" }],
+      notes: new Map([[NOTED.url, "mine"]]),
+    });
+    const plan = marksImportPlan([NOTED], lib);
+    assert.equal(plan.notes, 0);
+    assert.deepEqual(
+      plan.targets.map((row) => [row.note, row.noted, row.added]),
+      [["mine", false, 1]],
+    );
   });
 });

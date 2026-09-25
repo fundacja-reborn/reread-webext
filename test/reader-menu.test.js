@@ -40,6 +40,9 @@ describe("the reader's menu", () => {
       "nav-toc",
       "nav-search",
       "nav-marks",
+      // The reader's own words on the whole document (D282), beside the
+      // highlights they belong with.
+      "nav-note",
       // The document as a whole: its read mark, its pictures, the files it
       // is written out as - and last the act that cannot be taken back (D272).
       "nav-mark-read",

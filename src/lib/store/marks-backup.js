@@ -1,6 +1,7 @@
 /**
  * The copy of the highlights that outlives the database: every document's
- * marks with their notes, and the one thing about each document the
+ * marks with their notes, the reader's note on the document itself (D282),
+ * and the one thing about each document the
  * highlights page needs once the document itself is gone - its title. The
  * second copy after the vocabulary's (`backup.js`, where the reasons are:
  * Safari deletes the origin's IndexedDB after thirty days without a touch on
@@ -32,7 +33,7 @@
  */
 
 import { inPrivateContext, webext } from "../browser.js";
-import { asMark, compareMarks } from "../reader/marks.js";
+import { asMark, asNote, compareMarks } from "../reader/marks.js";
 import { copiesWritable } from "./private-copies.js";
 
 /** @typedef {import("../reader/marks.js").Mark} Mark */
@@ -48,7 +49,8 @@ import { copiesWritable } from "./private-copies.js";
  * @property {string} docId an article's url, a book's id - the marks row's key
  * @property {"article" | "book"} kind
  * @property {string} title
- * @property {Mark[]} marks in reading order
+ * @property {Mark[]} marks in reading order - empty under a document that has only a note
+ * @property {string} [note] the reader's note on the whole document (D282), where there is one
  */
 
 /**
@@ -60,8 +62,9 @@ import { copiesWritable } from "./private-copies.js";
 
 /**
  * @typedef {object} MarksBackupDeps
- * @property {() => Promise<{ marks: Map<string, Mark[]>, titles: Map<string, DocTitle> }>} snapshot
- *   every marks row and the titles the library can still put to them
+ * @property {() => Promise<{ marks: Map<string, Mark[]>, notes: Map<string, string>, titles: Map<string, DocTitle> }>} snapshot
+ *   every marks row - the marks and the document notes it holds - and the titles the library
+ *   can still put to them
  * @property {() => Promise<boolean>} empty whether the library holds no article, no book and no marks
  * @property {(docs: BackupDoc[]) => Promise<void>} putRows the marks rows written back - into an
  *   empty library only, checked again where the write is atomic
@@ -107,24 +110,30 @@ export function storageDeps(isPrivate = inPrivateContext) {
  * The copy as the store stands: one entry per marks row, sorted by document
  * so two copies of the same library are the same value. A row whose document
  * the library no longer names keeps the row's own key as its title - the
- * copy carries what is there, and a name is better than none.
+ * copy carries what is there, and a name is better than none. A document
+ * that has a note and no mark (D282) is an entry too, with an empty list:
+ * the note is the reader's words as much as a mark's is.
  *
  * @param {Map<string, Mark[]>} marks keyed by `docId`
  * @param {Map<string, DocTitle>} titles
  * @param {number} now
+ * @param {Map<string, string>} [notes] each document's note, keyed by `docId`
  * @returns {MarksBackup}
  */
-export function marksBackupOf(marks, titles, now) {
+export function marksBackupOf(marks, titles, now, notes = new Map()) {
   /** @type {BackupDoc[]} */
   const docs = [];
-  for (const [docId, list] of marks) {
-    if (list.length === 0) continue;
+  for (const docId of new Set([...marks.keys(), ...notes.keys()])) {
+    const list = marks.get(docId) ?? [];
+    const note = notes.get(docId);
+    if (list.length === 0 && note === undefined) continue;
     const doc = titles.get(docId);
     docs.push({
       docId,
       kind: doc?.kind ?? "article",
       title: doc?.title ?? docId,
       marks: [...list].sort(compareMarks),
+      ...(note === undefined ? {} : { note }),
     });
   }
   docs.sort((a, b) => a.docId.localeCompare(b.docId));
@@ -137,7 +146,7 @@ export function marksBackupOf(marks, titles, now) {
  */
 function asDoc(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { docId, kind, title, marks } = /** @type {Record<string, unknown>} */ (value);
+  const { docId, kind, title, marks, note } = /** @type {Record<string, unknown>} */ (value);
   if (typeof docId !== "string" || docId.length === 0) return null;
   if (kind !== "article" && kind !== "book") return null;
   if (!Array.isArray(marks)) return null;
@@ -146,8 +155,17 @@ function asDoc(value) {
     .map(asMark)
     .filter((mark) => mark !== null)
     .sort(compareMarks);
-  if (kept.length === 0) return null;
-  return { docId, kind, title: typeof title === "string" && title.length > 0 ? title : docId, marks: kept };
+  // The document's note through the mark's own door (D282); an entry with
+  // neither a mark nor a note names nothing to bring back.
+  const words = asNote(note);
+  if (kept.length === 0 && words === undefined) return null;
+  return {
+    docId,
+    kind,
+    title: typeof title === "string" && title.length > 0 ? title : docId,
+    marks: kept,
+    ...(words === undefined ? {} : { note: words }),
+  };
 }
 
 /**
@@ -203,8 +221,8 @@ export function marksInBackup(backup) {
  * @returns {Promise<number>} how many marks the copy now holds
  */
 export async function rebuildMarksBackup(deps) {
-  const { marks, titles } = await deps.snapshot();
-  const backup = marksBackupOf(marks, titles, deps.now());
+  const { marks, notes, titles } = await deps.snapshot();
+  const backup = marksBackupOf(marks, titles, deps.now(), notes);
   await deps.write(backup);
   return marksInBackup(backup);
 }

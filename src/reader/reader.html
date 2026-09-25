@@ -570,6 +570,14 @@
              document's own quotes; over the list, everybody's. Like the
              list row it hides in the room it names. -->
         <button id="nav-marks" type="button" data-i18n="reader_marks_title">Highlights</button>
+        <!-- The reader's note on the whole document (D282): the dialog a
+             highlight's note opens, over the document's title instead of a
+             quote. The row's words say whether a note stands (Add / Edit),
+             and the dialog is where an existing one is read - one dialog for
+             reading and writing, the highlight note's own rule. Over every
+             document the list holds; hidden over a page not saved yet, the
+             list and the highlights page. The words are set by script. -->
+        <button id="nav-note" type="button" hidden>Add a note to this document</button>
         <!-- The read mark of the document on screen (D272): the act of the
              button over the title and under the last line, in the bar that
              is always in reach. A long book wears those buttons only at its
@@ -1113,6 +1121,50 @@
         <!-- The scoped page says whose quotes these are; the global one
              says it row by row instead. -->
         <p class="hint marks-doc" id="marks-doc" hidden></p>
+        <!-- The reader's note on the scoped document (D282), where the
+             document's quotes are read: its own caption, the note in the
+             dress the rows give a quote's note, and beside it the note act
+             that opens the dialog the menu row opens. Shown only while the
+             document has a note - the door to the first one is the
+             document's menu, and this page names no document on the global
+             visit. -->
+        <div id="marks-doc-note" class="marks-doc-note" hidden>
+          <p class="hint marks-doc-note-label" data-i18n="reader_doc_note_label">Note on this document</p>
+          <p id="marks-doc-note-text" class="marks-note"></p>
+          <button
+            type="button"
+            id="marks-doc-note-edit"
+            class="marks-act"
+            title="Edit this document's note"
+            data-i18n-title="reader_doc_note_edit"
+            aria-label="Edit this document's note"
+            data-i18n-aria-label="reader_doc_note_edit"
+          >
+            <svg class="reader-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M13.6 10V2.9a.9.9 0 0 0-.9-.9H3.3a.9.9 0 0 0-.9.9v10.2a.9.9 0 0 0 .9.9h6.2z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M9.5 14v-3.1a.9.9 0 0 1 .9-.9h3.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M4.9 5.4h6.4M4.9 7.9h4.6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
         <div class="filter-line">
           <label for="marks-filter" class="visually-hidden" data-i18n="reader_marks_filter_label">
             Filter the highlights
@@ -1945,7 +1997,8 @@
       mark being annotated - clamped, context not content. Save keeps what
       the box holds; an emptied box saved is the note removed - absence is
       the only "no note" there is. The quote and the note are somebody's own
-      text, so both enter as textContent only.
+      text, so both enter as textContent only. Over the note on a whole
+      document (D282) the line holds the document's title and wears no ink.
     -->
     <dialog id="note-dialog" class="note-dialog" aria-labelledby="note-title">
       <header class="toc-head">

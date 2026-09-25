@@ -24,9 +24,11 @@ export const MARKS_FILENAME = "reread-highlights.md";
 /**
  * One document as the file wants it: its title, where it came from (an
  * article's address, a book's author - whichever the document has), when it
- * entered the list, and its marks in reading order.
+ * entered the list, the reader's note on the whole document where there is
+ * one (D282), and its marks in reading order - an empty list under a
+ * document that has only the note.
  *
- * @typedef {{ title: string, source: string | null, at: number, marks: Mark[] }} MarkedDoc
+ * @typedef {{ title: string, source: string | null, at: number, note?: string, marks: Mark[] }} MarkedDoc
  */
 
 /**
@@ -43,9 +45,11 @@ export const MARKS_FILENAME = "reread-highlights.md";
  * A mark's note (D118) stands under its quote as plain paragraphs: the quote
  * is the document's words and wears the quote dress, the note is the
  * reader's own and wears none - and none means no markup wrapped around
- * text this module did not write.
+ * text this module did not write. The note on the whole document (D282)
+ * stands the same way under the document's heading and its detail line,
+ * before the first quote: it is about all of them.
  *
- * @param {MarkedDoc[]} docs only documents that have marks - the caller's cut
+ * @param {MarkedDoc[]} docs only documents that have marks or a note - the caller's cut
  * @returns {string}
  */
 export function toMarksFile(docs) {
@@ -59,6 +63,10 @@ export function toMarksFile(docs) {
     const when = Number.isFinite(doc.at) && doc.at > 0 ? [isoDay(doc.at)] : [];
     const detail = [...where, ...when].join(" - ");
     if (detail.length > 0) lines.push(detail, "");
+    if (doc.note !== undefined) {
+      for (const line of doc.note.split("\n")) lines.push(line);
+      if (doc.marks.length > 0) lines.push("");
+    }
 
     for (const [index, mark] of doc.marks.entries()) {
       if (index > 0) lines.push("");

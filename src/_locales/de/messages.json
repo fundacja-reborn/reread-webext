@@ -709,6 +709,14 @@
     "message": "$COUNT$ Markierungen hinzugefügt.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
+  "reader_marks_import_notes_done_one": {
+    "message": "$COUNT$ Notiz zu einem Dokument hinzugefügt.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_notes_done_other": {
+    "message": "$COUNT$ Notizen zu Dokumenten hinzugefügt.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_transfer_marks": {
     "message": "ein Markdown-Text - eine Notiz aus einer anderen App oder ein aus dem Menü des Readers exportiertes Dokument -, den der Import wie ein Buch in die Liste aufnimmt. Auch die Markierungsseite schreibt ihre Zitate in eine solche Datei; importiert ist sie ein Text zum Lesen, nicht die Markierungen."
   },
@@ -840,6 +848,14 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" }
     }
+  },
+  "reader_backup_part_doc_notes_one": {
+    "message": "$COUNT$ Notiz zu einem Dokument - ausgelassen, wenn das Dokument schon eine hat",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_part_doc_notes_other": {
+    "message": "$COUNT$ Notizen zu Dokumenten - ausgelassen werden die, deren Dokument schon eine hat",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_backup_phrases_counted_one": {
     "message": "$COUNT$ gespeicherter Eintrag hat höhere Zähler aus der Datei übernommen.",
@@ -987,6 +1003,9 @@
     "message": "Noch ist nichts markiert - markiert wird beim Lesen. Öffne etwas aus der Offline-Leseliste, nimm den Textmarker und markiere eine Passage; sie wartet dann hier."
   },
   "reader_marks_empty_doc": { "message": "In diesem Dokument ist noch nichts markiert." },
+  "reader_doc_note_add": { "message": "Notiz zu diesem Dokument hinzufügen" },
+  "reader_doc_note_edit": { "message": "Notiz zu diesem Dokument bearbeiten" },
+  "reader_doc_note_label": { "message": "Notiz zu diesem Dokument" },
   "reader_marks_no_match": {
     "message": "Keine Markierung passt zu „$QUERY$“.",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }

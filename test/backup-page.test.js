@@ -84,7 +84,9 @@ describe("the backup of everything on the reading list page", () => {
     // The marks are planned after the articles, against the library as it then stands.
     // The book documents are laid against their books' text first (D223,
     // `marks-reanchor.test.js`), then the plan against the library.
-    assert.match(running, /await restoreMarks\(\);\s*const \[articles, books, marks\] = await Promise\.all\(\[listArticles\(\), listBooks\(\), allMarks\(\)\]\);[\s\S]*?const plan = marksImportPlan\(laid\.documents, \{ articles, books, marks \}\);/, "the highlights are not laid against the library at the press");
+    // The marks and the document notes in one read (D282): the plan lays
+    // both against the library as it stands at the press.
+    assert.match(running, /await restoreMarks\(\);\s*const \[articles, books, \{ marks, notes \}\] = await Promise\.all\(\[listArticles\(\), listBooks\(\), allMarksRows\(\)\]\);[\s\S]*?const plan = marksImportPlan\(laid\.documents, \{ articles, books, marks, notes \}\);/, "the highlights are not laid against the library at the press");
   });
 
   it("offers a backup in the list's own frame: what the file is, one line per part, the settings' box", async () => {

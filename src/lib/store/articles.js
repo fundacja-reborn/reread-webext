@@ -35,7 +35,7 @@ import {
   restorePictures,
 } from "./library-copy.js";
 import { promisify, withLibrary } from "./library-db.js";
-import { rebuildMarksBackup, restoreMarks } from "./marks.js";
+import { noteOfRow, rebuildMarksBackup, restoreMarks } from "./marks.js";
 import { asSavedMeta } from "./saved-article.js";
 
 /**
@@ -65,7 +65,9 @@ function pictureRange(url) {
  * Overwriting also clears the old reading position, the old highlighter
  * marks and the old pictures: all anchored into the text that has just been
  * replaced, and saving a page again puts it back on the reading pile - the
- * same reset `readAt` gets. A first save of an address clears nothing: the only marks that can
+ * same reset `readAt` gets. The reader's note on the document (D282) is
+ * anchored to nothing in the text and stays: the marks row is written back
+ * with the note alone. A first save of an address clears nothing: the only marks that can
  * stand under an address nobody saved are the ones the copy put back after
  * the browser emptied the library (`marks-backup.js`), and this save is the
  * page returning to them. The reading list's own copy is asked back first
@@ -84,7 +86,9 @@ export async function putArticle(article) {
     await promisify(stores.content.put({ url: article.url, content, dir, lang }));
     if (existing === undefined) return false;
     await promisify(stores.positions.delete(article.url));
+    const note = noteOfRow(await promisify(stores.marks.get(article.url)));
     await promisify(stores.marks.delete(article.url));
+    if (note !== undefined) await promisify(stores.marks.put({ docId: article.url, marks: [], note }));
     await promisify(stores.pictures.delete(pictureRange(article.url)));
     return true;
   });
@@ -376,11 +380,13 @@ export async function allArticles() {
  *
  * The marks an entry brought ride in beside it (D106) - and only beside an
  * entry that is being added: a skipped article keeps its copy untouched in
- * the whole, marks included. And only where no marks row stands under the
+ * the whole, marks included. And only where no marks stand under the
  * address already: the one row that can stand under an address nobody saved
  * is the copy's (`marks-backup.js`, after the browser emptied the library),
  * and it is the latest word - newer than any file, which was written before
- * the marks the reader made since. The reading list's own copy is asked back
+ * the marks the reader made since. A copy's row holding the document's note
+ * and no mark (D282) keeps its note and takes the file's marks beside it:
+ * the two say nothing about each other. The reading list's own copy is asked back
  * before the writes for the same reason `putArticle` asks: this is a write
  * that fills an empty library, and a library filled first would shut the
  * door on what the copy holds.
@@ -408,8 +414,14 @@ export async function importArticles(articles) {
       await promisify(stores.meta.put(meta));
       await promisify(stores.content.put({ url: article.url, content, dir, lang }));
       if (marks !== undefined && marks.length > 0) {
-        const standing = await promisify(stores.marks.getKey(article.url));
-        if (standing === undefined) await promisify(stores.marks.put({ docId: article.url, marks }));
+        const standing = await promisify(stores.marks.get(article.url));
+        const note = noteOfRow(standing);
+        const held = /** @type {{ marks?: unknown } | undefined} */ (standing)?.marks;
+        if (standing === undefined || !Array.isArray(held) || held.length === 0) {
+          await promisify(
+            stores.marks.put({ docId: article.url, marks, ...(note === undefined ? {} : { note }) }),
+          );
+        }
       }
       // Where the reader stopped (D213) comes back with the article it
       // belongs to - only with an article actually added: one already saved

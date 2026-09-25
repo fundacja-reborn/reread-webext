@@ -935,6 +935,15 @@
     "message": "Added $COUNT$ highlights.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
+  "reader_marks_import_notes_done_one": {
+    "message": "Added $COUNT$ document note.",
+    "description": "In the import report, after the highlights sentence, only when the file brought notes on whole documents (D282). Plural family over the count.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_notes_done_other": {
+    "message": "Added $COUNT$ document notes.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_transfer_marks": {
     "message": "a Markdown text - a note from another app, or a document exported from the reader's menu - which Import adds to the list the way it adds a book. The Highlights page also writes its quotes as one; imported, it is a text to read, not the highlights.",
     "description": "The .md entry of the glossary, after the bold extension: the notes file of the Highlights page."
@@ -1083,6 +1092,15 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" }
     }
+  },
+  "reader_backup_part_doc_notes_one": {
+    "message": "$COUNT$ document note - left out when the document already has one",
+    "description": "One line of a backup's import offer: the notes on whole documents the file holds (D282), and the rule for the ones left out. Plural family over the count.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_part_doc_notes_other": {
+    "message": "$COUNT$ document notes - those whose document already has one are left out",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_backup_phrases_counted_one": {
     "message": "$COUNT$ saved phrase took higher counts from the file.",
@@ -1274,6 +1292,18 @@
     "message": "Nothing is highlighted yet - highlights are made while reading. Open something from the offline reading list, take the highlighter and mark a passage; it will be waiting here."
   },
   "reader_marks_empty_doc": { "message": "Nothing is highlighted in this document yet." },
+  "reader_doc_note_add": {
+    "message": "Add a note to this document",
+    "description": "The reader's menu row over a saved document that has no note of its own (D282): it opens the note dialog over the document's title, and the note is read and written there. While a note stands the row wears the key below."
+  },
+  "reader_doc_note_edit": {
+    "message": "Edit this document's note",
+    "description": "The same menu row while the document has a note, and the accessible name of the note act beside the note on the document's highlights page."
+  },
+  "reader_doc_note_label": {
+    "message": "Note on this document",
+    "description": "The caption over the reader's note on the document's own highlights page (D282)."
+  },
   "reader_marks_no_match": {
     "message": "No highlight matches \"$QUERY$\".",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }
