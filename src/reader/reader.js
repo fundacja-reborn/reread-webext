@@ -345,6 +345,10 @@ const navLibrary = document.getElementById("nav-library");
 const navMarks = document.getElementById("nav-marks");
 // The document's note row (D282): the words say Add or Edit, set by script.
 const navNote = document.getElementById("nav-note");
+// The note itself under the title (D284), and the door to the dialog beside it.
+const docNoteLine = document.getElementById("doc-note");
+const docNoteText = document.getElementById("doc-note-text");
+const docNoteEdit = document.getElementById("doc-note-edit");
 const navVocabulary = document.getElementById("nav-vocabulary");
 const navSettings = document.getElementById("nav-settings");
 const navPictures = document.getElementById("nav-pictures");
@@ -1373,6 +1377,9 @@ function renderArticle(piece) {
   // The pictures line (D231) waits for the database's say like the action
   // rows do: the offer of the document just left must not stand over this one.
   if (picturesOffer !== null) picturesOffer.hidden = true;
+  // So does the note under the title (D284): the note of the document just
+  // left is not this one's.
+  if (docNoteLine !== null) docNoteLine.hidden = true;
 
   // The direction and language of the article, not of the extension: a page in
   // Arabic has to lay out as one, and `lang` is what a spell checker and a
@@ -7744,6 +7751,7 @@ async function refreshActions() {
     if (navMarkRead !== null) navMarkRead.hidden = true;
     if (navDelete !== null) navDelete.hidden = true;
     if (navNote !== null) navNote.hidden = true;
+    if (docNoteLine !== null) docNoteLine.hidden = true;
     return;
   }
 
@@ -7838,27 +7846,33 @@ async function refreshActions() {
   // The note row (D282) over every document the list holds, like the two
   // acts above it: a page not saved yet has no row for a note to live on.
   if (navNote !== null) navNote.hidden = row === null;
-  dressNoteRow();
+  dressDocNote();
 
   refreshPicturesRow(target, row);
   refreshExportRows(target, row);
 }
 
 /**
- * The note row's words (D282), from the note as it stands: Add where none
- * does, Edit where one does - the highlight bar's own two labels, so the
- * state is read off the row before it is pressed, the mark bar's manner.
+ * The note as it stands, said in its two places: the menu row's words
+ * (D282) - Add where none does, Edit where one does, the highlight bar's own
+ * two labels, so the state is read off the row before it is pressed - and
+ * the line under the title (D284), the note itself, shown while there is
+ * one. The note is the reader's own text and enters as textContent.
  */
-function dressNoteRow() {
-  if (navNote === null) return;
-  navNote.textContent = docNote === undefined ? t("reader_doc_note_add") : t("reader_doc_note_edit");
+function dressDocNote() {
+  if (navNote !== null) {
+    navNote.textContent = docNote === undefined ? t("reader_doc_note_add") : t("reader_doc_note_edit");
+  }
+  if (docNoteLine !== null) docNoteLine.hidden = docNote === undefined;
+  if (docNoteText !== null) docNoteText.textContent = docNote ?? "";
 }
 
 /**
- * The menu's note row pressed (D282): the note dialog over the document's
- * title - no quote and no ink, the title is what the note is about - with
- * the note as it stands in the box. The menu closes first, as under every
- * row that opens a room of its own.
+ * The menu's note row pressed (D282), or the act beside the note under the
+ * title (D284): the note dialog over the document's title - no quote and no
+ * ink, the title is what the note is about - with the note as it stands in
+ * the box. The menu closes first, as under every row that opens a room of
+ * its own; pressed from the line it was closed already.
  */
 function onDocNotePress() {
   const target = shown;
@@ -7890,13 +7904,13 @@ async function applyDocNote(target, text) {
   if (next === docNote) return;
   const before = docNote;
   docNote = next;
-  dressNoteRow();
+  dressDocNote();
   try {
     await putDocNote(target.url, text);
   } catch {
     if (shown !== target) return;
     docNote = before;
-    dressNoteRow();
+    dressDocNote();
     showNotice(t("reader_list_write_failed"));
   }
 }
@@ -9862,9 +9876,11 @@ navMarks?.addEventListener("click", () => {
   void showMarks(scope, { fresh: true });
 });
 
-// The document's note row (D282), and the note act on the document's
-// highlights page: two doors to one dialog over the same row.
+// The document's note row (D282), the act beside the note under the title
+// (D284) and the note act on the document's highlights page: three doors to
+// one dialog over the same row.
 navNote?.addEventListener("click", () => onDocNotePress());
+docNoteEdit?.addEventListener("click", () => onDocNotePress());
 marksDocNoteEdit?.addEventListener("click", () => onMarksDocNotePress());
 
 navVocabulary?.addEventListener("click", () => {
@@ -10366,15 +10382,17 @@ function rootReadingSide(ground) {
     // block order to write against), what a finished stroke becomes, and what
     // a tap means while the pen is up. The delete bubble is ours the way the
     // translation bubble is - presses on it must not read as the page's. So
-    // are the pictures line under the header (D231) and the site line over
-    // it (D232): a hold on the press is a press held, a hold on the arrow is
-    // the browser's own gesture on a link, and the site's name is no word
-    // to look up - none of them a word to select.
+    // are the pictures line under the header (D231), the site line over
+    // it (D232) and the reader's note under them (D284): a hold on the
+    // press is a press held, a hold on the arrow is the browser's own
+    // gesture on a link, and the site's name and the reader's own words
+    // are no words to look up - none of them a word to select.
     alsoOwns: (target) =>
       target instanceof Node &&
       (markBar?.contains(target) === true ||
         picturesOffer?.contains(target) === true ||
-        sourceLine?.contains(target) === true),
+        sourceLine?.contains(target) === true ||
+        docNoteLine?.contains(target) === true),
     marking: () => markerOn,
     markRoot: () => contentRoot(),
     onMarked: (range) => void onMarked(range),
