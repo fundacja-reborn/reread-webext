@@ -1007,6 +1007,22 @@
     "message": "Додано $COUNT$ позначення.",
     "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
+  "reader_marks_import_notes_done_one": {
+    "message": "Додано $COUNT$ нотатку до документа.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_notes_done_few": {
+    "message": "Додано $COUNT$ нотатки до документів.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_marks_import_notes_done_many": {
+    "message": "Додано $COUNT$ нотаток до документів.",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_marks_import_notes_done_other": {
+    "message": "Додано $COUNT$ нотатки до документів.",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
+  },
   "reader_transfer_marks": {
     "message": "текст Markdown - нотатка з іншого застосунку або документ, експортований з меню читача, - який імпорт додає до списку так само, як книжку. Сторінка позначень теж записує в нього свої цитати; після імпорту це текст для читання, а не позначення."
   },
@@ -1224,6 +1240,22 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" }
     }
+  },
+  "reader_backup_part_doc_notes_one": {
+    "message": "$COUNT$ нотатка до документа - пропущена, якщо документ уже має нотатку",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_part_doc_notes_few": {
+    "message": "$COUNT$ нотатки до документів - пропущені будуть ті, чий документ уже має нотатку",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
+  "reader_backup_part_doc_notes_many": {
+    "message": "$COUNT$ нотаток до документів - пропущені будуть ті, чий документ уже має нотатку",
+    "placeholders": { "count": { "content": "$1", "example": "12" } }
+  },
+  "reader_backup_part_doc_notes_other": {
+    "message": "$COUNT$ нотатки до документів - пропущені будуть ті, чий документ уже має нотатку",
+    "placeholders": { "count": { "content": "$1", "example": "1,5" } }
   },
   "reader_backup_phrases_counted_one": {
     "message": "$COUNT$ збережена фраза отримала вищі лічильники з файлу.",
@@ -1469,6 +1501,9 @@
     "message": "Поки що нічого не позначено - позначають під час читання. Відкрийте щось з офлайн-списку читання, візьміть маркер і позначте уривок; він чекатиме тут."
   },
   "reader_marks_empty_doc": { "message": "У цьому документі поки що нічого не позначено." },
+  "reader_doc_note_add": { "message": "Додати нотатку до цього документа" },
+  "reader_doc_note_edit": { "message": "Редагувати нотатку до цього документа" },
+  "reader_doc_note_label": { "message": "Нотатка до цього документа" },
   "reader_marks_no_match": {
     "message": "Жодне позначення не відповідає «$QUERY$».",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }

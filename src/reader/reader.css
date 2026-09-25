@@ -2008,6 +2008,37 @@ a.marks-act {
   margin: -0.25rem 0 0;
 }
 
+/* The reader's note on the scoped document (D282), under the title line
+   and over the filter: a caption in the hint's voice, the note itself in
+   the dress a quote's note wears in the rows (`.marks-note` - the same
+   words about a larger thing), and the note act at the end of the line in
+   the acts' quiet dress, spanning both so it stands beside the note, not
+   under it. The caption and the note keep the interface face: this is the
+   reader's comment, not the text. */
+.marks-doc-note {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 0.5rem;
+  align-items: start;
+  margin: 0.9rem 0 0;
+}
+
+.marks-doc-note .marks-doc-note-label {
+  grid-column: 1;
+  margin: 0;
+}
+
+.marks-doc-note .marks-note {
+  grid-column: 1;
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+}
+
+.marks-doc-note .marks-act {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
 /* The list has ended, the tool resumes: the export stands a clear step
    under the rows (Michał's report) - margin only, no rule of its own,
    because the last row already closes the list with its hairline and a

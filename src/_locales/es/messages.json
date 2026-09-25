@@ -740,6 +740,14 @@
     "message": "Se añadieron $COUNT$ resaltados.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
+  "reader_marks_import_notes_done_one": {
+    "message": "Se añadió $COUNT$ nota sobre un documento.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_notes_done_other": {
+    "message": "Se añadieron $COUNT$ notas sobre documentos.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_transfer_marks": {
     "message": "un texto Markdown - una nota de otra aplicación, o un documento exportado desde el menú del lector - que la importación añade a la lista como un libro. La página Resaltados también escribe sus citas en uno; importado, es un texto para leer, no los resaltados."
   },
@@ -871,6 +879,14 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" }
     }
+  },
+  "reader_backup_part_doc_notes_one": {
+    "message": "$COUNT$ nota sobre un documento - se omite si el documento ya tiene una",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_part_doc_notes_other": {
+    "message": "$COUNT$ notas sobre documentos - se omiten las de documentos que ya tienen una",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_backup_phrases_counted_one": {
     "message": "$COUNT$ frase guardada tomó contadores más altos del archivo.",
@@ -1018,6 +1034,9 @@
     "message": "Aún no hay nada resaltado - se resalta mientras se lee. Abre algo de la lista de lectura sin conexión, toma el resaltador y marca un pasaje; te esperará aquí."
   },
   "reader_marks_empty_doc": { "message": "Aún no hay nada resaltado en este documento." },
+  "reader_doc_note_add": { "message": "Añadir una nota sobre este documento" },
+  "reader_doc_note_edit": { "message": "Editar la nota sobre este documento" },
+  "reader_doc_note_label": { "message": "Nota sobre este documento" },
   "reader_marks_no_match": {
     "message": "Ningún resaltado coincide con «$QUERY$».",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }

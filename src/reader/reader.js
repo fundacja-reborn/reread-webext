@@ -81,6 +81,7 @@ import { speechAction } from "../lib/reader/keys.js";
 import { readingTime, wordsIn } from "../lib/reader/length.js";
 import { wordless } from "../lib/matcher/words.js";
 import {
+  asNote,
   compareMarks,
   comparePoints,
   fitsProse,
@@ -217,7 +218,16 @@ import { fromSettingsFile } from "../lib/store/settings-file.js";
 import { allPhrases } from "../lib/store/vocab.js";
 import { fromVocabularyFile } from "../lib/store/vocabulary-file.js";
 import { completeLibraryCopy, restoreLibrary } from "../lib/store/library-copy.js";
-import { allMarks, getMarks, putMarks, putMarksRows, restoreMarks } from "../lib/store/marks.js";
+import {
+  allMarks,
+  allMarksRows,
+  getDocNote,
+  getMarks,
+  putDocNote,
+  putMarks,
+  putMarksRows,
+  restoreMarks,
+} from "../lib/store/marks.js";
 import { keptTitles, readMarksBackup } from "../lib/store/marks-backup.js";
 import { Segment, emptySentence, savedArticle } from "../lib/store/saved-article.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
@@ -331,6 +341,8 @@ const navToc = document.getElementById("nav-toc");
 const navSearch = document.getElementById("nav-search");
 const navLibrary = document.getElementById("nav-library");
 const navMarks = document.getElementById("nav-marks");
+// The document's note row (D282): the words say Add or Edit, set by script.
+const navNote = document.getElementById("nav-note");
 const navVocabulary = document.getElementById("nav-vocabulary");
 const navSettings = document.getElementById("nav-settings");
 const navPictures = document.getElementById("nav-pictures");
@@ -489,6 +501,10 @@ const exportBooksLabel = document.getElementById("library-export-books-label");
 // line, its own export, and the template a row's copy button is cloned from.
 const marksSection = document.getElementById("marks");
 const marksDocLine = document.getElementById("marks-doc");
+// The scoped document's own note under that line (D282), and its edit act.
+const marksDocNote = document.getElementById("marks-doc-note");
+const marksDocNoteText = document.getElementById("marks-doc-note-text");
+const marksDocNoteEdit = document.getElementById("marks-doc-note-edit");
 const marksFilter = /** @type {HTMLInputElement | null} */ (
   document.getElementById("marks-filter")
 );
@@ -615,6 +631,18 @@ let markerOn = false;
  * @type {import("../lib/reader/marks.js").Mark[]}
  */
 let docMarks = [];
+
+/**
+ * The reader's note on the document on screen (D282) - undefined for none,
+ * and for a page the list does not hold. Read with the row behind the view
+ * (`refreshActions`), so it stands fresh whenever the row is asked about,
+ * and the title of that row, for the note dialog's line over the box: the
+ * one text the dialog shows about what the note is on.
+ *
+ * @type {string | undefined}
+ */
+let docNote;
+let docTitle = "";
 
 /**
  * The save of pictures under way, if one is (D145): which article's, the
@@ -928,6 +956,16 @@ let marksPage = 1;
  * @type {import("./marks-list.js").MarkRow[]}
  */
 let marksOnScreen = [];
+
+/**
+ * The scoped document's title and note as the last refresh read them
+ * (D282), for the note act on its page: the dialog opens over the title,
+ * holding the note as it stands. Both undefined on the global visit, and
+ * for a document the lists no longer name.
+ *
+ * @type {{ title: string, note: string | undefined } | undefined}
+ */
+let marksScopeDoc;
 
 /**
  * The quote on its way out loud, by the mark's own name - the saved-phrases
@@ -4146,19 +4184,24 @@ let noteDialogSave = null;
  * anchor. An emptied box saved means the note removed: absence is the only
  * "no note" there is, and `markRecord` narrows emptiness into absence.
  *
- * @param {import("../lib/reader/marks.js").Mark} mark
+ * The same dialog over a whole document (D282): the line holds the
+ * document's title and wears no ink - a mark passes as it is, a document
+ * passes its title and its note.
+ *
+ * @param {{ text: string, color?: string, note?: string }} about what the note is on
  * @param {(text: string) => void} onSave
  */
-function openNoteDialog(mark, onSave) {
+function openNoteDialog(about, onSave) {
   if (noteDialog === null || noteText === null) return;
   noteDialogSave = onSave;
   if (noteQuote !== null) {
     // textContent only - the quote came off somebody's page. Its newlines
     // collapse in the clamped line: this is context, not the passage.
-    noteQuote.textContent = mark.text;
-    noteQuote.setAttribute("data-color", mark.color);
+    noteQuote.textContent = about.text;
+    if (about.color === undefined) noteQuote.removeAttribute("data-color");
+    else noteQuote.setAttribute("data-color", about.color);
   }
-  noteText.value = mark.note ?? "";
+  noteText.value = about.note ?? "";
   noteDialog.showModal();
   // After showModal: a closed dialog is display:none, where nothing has a
   // scrollHeight to measure.
@@ -5492,9 +5535,11 @@ function leaveDocView() {
   // action rows for the same reason.
   if (navExportEpub !== null) navExportEpub.hidden = true;
   if (navExportMarkdown !== null) navExportMarkdown.hidden = true;
-  // And so are the document's two acts in the menu (D272).
+  // And so are the document's two acts in the menu (D272), and its note
+  // row (D282).
   if (navMarkRead !== null) navMarkRead.hidden = true;
   if (navDelete !== null) navDelete.hidden = true;
+  if (navNote !== null) navNote.hidden = true;
   showSegmentNav(null);
   showBookNote(null);
   docToc = [];
@@ -5987,10 +6032,10 @@ async function refreshMarks() {
   // reads; the copy is read too, for the titles of the documents that are
   // gone (`marks-backup.js`).
   await restoreMarks();
-  const [metas, books, marks, backup] = await Promise.all([
+  const [metas, books, { marks, notes }, backup] = await Promise.all([
     listArticles(),
     listBooks(),
-    allMarks().catch(() => new Map()),
+    allMarksRows().catch(() => ({ marks: new Map(), notes: new Map() })),
     readMarksBackup(),
   ]);
   const target = marksShown;
@@ -6018,6 +6063,12 @@ async function refreshMarks() {
     marksDocLine.textContent = scopeTitle ?? "";
   }
   if (scopeTitle !== null) setBackDoor(t("reader_back_to_doc", scopeTitle), scopeTitle);
+  // The document's own note under its title (D282), while it has one and
+  // the lists still name the document; textContent, the reader's words.
+  const scopeNote = target.scope === null || scopeTitle === null ? undefined : notes.get(target.scope);
+  marksScopeDoc = scopeTitle === null ? undefined : { title: scopeTitle, note: scopeNote };
+  if (marksDocNote !== null) marksDocNote.hidden = scopeNote === undefined;
+  if (marksDocNoteText !== null) marksDocNoteText.textContent = scopeNote ?? "";
 
   // The heading says which page this is (Michał's smoke, 2026-08-29): every
   // document's quotes, or one article's or one book's - the title line under
@@ -6045,8 +6096,11 @@ async function refreshMarks() {
   // link over the rows leads down to the button (D152/D153) - a long list
   // puts it a page away - and stands only while there is something to
   // write.
-  if (marksExportButton !== null) marksExportButton.disabled = view.total === 0;
-  if (marksTransferLink !== null) marksTransferLink.hidden = view.total === 0;
+  // A document's note alone is a file too (D282): the notes page writes
+  // it under the title, quotes or none.
+  const nothingToWrite = view.total === 0 && scopeNote === undefined;
+  if (marksExportButton !== null) marksExportButton.disabled = nothingToWrite;
+  if (marksTransferLink !== null) marksTransferLink.hidden = nothingToWrite;
 
   // "3 of 12" while the filter narrows the page down, like the list's line.
   if (marksCount !== null) {
@@ -6783,47 +6837,61 @@ async function exportPickedDocuments(format) {
  *   title: string,
  *   author: string | null,
  *   at: number,
+ *   note?: string,
  *   marks: import("../lib/reader/marks.js").Mark[],
  * }} MarksDoc
  */
 
 /**
+ * Every document with a mark or a note (D282), for the files - a document
+ * with only a note has an empty list and is still written.
+ *
  * @param {(docId: string) => boolean} wanted
  * @returns {Promise<MarksDoc[]>}
  */
 async function marksDocs(wanted) {
-  const [metas, books, marks, backup] = await Promise.all([
+  const [metas, books, { marks, notes }, backup] = await Promise.all([
     listArticles(),
     listBooks(),
-    allMarks(),
+    allMarksRows(),
     readMarksBackup(),
   ]);
+  /**
+   * @param {string} docId
+   * @returns {{ note?: string, marks: import("../lib/reader/marks.js").Mark[] } | null}
+   */
+  const wordsOf = (docId) => {
+    const kept = marks.get(docId);
+    const note = notes.get(docId);
+    if ((kept === undefined && note === undefined) || !wanted(docId)) return null;
+    return { ...(note === undefined ? {} : { note }), marks: kept ?? [] };
+  };
 
   /** @type {MarksDoc[]} */
   const docs = [];
   for (const meta of metas) {
-    const kept = marks.get(meta.url);
-    if (kept !== undefined && wanted(meta.url)) {
+    const words = wordsOf(meta.url);
+    if (words !== null) {
       docs.push({
         docId: meta.url,
         kind: "article",
         title: meta.title,
         author: null,
         at: meta.savedAt,
-        marks: kept,
+        ...words,
       });
     }
   }
   for (const book of books) {
-    const kept = marks.get(book.id);
-    if (kept !== undefined && wanted(book.id)) {
+    const words = wordsOf(book.id);
+    if (words !== null) {
       docs.push({
         docId: book.id,
         kind: "book",
         title: book.title,
         author: book.author,
         at: book.addedAt,
-        marks: kept,
+        ...words,
       });
     }
   }
@@ -6832,9 +6900,10 @@ async function marksDocs(wanted) {
   // from whole, and a quote is no less the reader's for having lost its page.
   const named = new Set([...metas.map((meta) => meta.url), ...books.map((book) => book.id)]);
   for (const [docId, remembered] of keptTitles(backup)) {
-    const kept = marks.get(docId);
-    if (kept === undefined || named.has(docId) || !wanted(docId)) continue;
-    docs.push({ docId, kind: remembered.kind, title: remembered.title, author: null, at: 0, marks: kept });
+    if (named.has(docId)) continue;
+    const words = wordsOf(docId);
+    if (words === null) continue;
+    docs.push({ docId, kind: remembered.kind, title: remembered.title, author: null, at: 0, ...words });
   }
   return docs;
 }
@@ -6851,6 +6920,7 @@ function notesDocOf(doc) {
     title: doc.title,
     source: doc.kind === "article" ? doc.docId : doc.author,
     at: doc.at,
+    ...(doc.note === undefined ? {} : { note: doc.note }),
     marks: doc.marks,
   };
 }
@@ -6863,9 +6933,10 @@ function notesDocOf(doc) {
  * @returns {import("../lib/store/marks-copy.js").CopyDoc}
  */
 function copyDocOf(doc) {
+  const note = doc.note === undefined ? {} : { note: doc.note };
   return doc.kind === "article"
-    ? { kind: "article", url: doc.docId, title: doc.title, marks: doc.marks }
-    : { kind: "book", title: doc.title, author: doc.author, marks: doc.marks };
+    ? { kind: "article", url: doc.docId, title: doc.title, ...note, marks: doc.marks }
+    : { kind: "book", title: doc.title, author: doc.author, ...note, marks: doc.marks };
 }
 
 /**
@@ -7387,6 +7458,10 @@ function renderBackupOffer() {
     }
     const marks = offer.highlights.reduce((sum, doc) => sum + doc.marks.length, 0);
     if (marks > 0) lines.push(plural(marks, "reader_backup_part_highlights"));
+    // The notes on whole documents the file holds (D282), with their rule:
+    // a document that has a note keeps it.
+    const noted = offer.highlights.filter((doc) => doc.note !== undefined).length;
+    if (noted > 0) lines.push(plural(noted, "reader_backup_part_doc_notes"));
     if (offer.invalid > 0) lines.push(plural(offer.invalid, "reader_import_unreadable"));
     importParts.replaceChildren(
       ...lines.map((line) => {
@@ -7472,16 +7547,24 @@ async function runBackup() {
     }
     if (offered.highlights.length > 0) {
       await restoreMarks();
-      const [articles, books, marks] = await Promise.all([listArticles(), listBooks(), allMarks()]);
+      const [articles, books, { marks, notes }] = await Promise.all([listArticles(), listBooks(), allMarksRows()]);
       // A book's marks laid against its text first (D223): a book that
       // stood here before this import may be cut otherwise than the one
       // the file's anchors count on. A book this same import just wrote
       // came with the file's own parts, so its anchors fit as they are.
       const written = new Set(offered.books === null ? [] : offered.books.plan.toAdd.map((book) => book.meta.id));
       const laid = await layBookMarks(offered.highlights, books, written);
-      const plan = marksImportPlan(laid.documents, { articles, books, marks });
-      if (plan.added > 0) await putMarksRows(plan.targets.map(({ docId, marks }) => ({ docId, marks })));
-      sentences.push(plural(plan.added, "reader_marks_import_done"), ...marksImportNotes(plan, 0), ...unplacedNotes(laid.unplaced));
+      const plan = marksImportPlan(laid.documents, { articles, books, marks, notes });
+      // The rows as the plan lays them, document notes included (D282): a
+      // target's note is the one that stood or the file's where none did.
+      if (plan.added > 0 || plan.notes > 0) {
+        await putMarksRows(
+          plan.targets.map(({ docId, marks, note }) => ({ docId, marks, ...(note === undefined ? {} : { note }) })),
+        );
+      }
+      sentences.push(plural(plan.added, "reader_marks_import_done"));
+      if (plan.notes > 0) sentences.push(plural(plan.notes, "reader_marks_import_notes_done"));
+      sentences.push(...marksImportNotes(plan, 0), ...unplacedNotes(laid.unplaced));
     }
     if (offered.settings !== null && importSettings !== null && importSettings.checked) {
       await writeConfig(offered.settings);
@@ -7633,16 +7716,24 @@ async function refreshActions() {
     if (navExportMarkdown !== null) navExportMarkdown.hidden = true;
     if (navMarkRead !== null) navMarkRead.hidden = true;
     if (navDelete !== null) navDelete.hidden = true;
+    if (navNote !== null) navNote.hidden = true;
     return;
   }
 
   // The database row behind the view - an article's meta or a book's, both
-  // answering the two questions asked here: is it kept, and is it read.
-  const row =
+  // answering the two questions asked here: is it kept, and is it read -
+  // and, in the same round trip, the reader's note on the document (D282):
+  // the row's own kind of fact, read whenever the row is, so the menu's
+  // word about it (Add or Edit) is never a refresh behind another tab.
+  const [row, note] = await Promise.all([
     target.origin === "book"
-      ? await getBook(target.url).catch(() => null)
-      : await getArticleMeta(target.url).catch(() => null);
+      ? getBook(target.url).catch(() => null)
+      : getArticleMeta(target.url).catch(() => null),
+    getDocNote(target.url).catch(() => undefined),
+  ]);
   if (shown !== target) return;
+  docNote = note;
+  docTitle = row?.title ?? "";
 
   const book = target.origin === "book";
   // A book opens on its acts once, at its beginning, and closes on the acts
@@ -7717,9 +7808,93 @@ async function refreshActions() {
     navDelete.textContent = t("reader_menu_delete");
     navDelete.removeAttribute("aria-label");
   }
+  // The note row (D282) over every document the list holds, like the two
+  // acts above it: a page not saved yet has no row for a note to live on.
+  if (navNote !== null) navNote.hidden = row === null;
+  dressNoteRow();
 
   refreshPicturesRow(target, row);
   refreshExportRows(target, row);
+}
+
+/**
+ * The note row's words (D282), from the note as it stands: Add where none
+ * does, Edit where one does - the highlight bar's own two labels, so the
+ * state is read off the row before it is pressed, the mark bar's manner.
+ */
+function dressNoteRow() {
+  if (navNote === null) return;
+  navNote.textContent = docNote === undefined ? t("reader_doc_note_add") : t("reader_doc_note_edit");
+}
+
+/**
+ * The menu's note row pressed (D282): the note dialog over the document's
+ * title - no quote and no ink, the title is what the note is about - with
+ * the note as it stands in the box. The menu closes first, as under every
+ * row that opens a room of its own.
+ */
+function onDocNotePress() {
+  const target = shown;
+  if (target === null) return;
+  setPanel(menuButton, menuPanel, false);
+  openNoteDialog({ text: docTitle, note: docNote }, (text) => void applyDocNote(target, text));
+}
+
+/**
+ * The note landing on the document on screen (D282): the row's word changed
+ * first, the note written, the word taken back with the notice if the write
+ * does not land - a mark's note's own manner (`applyNoteInDoc`). When the
+ * view moved while the dialog stood, the edit still lands on the document
+ * it was written under: the row is keyed by the document, not by the view.
+ *
+ * @param {NonNullable<typeof shown>} target
+ * @param {string} text
+ */
+async function applyDocNote(target, text) {
+  const next = asNote(text);
+  if (shown !== target) {
+    try {
+      await putDocNote(target.url, text);
+    } catch {
+      showNotice(t("reader_list_write_failed"));
+    }
+    return;
+  }
+  if (next === docNote) return;
+  const before = docNote;
+  docNote = next;
+  dressNoteRow();
+  try {
+    await putDocNote(target.url, text);
+  } catch {
+    if (shown !== target) return;
+    docNote = before;
+    dressNoteRow();
+    showNotice(t("reader_list_write_failed"));
+  }
+}
+
+/**
+ * The note act on a document's highlights page (D282): the dialog over the
+ * document's title with its note, the write to the row, and the page
+ * refreshed either way - the note under the caption must show what was
+ * written, and a note emptied must stop being shown.
+ */
+function onMarksDocNotePress() {
+  const target = marksShown;
+  const doc = marksScopeDoc;
+  if (target === null || target.scope === null || doc === undefined) return;
+  const scope = target.scope;
+  openNoteDialog({ text: doc.title, note: doc.note }, (text) => {
+    void (async () => {
+      try {
+        await putDocNote(scope, text);
+      } catch {
+        showNotice(t("reader_list_write_failed"));
+      }
+      if (marksShown !== null) await refreshMarks();
+    })();
+  });
 }
 
 /**
@@ -9659,6 +9834,11 @@ navMarks?.addEventListener("click", () => {
   history.pushState(marksState(scope), "");
   void showMarks(scope, { fresh: true });
 });
+
+// The document's note row (D282), and the note act on the document's
+// highlights page: two doors to one dialog over the same row.
+navNote?.addEventListener("click", () => onDocNotePress());
+marksDocNoteEdit?.addEventListener("click", () => onMarksDocNotePress());
 
 navVocabulary?.addEventListener("click", () => {
   setPanel(menuButton, menuPanel, false);

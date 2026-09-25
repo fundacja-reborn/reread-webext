@@ -80,6 +80,26 @@ describe("toMarksFile", () => {
     assert.ok(file.includes("> quoted words\n\nmy thought\non two lines\n\n> unannotated"));
   });
 
+  it("stands the document's note under its heading and detail line, before the quotes (D282)", () => {
+    const file = toMarksFile([
+      {
+        title: "Noted",
+        source: "https://example.com/n",
+        at: Date.UTC(2026, 8, 25),
+        note: "on the whole\ntwo lines",
+        marks: [mark("q one")],
+      },
+    ]);
+    assert.ok(
+      file.includes("## Noted\n\nhttps://example.com/n - 2026-09-25\n\non the whole\ntwo lines\n\n> q one\n"),
+    );
+  });
+
+  it("writes a document that has only a note (D282)", () => {
+    const file = toMarksFile([{ title: "Only", source: null, at: 0, note: "kept", marks: [] }]);
+    assert.equal(file, "# re/read highlights\n\n## Only\n\nkept\n");
+  });
+
   it("says nothing about a source or a day it does not have", () => {
     // A book without an author, a document with no clock: the heading stands
     // alone rather than over an empty line of dashes.

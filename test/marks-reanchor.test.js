@@ -27,7 +27,7 @@ describe("the highlights laid against their book at import (D223)", () => {
     const running = bodyOf(script, "runBackup");
     const written = running.indexOf("const written = new Set(");
     const laid = running.indexOf("const laid = await layBookMarks(offered.highlights, books, written);");
-    const plan = running.indexOf("const plan = marksImportPlan(laid.documents, { articles, books, marks });");
+    const plan = running.indexOf("const plan = marksImportPlan(laid.documents, { articles, books, marks, notes });");
     const notes = running.indexOf("...unplacedNotes(laid.unplaced)");
     assert.ok(written !== -1 && laid !== -1 && plan !== -1 && notes !== -1, "a step is missing");
     assert.ok(written < laid && laid < plan && plan < notes, "the marks are not laid before the plan");

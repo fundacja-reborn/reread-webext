@@ -740,6 +740,14 @@
     "message": "$COUNT$ surlignages ajoutés.",
     "placeholders": { "count": { "content": "$1", "example": "12" } }
   },
+  "reader_marks_import_notes_done_one": {
+    "message": "$COUNT$ note sur un document ajoutée.",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_marks_import_notes_done_other": {
+    "message": "$COUNT$ notes sur des documents ajoutées.",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
+  },
   "reader_transfer_marks": {
     "message": "un texte Markdown - une note d'une autre application, ou un document exporté depuis le menu du lecteur - que l'import ajoute à la liste comme un livre. La page Surlignages y écrit aussi ses citations ; importé, c'est un texte à lire, pas les surlignages."
   },
@@ -871,6 +879,14 @@
     "placeholders": {
       "count": { "content": "$1", "example": "12" }
     }
+  },
+  "reader_backup_part_doc_notes_one": {
+    "message": "$COUNT$ note sur un document - laissée de côté si le document en a déjà une",
+    "placeholders": { "count": { "content": "$1", "example": "1" } }
+  },
+  "reader_backup_part_doc_notes_other": {
+    "message": "$COUNT$ notes sur des documents - celles dont le document en a déjà une sont laissées de côté",
+    "placeholders": { "count": { "content": "$1", "example": "3" } }
   },
   "reader_backup_phrases_counted_one": {
     "message": "$COUNT$ phrase enregistrée a pris des compteurs plus élevés du fichier.",
@@ -1018,6 +1034,9 @@
     "message": "Rien n'est encore surligné - on surligne en lisant. Ouvrez un texte de la liste de lecture hors ligne, prenez le surligneur et marquez un passage ; il vous attendra ici."
   },
   "reader_marks_empty_doc": { "message": "Rien n'est encore surligné dans ce document." },
+  "reader_doc_note_add": { "message": "Ajouter une note sur ce document" },
+  "reader_doc_note_edit": { "message": "Modifier la note sur ce document" },
+  "reader_doc_note_label": { "message": "Note sur ce document" },
   "reader_marks_no_match": {
     "message": "Aucun surlignage ne correspond à « $QUERY$ ».",
     "placeholders": { "query": { "content": "$1", "example": "wikipedia" } }

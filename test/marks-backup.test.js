@@ -41,7 +41,7 @@ function mark(block, over = {}) {
 }
 
 /**
- * @param {{ marks?: Map<string, Mark[]>, titles?: Map<string, DocTitle>, empty?: boolean, snapshotFails?: boolean, stored?: unknown }} [script]
+ * @param {{ marks?: Map<string, Mark[]>, notes?: Map<string, string>, titles?: Map<string, DocTitle>, empty?: boolean, snapshotFails?: boolean, stored?: unknown }} [script]
  */
 function standIn(script = {}) {
   /** @type {string[]} */
@@ -55,7 +55,7 @@ function standIn(script = {}) {
     snapshot: async () => {
       asked.push("snapshot");
       if (script.snapshotFails === true) throw new Error("the store would not open");
-      return { marks: script.marks ?? new Map(), titles: script.titles ?? new Map() };
+      return { marks: script.marks ?? new Map(), notes: script.notes ?? new Map(), titles: script.titles ?? new Map() };
     },
     empty: async () => {
       asked.push("empty");
@@ -185,6 +185,74 @@ describe("the copy of the highlights", () => {
         },
       }),
       null,
+    );
+  });
+});
+
+describe("the note on a whole document in the copy (D282)", () => {
+  it("rides beside the marks, and a document with only a note is an entry with an empty list", () => {
+    const marks = new Map([["https://a.example/", [mark(1)]]]);
+    const notes = new Map([
+      ["https://a.example/", "about a"],
+      ["https://b.example/", "about b"],
+    ]);
+    /** @type {Map<string, DocTitle>} */
+    const titles = new Map([
+      ["https://a.example/", { kind: "article", title: "A" }],
+      ["https://b.example/", { kind: "article", title: "B" }],
+    ]);
+    const backup = marksBackupOf(marks, titles, 42, notes);
+    assert.deepEqual(
+      backup.docs.map((doc) => [doc.docId, doc.title, doc.note, doc.marks.length]),
+      [
+        ["https://a.example/", "A", "about a", 1],
+        ["https://b.example/", "B", "about b", 0],
+      ],
+    );
+    // The count the settings page shows is of marks: a note is not one.
+    assert.equal(marksInBackup(backup), 1);
+    assert.deepEqual(asMarksBackup(JSON.parse(JSON.stringify(backup))), backup);
+    // Without notes the copy is what it was before the field.
+    assert.deepEqual(marksBackupOf(marks, titles, 42), marksBackupOf(marks, titles, 42, new Map()));
+  });
+
+  it("reads a stored note through the mark's own door, and drops an entry with neither a mark nor a note", () => {
+    const stored = {
+      version: 1,
+      writtenAt: 1,
+      docs: [
+        { docId: "x", kind: "article", title: "X", marks: [], note: "  padded  " },
+        { docId: "y", kind: "article", title: "Y", marks: [], note: "   " },
+        { docId: "z", kind: "book", title: "Z", marks: [] },
+        { docId: "w", kind: "book", title: "W", marks: [mark(2)], note: 7 },
+      ],
+    };
+    const backup = asMarksBackup(stored);
+    assert.deepEqual(
+      backup?.docs.map((doc) => [doc.docId, doc.note, doc.marks.length]),
+      [
+        ["x", "padded", 0],
+        ["w", undefined, 1],
+      ],
+    );
+    assert.equal("note" in (backup?.docs[1] ?? {}), false);
+  });
+
+  it("rebuilds with the notes the snapshot holds, and restores them with the marks", async () => {
+    const marks = new Map([["a", [mark(1)]]]);
+    const notes = new Map([["b", "only a note"]]);
+    const fine = standIn({ marks, notes });
+    await rebuildMarksBackup(fine.deps);
+    assert.deepEqual(fine.written(), marksBackupOf(marks, new Map(), 42, notes));
+
+    const emptied = standIn({ empty: true, stored: fine.written() });
+    assert.equal(await restoreMarks(emptied.deps), 2);
+    assert.deepEqual(
+      emptied.put().map((doc) => [doc.docId, doc.note, doc.marks.length]),
+      [
+        ["a", undefined, 1],
+        ["b", "only a note", 0],
+      ],
     );
   });
 });

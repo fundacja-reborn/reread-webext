@@ -1,6 +1,7 @@
 /**
  * The file the highlights travel in and back - `reread-highlights.json`
- * (D168): every document's marks with their notes, and the one thing each
+ * (D168): every document's marks with their notes, the reader's note on the
+ * document itself where there is one (D282), and the one thing each
  * document is found by again. Beside it stands the `.md` (`marks-file.js`),
  * the same quotes for reading; the shared stem says the two are one list in
  * two dresses, and the page that writes them says which dress does what.
@@ -24,8 +25,9 @@
  * carried down to the single mark (`marksImportPlan`): a mark already
  * standing stays as it is, a mark meeting one is left out (merging them
  * would need the union's quote read off a document this import never
- * opens), and every other mark is added. Running the same file again adds
- * nothing.
+ * opens), and every other mark is added. A document's note lands only on a
+ * document that has none; one standing here is the reader's latest word
+ * and stays. Running the same file again adds nothing.
  *
  * A book's marks reach the plan laid against the book's own text (D223,
  * the reader page): the file's anchors count on the cut the book had
@@ -40,20 +42,22 @@
  * `marks.js`, and the reader page dresses the map it returns in titles.
  */
 
-import { asMark, compareMarks, mergePlan } from "../reader/marks.js";
+import { asMark, asNote, compareMarks, mergePlan } from "../reader/marks.js";
 
 /** @typedef {import("../reader/marks.js").Mark} Mark */
 
 /**
  * One document as the file carries it: its kind, what it is found by again,
- * and its marks in reading order. A book's `docId` is never in the file:
+ * its marks in reading order and, where the reader wrote one, the note on
+ * the whole document (D282) - a document with a note and no mark is an
+ * entry with an empty list. A book's `docId` is never in the file:
  * the reader page sets it (D223) once it has laid the document's marks
  * against one copy of the book in the library - the document then names
  * that copy and no other, so two copies cut differently each get the marks
  * laid against their own text.
  *
- * @typedef {{ kind: "article", url: string, title: string, marks: Mark[] }
- *   | { kind: "book", title: string, author: string | null, marks: Mark[], docId?: string }} CopyDoc
+ * @typedef {{ kind: "article", url: string, title: string, marks: Mark[], note?: string }
+ *   | { kind: "book", title: string, author: string | null, marks: Mark[], note?: string, docId?: string }} CopyDoc
  */
 
 /** What the file says it is, and the first thing reading one checks. */
@@ -107,23 +111,24 @@ function compareDocs(a, b) {
 }
 
 /**
- * The whole file, as one string. A document without marks is not written -
- * the file lists highlights, and a title over nothing would be a row about
- * nothing. Indented, because the point of the file is that somebody can open
- * it and see their reading.
+ * The whole file, as one string. A document with neither a mark nor a note
+ * is not written - the file lists the reader's words, and a title over
+ * nothing would be a row about nothing. Indented, because the point of the
+ * file is that somebody can open it and see their reading.
  *
  * @param {CopyDoc[]} docs
  * @returns {string}
  */
 export function toMarksCopy(docs) {
   const rows = docs
-    .filter((doc) => doc.marks.length > 0)
+    .filter((doc) => doc.marks.length > 0 || doc.note !== undefined)
     .sort(compareDocs)
     .map((doc) => {
       const marks = [...doc.marks].sort(compareMarks);
+      const note = doc.note === undefined ? {} : { note: doc.note };
       return doc.kind === "article"
-        ? { kind: doc.kind, url: doc.url, title: doc.title, marks }
-        : { kind: doc.kind, title: doc.title, author: doc.author, marks };
+        ? { kind: doc.kind, url: doc.url, title: doc.title, ...note, marks }
+        : { kind: doc.kind, title: doc.title, author: doc.author, ...note, marks };
     });
   return JSON.stringify({ format: FORMAT, version: VERSION, documents: rows }, null, 2) + "\n";
 }
@@ -160,33 +165,37 @@ export function isMarksCopy(text) {
  * One entry as a document, or null. The marks narrow one by one through
  * `asMark` - the entry is not refused over a broken mark, the lean every
  * file of this extension reads by - capped and put in reading order however
- * the file held them; an entry left with no mark is no document of this
- * file. What a document is found by must be there: an article's address, a
- * book's title. A title an article lacks reads as its address, the way the
- * copy in `storage.local` names a row it has no title for.
+ * the file held them; the document's note through `asNote`, the door a
+ * mark's note takes (D282); an entry left with no mark and no note is no
+ * document of this file. What a document is found by must be there: an
+ * article's address, a book's title. A title an article lacks reads as its
+ * address, the way the copy in `storage.local` names a row it has no title
+ * for.
  *
  * @param {unknown} value
  * @returns {CopyDoc | null}
  */
 function asCopyDoc(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { kind, url, title, author, marks } = /** @type {Record<string, unknown>} */ (value);
+  const { kind, url, title, author, marks, note } = /** @type {Record<string, unknown>} */ (value);
   if (!Array.isArray(marks)) return null;
   const kept = marks
     .slice(0, MAX_MARKS_PER_DOC)
     .map(asMark)
     .filter((mark) => mark !== null)
     .sort(compareMarks);
-  if (kept.length === 0) return null;
+  const words = asNote(note);
+  if (kept.length === 0 && words === undefined) return null;
+  const noted = words === undefined ? {} : { note: words };
 
   if (kind === "article") {
     if (typeof url !== "string" || url.length === 0) return null;
     const named = typeof title === "string" && title.length > 0 ? title : url;
-    return { kind, url, title: named, marks: kept };
+    return { kind, url, title: named, marks: kept, ...noted };
   }
   if (kind === "book") {
     if (typeof title !== "string" || title.length === 0) return null;
-    return { kind, title, author: authorOf(author), marks: kept };
+    return { kind, title, author: authorOf(author), marks: kept, ...noted };
   }
   return null;
 }
@@ -225,20 +234,33 @@ export function fromMarksCopy(text) {
  * @property {{ url: string, title: string }[]} articles
  * @property {{ id: string, title: string, author: string | null }[]} books
  * @property {Map<string, Mark[]>} marks keyed by `docId`
+ * @property {Map<string, string>} [notes] each document's note (D282), keyed by `docId`; none
+ *   when left out
  */
 
 /**
- * One document of the library that receives marks: the row as it will stand
- * once written - what stood there plus what is added - and how many of them
- * are new.
+ * One document of the library that receives marks or a note: the row as it
+ * will stand once written - what stood there plus what is added, the note
+ * that stood or the file's where none stood - and how many marks of it are
+ * new. `noted` says the note is the file's: a target may receive a note and
+ * no mark.
  *
- * @typedef {{ docId: string, kind: "article" | "book", title: string, marks: Mark[], added: number }} MarksImportTarget
+ * @typedef {{
+ *   docId: string,
+ *   kind: "article" | "book",
+ *   title: string,
+ *   marks: Mark[],
+ *   note?: string,
+ *   added: number,
+ *   noted: boolean,
+ * }} MarksImportTarget
  */
 
 /**
  * @typedef {object} MarksImportPlan
- * @property {MarksImportTarget[]} targets the documents that receive at least one mark
+ * @property {MarksImportTarget[]} targets the documents that receive at least one mark or a note
  * @property {number} added marks that will be written, across the targets
+ * @property {number} notes document notes that will be written (D282), across the targets
  * @property {number} twins marks left out because the same mark already stands
  * @property {number} overlapping marks left out because they meet a standing mark
  * @property {CopyDoc[]} missing the file's documents the library does not hold
@@ -307,7 +329,9 @@ function targetsOf(doc, library) {
  * Pure so that `node --test` can hold the promise down: nothing standing
  * is changed or removed, a mark already here is left out without a word
  * (the same file twice adds nothing), a mark meeting a standing one is left
- * out and counted, and a document the library does not hold is named so the
+ * out and counted, a document's note lands only where no note stands (D282
+ * - the one standing is the reader's latest word, and the same words twice
+ * say nothing), and a document the library does not hold is named so the
  * reader can import it first.
  *
  * @param {CopyDoc[]} documents
@@ -320,6 +344,7 @@ export function marksImportPlan(documents, library) {
   /** @type {CopyDoc[]} */
   const missing = [];
   let added = 0;
+  let notes = 0;
   let twins = 0;
   let overlapping = 0;
 
@@ -332,8 +357,20 @@ export function marksImportPlan(documents, library) {
     for (const target of targets) {
       let row = rows.get(target.docId);
       if (row === undefined) {
-        row = { ...target, marks: [...(library.marks.get(target.docId) ?? [])], added: 0 };
+        const standing = library.notes?.get(target.docId);
+        row = {
+          ...target,
+          marks: [...(library.marks.get(target.docId) ?? [])],
+          ...(standing === undefined ? {} : { note: standing }),
+          added: 0,
+          noted: false,
+        };
         rows.set(target.docId, row);
+      }
+      if (doc.note !== undefined && row.note === undefined) {
+        row.note = doc.note;
+        row.noted = true;
+        notes += 1;
       }
       for (const mark of doc.marks) {
         if (row.marks.some((standing) => sameMark(standing, mark))) {
@@ -352,8 +389,9 @@ export function marksImportPlan(documents, library) {
   }
 
   return {
-    targets: [...rows.values()].filter((row) => row.added > 0),
+    targets: [...rows.values()].filter((row) => row.added > 0 || row.noted),
     added,
+    notes,
     twins,
     overlapping,
     missing,

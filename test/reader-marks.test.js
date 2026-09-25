@@ -6,6 +6,7 @@ import {
   MAX_MARK_TEXT_LENGTH,
   MAX_NOTE_LENGTH,
   asMark,
+  asNote,
   compareMarks,
   comparePoints,
   findQuote,
@@ -581,5 +582,16 @@ describe("fitsProse, locateQuote and reanchorMarks (D223)", () => {
     }
     // A file written against this very cut: nothing moves, nothing is counted.
     assert.deepEqual(reanchorMarks(book, [fits]), { marks: [fits], healed: 0, lost: 0 });
+  });
+});
+
+describe("asNote, the one door for a note (D282)", () => {
+  it("trims, caps and reads emptiness as absence - for a mark's note and a document's alike", () => {
+    assert.equal(asNote("  words  "), "words");
+    assert.equal(asNote(""), undefined);
+    assert.equal(asNote("  \n "), undefined);
+    assert.equal(asNote(7), undefined);
+    assert.equal(asNote(undefined), undefined);
+    assert.equal(asNote("x".repeat(MAX_NOTE_LENGTH + 5))?.length, MAX_NOTE_LENGTH);
   });
 });

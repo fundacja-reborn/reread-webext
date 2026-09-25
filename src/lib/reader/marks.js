@@ -65,11 +65,15 @@ export const MAX_MARK_TEXT_LENGTH = 100_000;
  * rather than empty - a mark without a note has no field, so "no note" is one
  * shape everywhere. One narrowing for the record builder and the healer both,
  * so a note entered by editor and one entered by file read by the same rule.
+ * The note on a whole document (D282) is the same kind of words about a
+ * larger thing, and passes through this same door - in the store, in the
+ * copy and in every file - so the two notes can never differ in what they
+ * keep.
  *
  * @param {unknown} value
  * @returns {string | undefined}
  */
-function asNote(value) {
+export function asNote(value) {
   if (typeof value !== "string") return undefined;
   // The trim after the cut keeps the healing idempotent: a cut that lands on
   // a space must read the same on every later pass through this door.
