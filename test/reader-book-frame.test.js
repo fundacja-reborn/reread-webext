@@ -150,7 +150,7 @@ describe("the reader's page over a book", () => {
     // block of the page table, and a book's own chapter headings are h1 too.
     assert.match(
       css,
-      /#article\[data-book-place="within"\] > :is\(#title, \.reader-byline, \.reader-source, \.reader-facts\) \{\n  display: none;\n\}/,
+      /#article\[data-book-place="within"\] > :is\(#title, \.reader-byline, \.reader-source, \.reader-facts, \.reader-note\) \{\n  display: none;\n\}/,
     );
     const open = fn("openBook", "washSearchHit");
     assert.match(open, /showBookNote\(frame\.head \? book : null\)/);

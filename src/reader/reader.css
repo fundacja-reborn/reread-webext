@@ -852,6 +852,7 @@ html {
   max-width: 100%;
 }
 
+.reader-note,
 .reader-byline,
 .reader-source,
 .reader-facts,
@@ -870,6 +871,16 @@ html {
 .reader-byline:has(~ :is(.reader-source, .reader-facts, .reader-pictures):not([hidden])),
 .reader-source:has(~ :is(.reader-facts, .reader-pictures):not([hidden])),
 .reader-facts:has(~ .reader-pictures:not([hidden])) {
+  margin-bottom: 0.35rem;
+}
+
+/* The reader's note (D284) is the block's last line where it stands, and
+   every line before it closes up to it the same way - in a rule of its
+   own, so the block's rule above keeps the shape its tests know. */
+.reader-byline:has(~ .reader-note:not([hidden])),
+.reader-source:has(~ .reader-note:not([hidden])),
+.reader-facts:has(~ .reader-note:not([hidden])),
+.reader-pictures:has(~ .reader-note:not([hidden])) {
   margin-bottom: 0.35rem;
 }
 
@@ -902,7 +913,8 @@ html {
   overflow-wrap: anywhere;
 }
 
-.reader-source a {
+.reader-source a,
+.reader-note button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -914,16 +926,44 @@ html {
   padding: 0.35rem;
   border: 1px solid transparent;
   border-radius: 6px;
+  background: none;
   color: var(--page-muted);
   text-decoration: none;
   transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
 }
 
 .reader-source a:hover,
-.reader-source a:focus-visible {
+.reader-source a:focus-visible,
+.reader-note button:hover,
+.reader-note button:focus-visible {
   border-color: var(--page-border);
   background: color-mix(in srgb, var(--page-fg) 6%, transparent);
   color: var(--page-fg);
+}
+
+/* The reader's note under the title (D284): the block's dress, the words
+   whole - their own line breaks kept, the reader chose them - behind the
+   hairline the reader's words wear everywhere on this page (`.marks-note`,
+   the search snippets), so they read as a comment on the text and not as
+   one more fact about it. The act beside the words is the site line's
+   arrow in the note's clothes (the shared rule above): a flex row, so its
+   44px box rides the first line without growing it, and the hidden
+   attribute is said again for the same reason. */
+.reader-note {
+  display: flex;
+  align-items: flex-start;
+}
+
+.reader-note[hidden] {
+  display: none;
+}
+
+#doc-note-text {
+  min-width: 0;
+  padding-inline-start: 0.65rem;
+  border-inline-start: 2px solid var(--page-line);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 /* The pictures line (D231) lays its three parts - the sentence, the dot,
    the press - one gap apart, and lets the press wrap whole onto a line of
@@ -2183,7 +2223,7 @@ a.marks-act {
    in by the article's own name instead, which the script sets to the title
    over these stretches. The children by name and by `>`: a book's own
    chapter headings are `h1` too, inside the content. */
-#article[data-book-place="within"] > :is(#title, .reader-byline, .reader-source, .reader-facts) {
+#article[data-book-place="within"] > :is(#title, .reader-byline, .reader-source, .reader-facts, .reader-note) {
   display: none;
 }
 

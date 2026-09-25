@@ -94,8 +94,10 @@ describe("the site under the title (D232) - the page", () => {
     assert.match(css, /\.reader-byline:has\(~ :is\(\.reader-source, \.reader-facts, \.reader-pictures\):not\(\[hidden\]\)\)/);
     assert.match(css, /\.reader-source:has\(~ :is\(\.reader-facts, \.reader-pictures\):not\(\[hidden\]\)\)/);
     assert.match(css, /\.reader-source\[hidden\]\s*\{\s*display: none;/, "a flex row that does not hide");
-    assert.match(css, /\.reader-source a \{[^}]*min-height: 44px;/, "the link has no touch target");
-    assert.match(css, /\.reader-source a \{[^}]*text-decoration: none;/, "the arrow is underlined");
+    // The quiet icon's dress is one rule shared with the note line's act
+    // (D284), so the link's name stands first on the selector.
+    assert.match(css, /\.reader-source a,\n\.reader-note button \{[^}]*min-height: 44px;/, "the link has no touch target");
+    assert.match(css, /\.reader-source a,\n\.reader-note button \{[^}]*text-decoration: none;/, "the arrow is underlined");
     assert.doesNotMatch(css, /#source-site \{[^}]*text-decoration/, "the name is dressed as a link");
   });
 
