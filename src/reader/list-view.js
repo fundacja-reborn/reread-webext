@@ -17,7 +17,7 @@
 import { overallPercent } from "../lib/reader/position.js";
 import { isSearchableQuery } from "../lib/reader/search.js";
 import { Segment, listedRows } from "../lib/store/saved-article.js";
-import { matchesFilter } from "../options/models-view.js";
+import { matchesFilter, queryWords } from "../options/models-view.js";
 
 /** @typedef {import("../lib/store/saved-article.js").SavedMeta} SavedMeta */
 /** @typedef {import("../lib/store/saved-article.js").SegmentValue} SegmentValue */
@@ -32,13 +32,18 @@ import { matchesFilter } from "../options/models-view.js";
  * the measure). The renderer says it only on unread rows: on a read one the
  * mark has already said more. `lastReadAt` is the position row's clock - when
  * the reader last stood in the document - or null for one never opened; it is
- * half of the order the list stands in (`listedRows`).
+ * half of the order the list stands in (`listedRows`). `note` is the
+ * reader's own note on the document (D282), carried only while the list is
+ * being searched (D283): the search finds a document by it, and the row
+ * that the note found shows it. Absent otherwise - the plain list never
+ * reads the notes, and a document without one has no field.
  *
  * @typedef {SavedMeta & {
  *   kind: "article" | "book",
  *   progress: { at: number, of: number } | null,
  *   percentRead: number | null,
  *   lastReadAt: number | null,
+ *   note?: string,
  * }} LibraryEntry
  */
 
@@ -52,15 +57,17 @@ export const PAGE_SIZE = 50;
 /**
  * @param {SavedMeta} meta
  * @param {ReadingPosition | null} position
+ * @param {string} [note] the reader's note on the article (D282), while the list searches
  * @returns {LibraryEntry}
  */
-export function articleEntry(meta, position) {
+export function articleEntry(meta, position, note) {
   return {
     ...meta,
     kind: "article",
     progress: null,
     percentRead: overallPercent(position, 1),
     lastReadAt: lastReadFrom(position),
+    ...(note === undefined ? {} : { note }),
   };
 }
 
@@ -89,9 +96,10 @@ function lastReadFrom(position) {
  *
  * @param {BookMeta} book
  * @param {ReadingPosition | null} position
+ * @param {string} [note] the reader's note on the book (D282), while the list searches
  * @returns {LibraryEntry}
  */
-export function bookEntry(book, position) {
+export function bookEntry(book, position, note) {
   const at = position === null ? 0 : Math.min(position.segmentIndex, book.segmentCount - 1);
   return {
     url: book.id,
@@ -110,6 +118,7 @@ export function bookEntry(book, position) {
     // Its words too (D226), the whole book's: the row says how long the
     // reading is, the part on screen says its own share once opened.
     ...(book.words === undefined ? {} : { words: book.words }),
+    ...(note === undefined ? {} : { note }),
   };
 }
 
@@ -130,14 +139,40 @@ export function uncounted(entries, tried) {
 }
 
 /**
- * Everything a row can be found by: the title as it is shown, and the site
- * it came from - or, for a book, its author.
+ * Everything a row can be found by: the title as it is shown, the site it
+ * came from - or, for a book, its author - and the reader's own note on
+ * the document (D283), where the entry carries one. The note is the
+ * reader's words about the document, the same kind of thing the title is
+ * and a better key than either: they wrote it to find or describe this
+ * very document. So it belongs to the search over the rows' own words,
+ * not to the scan of the texts behind the checkbox - reading the notes
+ * costs one read of the highlights store at the press, reading the texts
+ * costs whole books.
  *
- * @param {SavedMeta} meta
+ * @param {SavedMeta & { note?: string }} meta
  * @returns {string}
  */
 export function searchableArticle(meta) {
-  return `${meta.title} ${meta.hostname}`.toLowerCase();
+  return `${meta.title} ${meta.hostname} ${meta.note ?? ""}`.toLowerCase();
+}
+
+/**
+ * Whether a row's note is part of the answer to the search on screen
+ * (D283), and so is shown under the row: the row matched because every
+ * word of the query stands somewhere in its title, site or note - the
+ * title and the site are already on the row, the note is the one part of
+ * the answer the row cannot otherwise show. Shown when any word of the
+ * query stands in it, the tokens `matchesFilter` matched by; never over an
+ * empty box, where nothing was asked, and never for a row without a note.
+ *
+ * @param {{ note?: string }} entry
+ * @param {string} query as typed
+ * @returns {boolean}
+ */
+export function noteShown(entry, query) {
+  if (entry.note === undefined) return false;
+  const note = entry.note.toLowerCase();
+  return queryWords(query).some((word) => note.includes(word));
 }
 
 /**

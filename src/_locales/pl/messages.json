@@ -740,7 +740,7 @@
   },
   "reader_empty_all_read": { "message": "Nie zostało nic do przeczytania – wszystko, co zapisane, jest oznaczone jako przeczytane." },
   "reader_empty_none_read": { "message": "Nic nie jest jeszcze oznaczone jako przeczytane." },
-  "reader_filter_placeholder": { "message": "Szukaj po tytule lub witrynie" },
+  "reader_filter_placeholder": { "message": "Szukaj po tytule, witrynie lub notatce" },
   "reader_filter_label": { "message": "Szukaj w czytelni" },
   "reader_filter_no_match": {
     "message": "Brak artykułów pasujących do „$QUERY$”.",
@@ -1634,7 +1634,7 @@
       "percent": { "content": "$1", "example": "19" }
     }
   },
-  "reader_search_in_titles": { "message": "W tytułach" },
+  "reader_search_in_titles": { "message": "W tytułach i notatkach" },
   "reader_search_in_text": { "message": "W treści" },
   "reader_search_more_hits_one": {
     "message": "i $COUNT$ dalsze trafienie",

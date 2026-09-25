@@ -219,6 +219,7 @@ import { allPhrases } from "../lib/store/vocab.js";
 import { fromVocabularyFile } from "../lib/store/vocabulary-file.js";
 import { completeLibraryCopy, restoreLibrary } from "../lib/store/library-copy.js";
 import {
+  allDocNotes,
   allMarks,
   allMarksRows,
   getDocNote,
@@ -260,6 +261,7 @@ import {
   bookEntry,
   keptPicks,
   libraryView,
+  noteShown,
   pickedState,
   searchButtonState,
   uncounted,
@@ -5633,14 +5635,20 @@ async function refreshLibrary() {
   await completeLibraryCopy();
   // One list, two stores: books enter dressed as rows (`bookEntry`), with
   // their positions read in bulk - fifty rows must not mean fifty lookups.
-  const [metas, books, positions] = await Promise.all([
+  // The readers' notes on the documents (D283) only while the list is
+  // being searched: the search finds a document by its note and the row
+  // shows it, and the plain list - every visit, every step back - never
+  // pays for a read of the highlights store it would not use.
+  const searching = libraryQuery.trim().length > 0;
+  const [metas, books, positions, notes] = await Promise.all([
     listArticles(),
     listBooks(),
     allPositions(),
+    searching ? allDocNotes().catch(() => new Map()) : Promise.resolve(new Map()),
   ]);
   const entries = [
-    ...metas.map((meta) => articleEntry(meta, positions.get(meta.url) ?? null)),
-    ...books.map((book) => bookEntry(book, positions.get(book.id) ?? null)),
+    ...metas.map((meta) => articleEntry(meta, positions.get(meta.url) ?? null, notes.get(meta.url))),
+    ...books.map((book) => bookEntry(book, positions.get(book.id) ?? null, notes.get(book.id))),
   ];
   const view = libraryView(entries, { segment, query: libraryQuery, page: libraryPage });
   libraryPage = view.page;
@@ -5938,7 +5946,7 @@ function libraryRow(entry) {
     label.className = "library-open";
     label.htmlFor = box.id;
     label.textContent = entry.title;
-    text.append(label, detailLine(entry));
+    text.append(label, detailLine(entry), ...noteLine(entry));
     item.append(box, text);
     return item;
   }
@@ -5950,7 +5958,7 @@ function libraryRow(entry) {
   open.setAttribute("data-kind", entry.kind);
   open.textContent = entry.title;
 
-  text.append(open, detailLine(entry));
+  text.append(open, detailLine(entry), ...noteLine(entry));
 
   const remove = document.createElement("button");
   remove.type = "button";
@@ -5964,6 +5972,25 @@ function libraryRow(entry) {
 
   item.append(text, remove);
   return item;
+}
+
+/**
+ * The reader's note under a row the search found by it (D283): one line,
+ * cut by the stylesheet, in the muted voice - the part of the answer the
+ * row cannot otherwise show, since the title and the site are on it
+ * already. Nothing over a row the note did not help find, and nothing at
+ * all while the list stands unsearched (`noteShown`, under test). The note
+ * is the reader's own text and enters as textContent.
+ *
+ * @param {import("./list-view.js").LibraryEntry} entry
+ * @returns {HTMLElement[]} the line, or nothing to append
+ */
+function noteLine(entry) {
+  if (!noteShown(entry, libraryQuery)) return [];
+  const note = document.createElement("p");
+  note.className = "library-doc-note";
+  note.textContent = entry.note ?? "";
+  return [note];
 }
 
 /**

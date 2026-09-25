@@ -146,8 +146,23 @@ export function searchableText(row) {
  * @returns {boolean}
  */
 export function matchesFilter(searchable, query) {
-  const words = query.toLowerCase().split(/\s+/).filter((word) => word.length > 0);
-  return words.every((word) => searchable.includes(word));
+  return queryWords(query).every((word) => searchable.includes(word));
+}
+
+/**
+ * The words a query is made of, as `matchesFilter` looks for them: lower
+ * case, split on air, nothing empty. Exported so that a row can say which
+ * of its parts carried the match (the reading list's note line, D283) by
+ * the very tokens the match was made of.
+ *
+ * @param {string} query as typed
+ * @returns {string[]}
+ */
+export function queryWords(query) {
+  return query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((word) => word.length > 0);
 }
 
 /**

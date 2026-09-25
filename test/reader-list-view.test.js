@@ -4,8 +4,11 @@ import { describe, it } from "node:test";
 import { Segment } from "../src/lib/store/saved-article.js";
 import {
   PAGE_SIZE,
+  articleEntry,
+  bookEntry,
   keptPicks,
   libraryView,
+  noteShown,
   pickedState,
   searchButtonState,
   searchableArticle,
@@ -15,7 +18,7 @@ import {
 
 /**
  * @typedef {import("../src/lib/store/saved-article.js").SavedMeta &
- *   { lastReadAt?: number | null, kind?: "article" | "book" }} ListedMeta
+ *   { lastReadAt?: number | null, kind?: "article" | "book", note?: string }} ListedMeta
  */
 
 /**
@@ -40,6 +43,43 @@ describe("searchableArticle", () => {
     for (const word of ["old", "chinese", "wikipedia"]) {
       assert.ok(searchable.includes(word), `misses ${word}`);
     }
+  });
+
+  it("finds a row by the reader's note on the document too (D283), and reads the same without one", () => {
+    const noted = searchableArticle({ ...meta(1, { title: "Old Chinese" }), note: "Compare with Baxter" });
+    assert.ok(noted.includes("baxter"));
+    assert.equal(searchableArticle(meta(1, { title: "Old Chinese" })), searchableArticle({ ...meta(1, { title: "Old Chinese" }), note: undefined }));
+  });
+});
+
+describe("the reader's note on a row (D283)", () => {
+  it("rides the entry only when given, for an article and for a book alike", () => {
+    const article = articleEntry(meta(1), null, "kept");
+    assert.equal(article.note, "kept");
+    assert.equal("note" in articleEntry(meta(1), null), false);
+    const book = {
+      id: "b1",
+      title: "A Novel",
+      author: null,
+      lang: null,
+      segmentCount: 3,
+      totalChars: 30,
+      addedAt: 5,
+      readAt: null,
+      toc: [],
+    };
+    assert.equal(bookEntry(book, null, "about the novel").note, "about the novel");
+    assert.equal("note" in bookEntry(book, null), false);
+  });
+
+  it("is shown under a row when any word of the query stands in it, and only then", () => {
+    const entry = { note: "Compare with Baxter\nand Sagart" };
+    assert.equal(noteShown(entry, "baxter"), true);
+    assert.equal(noteShown(entry, "BAXTER chinese"), true);
+    assert.equal(noteShown(entry, "chinese"), false);
+    assert.equal(noteShown(entry, ""), false);
+    assert.equal(noteShown(entry, "   "), false);
+    assert.equal(noteShown({}, "baxter"), false);
   });
 });
 
@@ -142,6 +182,18 @@ describe("libraryView", () => {
 
     const bySite = libraryView(metas, { segment: Segment.UNREAD, query: "cycling", page: 1 });
     assert.deepEqual(bySite.rows.map((one) => one.savedAt), [2]);
+  });
+
+  it("filters by the reader's note on the document as well (D283)", () => {
+    const metas = [
+      meta(1, { title: "Old Chinese", note: "compare with Baxter" }),
+      meta(2, { title: "Grand Tour" }),
+    ];
+    const byNote = libraryView(metas, { segment: Segment.UNREAD, query: "baxter", page: 1 });
+    assert.deepEqual(byNote.rows.map((one) => one.savedAt), [1]);
+    // Every word somewhere in the row - the title and the note together.
+    const across = libraryView(metas, { segment: Segment.UNREAD, query: "chinese baxter", page: 1 });
+    assert.deepEqual(across.rows.map((one) => one.savedAt), [1]);
   });
 
   it("needs every word of the query somewhere in the row", () => {

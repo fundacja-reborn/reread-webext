@@ -581,7 +581,7 @@
   },
   "reader_empty_all_read": { "message": "Plus rien à lire - tout ce qui est enregistré est marqué comme lu." },
   "reader_empty_none_read": { "message": "Rien n'est encore marqué comme lu." },
-  "reader_filter_placeholder": { "message": "Rechercher par titre ou par site" },
+  "reader_filter_placeholder": { "message": "Rechercher par titre, site ou note" },
   "reader_filter_label": { "message": "Rechercher dans la liste de lecture" },
   "reader_filter_no_match": {
     "message": "Aucun article enregistré ne correspond à « $QUERY$ ».",
@@ -1147,7 +1147,7 @@
       "percent": { "content": "$1", "example": "19" }
     }
   },
-  "reader_search_in_titles": { "message": "Dans les titres" },
+  "reader_search_in_titles": { "message": "Dans les titres et les notes" },
   "reader_search_in_text": { "message": "Dans le texte" },
   "reader_search_more_hits_one": {
     "message": "et $COUNT$ autre occurrence",

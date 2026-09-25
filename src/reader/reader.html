@@ -820,7 +820,7 @@
           <input
             type="search"
             id="library-filter"
-            placeholder="Search by title or site"
+            placeholder="Search by title, site or note"
             data-i18n-placeholder="reader_filter_placeholder"
           />
           <button type="button" id="library-search-go" data-i18n="reader_search_go" disabled>
@@ -838,7 +838,8 @@
         </div>
         <!-- What the deeper search found, standing where the rows stand:
              rows whose own words match first (known before any text is
-             read), then the texts' hits batch by batch, with the way to the
+             read - the title, the site or author, the reader's note on the
+             document), then the texts' hits batch by batch, with the way to the
              next portion under them. Rows are built by script; titles and
              snippets enter as text only. -->
         <section id="library-search" hidden aria-labelledby="library-title">
