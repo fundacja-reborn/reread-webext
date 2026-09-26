@@ -427,7 +427,7 @@ const TOUCH_SIZES = `
     --type-cta: 15px;
     --gap-actions: 0.63em;
     --pad-action: 0.57em 0.43em;
-    --pull-action: -0.43em;
+    --pull-action: calc(-0.43 * var(--type-action) * var(--bubble-scale, 1));
     --pad-cta: 0.53em 1.07em;
     --icon: 1.43em;
     --type-door: 16px;
@@ -471,7 +471,10 @@ export const STYLE = `
     --type-cta: 13px;
     --gap-actions: 0.43em;
     --pad-action: 0.17em 0.33em;
-    --pull-action: -0.33em;
+    /* The first action's pull, an absolute length rather than an em: it is
+       spent by the row (its margin), and the label's padding it gives back is
+       in the button's smaller type - the two ems would not agree. */
+    --pull-action: calc(-0.33 * var(--type-action) * var(--bubble-scale, 1));
     --pad-cta: 0.23em 0.77em;
     --icon: 1.33em;
     /* The dictionaries' shelf's measures (lib/lookup-shelf.js, the fifth
@@ -1043,8 +1046,11 @@ export const STYLE = `
   /* A label carries padding so that a focus ring has somewhere to go, and the
      first one gives it back: the row has to start on the same vertical line as
      the gloss above it. Save, the launcher and Settings bring their own box
-     and need no pulling. */
-  .actions button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"]) { margin-left: var(--pull-action); }
+     and need no pulling. The pull is the row's margin, not the button's: the
+     row is the fold's clip box, and a button pulled past its edge is cut
+     there - the speaker's ink (D287) lost its left side that way. Pulled at
+     the row, the button stands inside the box. */
+  .actions:has(> button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"])) { margin-left: var(--pull-action); }
   .actions button:hover:not(:disabled) { opacity: 1; }
   .actions button:focus-visible {
     opacity: 1;
