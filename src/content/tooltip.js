@@ -104,6 +104,7 @@ import { editedMeanings } from "../lib/meanings.js";
 import { t } from "../lib/i18n.js";
 import { afterPress, isSaved } from "../lib/lookup.js";
 import { renderShelf } from "../lib/lookup-shelf.js";
+import { reflectSpeech } from "../lib/tts.js";
 import { compileUserCss } from "../lib/user-css.js";
 
 const GAP = 8;
@@ -1103,6 +1104,18 @@ export const STYLE = `
     height: var(--icon);
     display: block;
   }
+  /* The speaker's two standings (D287): busy while the device's voice is
+     being prepared - seconds on an e-ink tablet, where the button used to
+     change nothing and a second press cancelled the wait - and pressed while
+     it speaks, when a press stops it. Both wear the filled door's dress, ink
+     on which the paper writes: one repaint, nothing animated, so an e-ink
+     panel draws it, in the pair the schemes hand the doors. */
+  .actions button[data-action="speak"][aria-busy="true"],
+  .actions button[data-action="speak"][aria-pressed="true"] {
+    background: var(--door-ink);
+    color: var(--door-paper);
+    opacity: 1;
+  }
 
   /* The exception, and the only real call to action a bubble has: Save is the
      press that keeps a phrase which would otherwise be gone, the launcher's
@@ -1477,6 +1490,7 @@ export const STYLE = `
  * @property {(hint: Hint | null) => void} setHint
  * @property {() => void} expand
  * @property {(actions: Action[]) => void} setActions
+ * @property {(phase: import("../lib/tts.js").SpeechPhase) => void} setSpeech
  * @property {(rect: DOMRect) => void} follow
  * @property {() => void} reveal
  * @property {() => void} hide
@@ -2740,6 +2754,17 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   }
 
   /**
+   * Where the voice is, as the page that owns this bubble last said (D287,
+   * `lib/tts.js`): the speaker is painted from it when the row is built and
+   * again whenever it changes. Held here rather than asked of the engine,
+   * because the bubble touches no API of its own - everything it knows
+   * arrives through its methods.
+   *
+   * @type {import("../lib/tts.js").SpeechPhase}
+   */
+  let speech = "idle";
+
+  /**
    * @param {(Action | "cancel")[]} actions
    */
   function renderActions(actions) {
@@ -2761,6 +2786,10 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
         button.setAttribute("aria-label", name);
         button.title = name;
         button.append(action === "speak" ? speakerIcon() : action === "copy" ? copyIcon() : readerIcon());
+        // The speaker wears the voice's standing from the moment it is built
+        // (D287): the row is rebuilt over a bubble that may be mid-phrase,
+        // and the standing must not blink off with it.
+        if (action === "speak") reflectSpeech(button, speech);
         // The copy icon is a disclosure: it says so, and keeps saying the
         // truth when the buttons are rebuilt over an open row.
         if (action === "copy") {
@@ -3142,6 +3171,17 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
       place();
     },
 
+    /**
+     * Where the voice is, from the page that owns this bubble (D287): the
+     * speaker is repainted at once, and again whenever the row is rebuilt.
+     *
+     * @param {import("../lib/tts.js").SpeechPhase} phase
+     */
+    setSpeech(phase) {
+      speech = phase;
+      const speaker = actionsElement?.querySelector('button[data-action="speak"]');
+      if (speaker instanceof HTMLButtonElement) reflectSpeech(speaker, speech);
+    },
     follow(rect) {
       if (host === null || bubble === null) return;
       // The phrase moved (a scroll, D82); the bubble keeps its place beside

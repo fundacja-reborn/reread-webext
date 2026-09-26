@@ -2029,6 +2029,18 @@ a.marks-act {
   white-space: nowrap;
 }
 
+/* The row's speaker in its two standings (D287): busy while the device's
+   voice is being prepared - seconds on an e-ink tablet, where the button
+   used to change nothing and a second press cancelled the wait - and
+   pressed while it speaks, when a press stops it. Ink on paper for both:
+   one repaint, nothing animated, so an e-ink panel draws it. */
+.marks-act.marks-speak[aria-busy="true"],
+.marks-act.marks-speak[aria-pressed="true"] {
+  border-color: var(--page-fg);
+  background: var(--page-fg);
+  color: var(--page-bg);
+}
+
 /* The document-wide deletion in the missing-document note (D150): a text
    act on its own line under the sentence that names and counts the document
    - words, because "all" is a scope no glyph can carry. Framed at rest, in

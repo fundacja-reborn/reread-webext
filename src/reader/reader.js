@@ -246,11 +246,14 @@ import {
   canSpeak,
   primaryLanguage,
   setSpeechOff,
+  reflectSpeech,
   speak,
-  speaking,
+  speechOwner,
+  speechPhase,
   speechSupported,
   stop as stopTts,
   voicesFor,
+  watchSpeech,
 } from "../lib/tts.js";
 import {
   closeDocSearch,
@@ -986,12 +989,33 @@ let marksScopeDoc;
 /**
  * The quote on its way out loud, by the mark's own name - the saved-phrases
  * page's rule repeated: pressing that row's speaker again stops it, any
- * other row's simply speaks (the engine replaces what was playing), and a
- * key gone stale is harmless because `speaking()` answers for the engine.
+ * other row's simply speaks (the engine replaces what was playing). Cleared
+ * when the voice rests (the watch below), so a stale name never answers for
+ * the engine.
  *
  * @type {string | null}
  */
 let soundingMark = null;
+
+/**
+ * That row's speaker, painted with the voice's standing (D287): busy while
+ * the voice is being prepared, pressed while it speaks. The token `speak` is
+ * handed, so that the watch tells a row's press from the bubble's on this
+ * page - whichever takes the voice, the other's button rests.
+ *
+ * @type {HTMLButtonElement | null}
+ */
+let soundingButton = null;
+
+watchSpeech((phase, owner) => {
+  if (soundingButton === null) return;
+  const ours = owner === soundingButton;
+  reflectSpeech(soundingButton, ours ? phase : "idle");
+  if (!ours || phase === "idle") {
+    soundingButton = null;
+    soundingMark = null;
+  }
+});
 
 /**
  * Whether a walk back to the list is in progress (the menu's list row over
@@ -6404,7 +6428,16 @@ function markRowElement(row, index, withTitle) {
   }
   // No speaker on an engine that cannot speak - the voice rows' own rule.
   if (canSpeak()) {
-    acts.append(markActButton("speak", index, t("reader_listen"), marksSpeakIcon));
+    const speaker = markActButton("speak", index, t("reader_listen"), marksSpeakIcon);
+    // Rebuilt rows wear the voice's standing again (D287): the sounding one
+    // keeps its button, every other rests.
+    if (soundingMark === markRowKey(row)) {
+      soundingButton = speaker;
+      reflectSpeech(speaker, speechPhase());
+    } else {
+      reflectSpeech(speaker, "idle");
+    }
+    acts.append(speaker);
   }
   acts.append(markActButton("copy", index, t("marker_copy"), marksCopyIcons));
   acts.append(
@@ -6558,15 +6591,22 @@ function markRowKey(row) {
  * the assumption the whole extension already makes about what is being read.
  *
  * @param {import("./marks-list.js").MarkRow} row
+ * @param {HTMLButtonElement} speaker the row's speaker, painted with the voice's standing
  */
-async function speakMarkRow(row) {
+async function speakMarkRow(row, speaker) {
   const key = markRowKey(row);
-  if (speaking() && soundingMark === key) {
+  // A press while the voice is being prepared is refused (D287): the button
+  // says so, and a stop there would cancel exactly that wait.
+  const phase = speechPhase();
+  if (phase === "pending") return;
+  if (phase === "speaking" && speechOwner() === soundingButton && soundingMark === key) {
     stopTts();
-    soundingMark = null;
     return;
   }
+  // The row spoken until now rests at once; the watch above paints this one.
+  if (soundingButton !== null && soundingButton !== speaker) reflectSpeech(soundingButton, "idle");
   soundingMark = key;
+  soundingButton = speaker;
   // The row's own language first; with none and no pair, the empty tag reads
   // in the device's default offline voice - `speechLang`'s manner.
   const lang = row.lang ?? settings.sourceLang ?? "";
@@ -6575,13 +6615,11 @@ async function speakMarkRow(row) {
     lang,
     settings.ttsVoices[primaryLanguage(lang)],
     settings.ttsRate / 100,
+    speaker,
   );
   // Refused for want of an offline voice (D155): the row's speaker has no bar
   // of its own to say so, so the page's notice line does.
-  if (!spoke) {
-    soundingMark = null;
-    showNotice(t("speech_no_offline_voice"));
-  }
+  if (!spoke) showNotice(t("speech_no_offline_voice"));
 }
 
 /**
@@ -9144,7 +9182,7 @@ marksRowsList?.addEventListener("click", (event) => {
   if (row === undefined) return;
   const act = button.getAttribute("data-act");
   if (act === "copy") void copyMarkRow(button, row);
-  else if (act === "speak") void speakMarkRow(row);
+  else if (act === "speak") void speakMarkRow(row, button);
   else if (act === "open") void openMarkRow(row);
   else if (act === "note") noteMarkRow(row);
   else if (act === "delete" || act === "delete-all") {

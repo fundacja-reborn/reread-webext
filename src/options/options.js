@@ -96,10 +96,13 @@ import {
   offlineLanguages,
   primaryLanguage,
   setSpeechOff,
+  reflectSpeech,
   speak,
+  speechPhase,
   speechSupported,
   voiceLanguage,
   voicesFor,
+  watchSpeech,
 } from "../lib/tts.js";
 import { hasToolbar, pinnedByBrowser, readSteps, stepsView, writeSteps } from "./first-steps.js";
 import { armSearch } from "./search.js";
@@ -3986,7 +3989,19 @@ document.getElementById("tts-voice")?.addEventListener("change", (event) => {
     config = written;
   });
 });
-document.getElementById("tts-listen")?.addEventListener("click", () => {
+const listenButton = document.getElementById("tts-listen");
+// The sample's button wears the voice's standing (D287): busy while the
+// device's voice is being prepared - the first press of a session on an
+// e-ink tablet takes seconds - and pressed while the sample sounds.
+if (listenButton instanceof HTMLButtonElement) {
+  watchSpeech((phase, owner) => {
+    reflectSpeech(listenButton, owner === listenButton ? phase : "idle");
+  });
+}
+listenButton?.addEventListener("click", () => {
+  // A press while the voice is being prepared is refused: the button says
+  // so, and a second sample queued behind the first would only wait longer.
+  if (speechPhase() === "pending") return;
   // The selection on screen, not the stored one: the point of the button is
   // trying a voice out before living with it.
   const select = document.getElementById("tts-voice");
@@ -3995,7 +4010,7 @@ document.getElementById("tts-listen")?.addEventListener("click", () => {
   // like - a sample read at a speed nobody uses is a sample of nothing. In the
   // language the row is about; with none the empty tag lets the device's
   // default offline voice read the sample.
-  void speak(VOICE_SAMPLE, voiceRowLanguage() ?? "", chosen, config.ttsRate / 100);
+  void speak(VOICE_SAMPLE, voiceRowLanguage() ?? "", chosen, config.ttsRate / 100, listenButton);
 });
 document.getElementById("tts-rate-down")?.addEventListener("click", () => {
   void stepRate(-TTS_RATE.step);

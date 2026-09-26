@@ -51,12 +51,15 @@ import { watchToolbarScheme } from "../lib/theme-icon.js";
 import {
   canSpeak,
   primaryLanguage,
+  reflectSpeech,
   setSpeechOff,
   speak,
-  speaking,
+  speechOwner,
+  speechPhase,
   speechSupported,
   stop as stopSpeaking,
   voicesFor,
+  watchSpeech,
 } from "../lib/tts.js";
 import { filterActive } from "../options/models-view.js";
 import {
@@ -205,12 +208,32 @@ const SAMPLE_ROWS = 3;
 /**
  * The row whose phrase is on its way out loud, by its key: pressing that
  * row's speaker again stops it, pressing any other row's simply speaks - the
- * engine replaces what was playing. A key gone stale (the utterance ended on
- * its own) is harmless, because `speaking()` answers for the engine.
+ * engine replaces what was playing. Cleared when the voice rests (the watch
+ * below), so a stale key never answers for the engine.
  *
  * @type {string | null}
  */
 let sounding = null;
+
+/**
+ * That row's speaker, painted with the voice's standing (D287): busy while
+ * the voice is being prepared, pressed while it speaks. The token `speak` is
+ * handed, so that the watch tells this row's press from the lookup box's on
+ * the same page - whichever takes the voice, the other's button rests.
+ *
+ * @type {HTMLButtonElement | null}
+ */
+let soundingButton = null;
+
+watchSpeech((phase, owner) => {
+  if (soundingButton === null) return;
+  const ours = owner === soundingButton;
+  reflectSpeech(soundingButton, ours ? phase : "idle");
+  if (!ours || phase === "idle") {
+    soundingButton = null;
+    sounding = null;
+  }
+});
 
 /**
  * @param {string} tag
@@ -243,15 +266,22 @@ function button(label) {
  * this extension reads (`ttsVoices`, `ttsRate`).
  *
  * @param {Phrase} phrase
+ * @param {HTMLButtonElement} speaker the row's speaker, painted with the voice's standing
  */
-async function speakPhrase(phrase) {
+async function speakPhrase(phrase, speaker) {
   if (config === null) return;
-  if (speaking() && sounding === phrase.normalized) {
+  // A press while the voice is being prepared is refused (D287): the button
+  // says so, and a stop there would cancel exactly that wait.
+  const phase = speechPhase();
+  if (phase === "pending") return;
+  if (phase === "speaking" && speechOwner() === soundingButton && sounding === phrase.normalized) {
     stopSpeaking();
-    sounding = null;
     return;
   }
+  // The row spoken until now rests at once; the watch above paints this one.
+  if (soundingButton !== null && soundingButton !== speaker) reflectSpeech(soundingButton, "idle");
   sounding = phrase.normalized;
+  soundingButton = speaker;
   // The voice is stored under the primary subtag (the rule every speaker of
   // this extension shares), so the row's language is narrowed the same way.
   const spoke = await speak(
@@ -259,13 +289,11 @@ async function speakPhrase(phrase) {
     phrase.langFrom,
     config.ttsVoices[primaryLanguage(phrase.langFrom)],
     config.ttsRate / 100,
+    speaker,
   );
   // Refused for want of an offline voice (D155): said in the page's own
   // status line, because a speaker that does nothing says nothing.
-  if (!spoke) {
-    sounding = null;
-    status(t("speech_no_offline_voice"), "error");
-  }
+  if (!spoke) status(t("speech_no_offline_voice"), "error");
 }
 
 /**
@@ -822,7 +850,15 @@ function phraseRow(phrase) {
     speaker.setAttribute("aria-label", t("vocab_speak_aria", phrase.phrase));
     speaker.title = t("bubble_speak");
     speaker.append(speakerIcon());
-    speaker.addEventListener("click", () => void speakPhrase(phrase));
+    // A rebuilt list wears the voice's standing again (D287): the sounding
+    // row keeps its button, every other rests.
+    if (sounding === phrase.normalized) {
+      soundingButton = speaker;
+      reflectSpeech(speaker, speechPhase());
+    } else {
+      reflectSpeech(speaker, "idle");
+    }
+    speaker.addEventListener("click", () => void speakPhrase(phrase, speaker));
     actions.append(speaker);
   }
   // The two written acts are the shelf's (D224): a phrase being learned

@@ -816,6 +816,18 @@ button.quiet-speak svg {
   height: 1.6em;
 }
 
+/* The speaker's two standings (D287): busy while the device's voice is being
+   prepared - seconds on an e-ink tablet, where the button used to change
+   nothing and a second press cancelled the wait - and pressed while it
+   speaks, when a press stops it. Ink on paper for both: one repaint, nothing
+   animated, so an e-ink panel draws it; the hover wash would be lost there. */
+button.quiet-speak[aria-busy="true"],
+button.quiet-speak[aria-pressed="true"] {
+  border-color: var(--page-fg);
+  background: var(--page-fg);
+  color: var(--page-bg);
+}
+
 /* --- the editor a row unfolds into --- */
 
 /* The meanings swapped for a textarea: one meaning per line, the bubble's

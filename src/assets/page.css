@@ -1151,6 +1151,18 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome::before {
   height: 1.6em;
 }
 
+/* The speaker's two standings (D287): busy while the device's voice is being
+   prepared - seconds on an e-ink tablet, where the button used to change
+   nothing and a second press cancelled the wait - and pressed while it
+   speaks, when a press stops it. Ink on paper for both: one repaint, nothing
+   animated, so an e-ink panel draws it. */
+.lookup-speak[aria-busy="true"],
+.lookup-speak[aria-pressed="true"] {
+  border-color: var(--page-fg);
+  background: var(--page-fg);
+  color: var(--page-bg);
+}
+
 /* The line that says the dictionaries are being asked, why they said
    nothing, or what went wrong - the page's own status voice, one step below
    the prose; pending in the italic the bubble uses for the same wait. */

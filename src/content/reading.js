@@ -46,7 +46,16 @@ import { ErrorCode, Message, asLookUp, asResult, asTranslation, fail } from "../
 import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { MIRROR_KEY, asMirror, formAliases, mirrorMatches } from "../lib/store/mirror.js";
-import { canSpeakLang, primaryLanguage, setSpeechOff, speak, speaking, stop as stopSpeaking } from "../lib/tts.js";
+import {
+  canSpeakLang,
+  primaryLanguage,
+  setSpeechOff,
+  speak,
+  speechOwner,
+  speechPhase,
+  stop as stopSpeaking,
+  watchSpeech,
+} from "../lib/tts.js";
 import { clear, mark, occurrences, paint, phraseAt, supported, unmark } from "./highlighter.js";
 import { blockTextAround, findable } from "./scan.js";
 import { claimsNativeSelection, clearSelection, releaseMouse, startSelect, stopSelect } from "./select.js";
@@ -277,6 +286,17 @@ const tooltip = createTooltip({
  * may hide.
  */
 let hideActions = DEFAULTS.hideBubbleActions;
+
+/**
+ * The bubble's press, as the voice knows it (D287): the token `speak` is
+ * handed, so that the bubble's speaker is painted for its own phrase and
+ * rests when another speaker on the page - the reader's rows - takes the
+ * voice. A page-long watch, like the bubble it paints.
+ */
+const BUBBLE_VOICE = Symbol("bubble");
+watchSpeech((phase, owner) => {
+  tooltip.setSpeech(owner === BUBBLE_VOICE ? phase : "idle");
+});
 
 /**
  * The open-layer setting (D186), mirrored the same way: while this is on, the
@@ -1145,18 +1165,24 @@ async function onAction(action, meanings) {
     return;
   }
   if (action === "speak") {
-    // Start or stop, decided by what is playing: hearing the phrase writes
-    // nothing, so no keepable gate - and what is spoken is the page's own
-    // text, never the gloss (D83). The language is the one being read
-    // (`readingLanguage`): the document's own in the no-translation trim -
-    // the reader's hand (D121) or the page's declaration (D165) - the pair's
-    // otherwise; the voice is the one stored for that language.
-    if (speaking()) stopSpeaking();
+    // Start or stop, decided by where the voice is (D287): a press while the
+    // voice is being prepared is refused - the button already says so, and a
+    // stop there would cancel exactly the wait the reader is sitting out; a
+    // press while our own phrase sounds stops it; any other press speaks.
+    // Hearing the phrase writes nothing, so no keepable gate - and what is
+    // spoken is the page's own text, never the gloss (D83). The language is
+    // the one being read (`readingLanguage`): the document's own in the
+    // no-translation trim - the reader's hand (D121) or the page's
+    // declaration (D165) - the pair's otherwise; the voice is the one stored
+    // for that language.
+    const phase = speechPhase();
+    if (phase === "pending") return;
+    if (phase === "speaking" && speechOwner() === BUBBLE_VOICE) stopSpeaking();
     else if (current !== null) {
       const lang = readingLanguage();
       const voiceURI =
         (noTranslation ? quietVoice?.()?.voiceURI : undefined) ?? ttsVoices[primaryLanguage(lang)];
-      void speak(current.text, lang, voiceURI, ttsRate / 100);
+      void speak(current.text, lang, voiceURI, ttsRate / 100, BUBBLE_VOICE);
     }
     return;
   }
