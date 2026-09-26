@@ -1,0 +1,35 @@
+# Dependabot version updates, for the two things it can see: the four
+# development dependencies in package.json and the two GitHub Actions in CI.
+# Nothing here ships in the extension package. The vendored libraries
+# (vendor/) are on no manifest and are followed by hand, with the recipe in
+# each vendor README; known vulnerabilities in the lockfile are Dependabot
+# alerts, a repository setting rather than this file.
+#
+# One pull request a month per ecosystem, so that a bump is a review and not
+# a stream. A major version of a development dependency comes in a pull
+# request of its own: esbuild, TypeScript and web-ext each change what the
+# quality gate means, and each deserves to be read alone. Merging stays a
+# decision, never an automation.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      # The repository's Conventional Commits scope for build tooling.
+      prefix: "chore(build)"
+    groups:
+      dev-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      actions:
+        patterns: ["*"]

@@ -21,9 +21,11 @@ jobs:
     # The two actions are pinned to commits, not to tags: a tag can be moved
     # to point at other code, a commit cannot, and this workflow runs with the
     # repository checked out. The comment beside each pin names the release
-    # the commit is; bumping means resolving the new tag to its commit
-    # (`git ls-remote --tags https://github.com/actions/checkout.git v5`) and
-    # updating both the pin and the comment.
+    # the commit is. Dependabot (`.github/dependabot.yml`) bumps the pin and
+    # the comment together in its monthly pull request; by hand, bumping
+    # means resolving the new tag to its commit
+    # (`git ls-remote --tags https://github.com/actions/checkout.git v5`)
+    # and updating both.
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
