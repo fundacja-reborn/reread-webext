@@ -123,13 +123,28 @@ describe("the page turned at the window's edge under a stretched range (D239)", 
     assert.match(dress, /if \(pages === null\) \{\s*markPinStart\.style\.visibility = "";\s*markPinEnd\.style\.visibility = "";/, "the scroll layout hides a pin");
   });
 
-  it("turns the page by key and wheel without closing a standing selection or an active mark", async () => {
+  it("turns the page by key and wheel without closing a selection being dragged or an active mark", async () => {
     const reader = await source("reader/reader.js");
-    for (const name of ["onPageKey", "turnPage", "showPageOf"]) {
+    // The turn itself, and the landing, close nothing at all.
+    for (const name of ["turnPage", "showPageOf"]) {
       assert.doesNotMatch(bodyOf(reader, name), /clearSelection|dismiss\(|deselectMark|setMarker\(false\)/, `${name} closes what stands on the page`);
     }
-    const wheel = reader.slice(reader.indexOf('document.addEventListener(\n  "wheel",'), reader.indexOf("{ passive: true },", reader.indexOf('document.addEventListener(\n  "wheel",')));
-    assert.doesNotMatch(wheel, /clearSelection|dismiss\(|deselectMark|setMarker\(false\)/, "the wheel closes what stands on the page");
+    // The roads into a turn - the keys, the two wheel listeners (the paged
+    // layout's and D275's edge) - close one thing only: an open bubble,
+    // with the page it stood on (D285), and never mid-stretch, where the
+    // range being dragged grows onto the next page - this decision's own
+    // case, a key or the wheel under a pointer the gesture holds.
+    const roads = [bodyOf(reader, "onPageKey")];
+    const opener = 'document.addEventListener(\n  "wheel",';
+    for (let at = reader.indexOf(opener); at !== -1; at = reader.indexOf(opener, at + 1)) {
+      roads.push(reader.slice(at, reader.indexOf("{ passive: true },", at)));
+    }
+    assert.equal(roads.length, 3, "the keys and two wheel listeners");
+    for (const road of roads) {
+      assert.doesNotMatch(road, /clearSelection|deselectMark|setMarker\(false\)/, "a road into a turn closes what stands on the page");
+      const bare = road.replaceAll("if (bubbleOpen() && !stretching) dismiss();", "");
+      assert.doesNotMatch(bare, /dismiss\(/, "a road into a turn closes the bubble mid-stretch, or closes more than the bubble");
+    }
     // The reading side's keys: the copy chord and Escape, nothing else -
     // the page keys and the arrows pass under a standing selection.
     const keys = bodyOf(await source("content/reading.js"), "onKeyDown");

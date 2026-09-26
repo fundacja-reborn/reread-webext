@@ -1931,6 +1931,13 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
     // (D79) the first.
     entriesElement.className = "entries lookup-entries";
     entriesElement.hidden = true;
+    // A press into the list gives it the focus (D285): then the arrows and
+    // the page keys scroll the list in every engine, instead of whatever
+    // each engine scrolls after a click that focused nothing - and a page
+    // that owns those keys (the reader read by pages) can tell a press
+    // aimed at the list from one aimed at the text by the event's target
+    // alone. Out of the Tab order: the list is reached by pressing it.
+    entriesElement.tabIndex = -1;
     // A press on a book's name must not grow the bubble: the box keeps the
     // height it has at that moment and the rest scrolls inside it (the
     // fifth brief). Pinned before the fold opens - on the press, in the

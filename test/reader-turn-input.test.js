@@ -79,7 +79,9 @@ describe("the gesture that turns a page by touch (D250)", () => {
     // it, so a swipe read through `reading.js` would silently do nothing.
     const swipe = bodyOf(reader, "swipeTurn");
     assert.match(swipe, /if \(!paged\(\) \|\| markerOn \|\| pressHadWork \|\| roomShown !== null \|\| stretching\) return;/, "the swipe's road has fewer guards than the tap's");
-    assert.match(swipe, /if \(bubbleOpen\(\)\) return;/, "a swipe turns the page out from under an open bubble");
+    // A finger that landed on the bubble is scrolling its list (D285); one
+    // that landed on the text turns the page and closes the bubble first.
+    assert.match(swipe, /if \(bubbleOwns\(target\)\) return;/, "a finger that landed on the bubble turns the page");
     assert.match(swipe, /if \(target instanceof Element && target\.closest\(TURN_STOPS\) !== null\) return;/, "a swipe over a button, a bar or a pager turns the page");
     // One list of what a press is about itself, read by both roads.
     assert.match(bodyOf(reader, "onBareTap"), /target\.closest\(TURN_STOPS\)/, "the two roads keep two lists of what stops a turn");
