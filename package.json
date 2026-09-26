@@ -23,9 +23,9 @@
     "start:isolated": "npm run build && web-ext run --source-dir dist/firefox --no-reload"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.6.2",
     "esbuild": "^0.28.2",
     "typescript": "^7.0.2",
-    "web-ext": "^10.6.0"
+    "web-ext": "^10.7.0"
   }
 }
