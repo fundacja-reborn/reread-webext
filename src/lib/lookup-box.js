@@ -61,7 +61,7 @@ import { ErrorCode, Message, asLookUp } from "./protocol.js";
 import { dictionarySourcesLink } from "./sources.js";
 import { speakerIcon } from "./speaker-icon.js";
 import { MAX_PHRASE_LENGTH } from "./store/phrase.js";
-import { canSpeak, primaryLanguage, speak, speaking, stop as stopSpeaking } from "./tts.js";
+import { canSpeak, primaryLanguage, reflectSpeech, speak, speechOwner, speechPhase, stop as stopSpeaking, watchSpeech } from "./tts.js";
 
 /**
  * @typedef {object} LookupBoxDeps
@@ -265,18 +265,42 @@ export function mountLookupBox(hosts, deps, { readOnly = false, foldAt = LINES_O
   }
 
   /**
+   * This box's press, as the voice knows it (D287): the token `speak` is
+   * handed, so that the watch tells the box's speaker from the page's other
+   * speakers - a row's on the saved phrases, the bubble's in the reader -
+   * and paints it for its own phrase alone. The button itself is rebuilt
+   * with every render, so the token is the box's, not the button's.
+   */
+  const voiceOwner = Symbol("lookup-box");
+
+  /**
+   * The speaker as last rendered, painted with the voice's standing: busy
+   * while the voice is being prepared, pressed while it speaks.
+   *
+   * @type {HTMLButtonElement | null}
+   */
+  let speaker = null;
+
+  watchSpeech((phase, owner) => {
+    if (speaker !== null) reflectSpeech(speaker, owner === voiceOwner ? phase : "idle");
+  });
+
+  /**
    * The phrase read aloud (D83: the phrase, never the meanings), in the
    * pair's language with the voice stored for it; a second press while it
-   * sounds stops it.
+   * sounds stops it. A press while the voice is being prepared is refused
+   * (D287): the button says so, and a stop there would cancel that wait.
    */
   async function speakPhrase() {
     const voice = deps.voice();
     if (state.phrase === null || voice === null) return;
-    if (speaking()) {
+    const phase = speechPhase();
+    if (phase === "pending") return;
+    if (phase === "speaking" && speechOwner() === voiceOwner) {
       stopSpeaking();
       return;
     }
-    const spoke = await speak(state.phrase.text, voice.lang, voice.voiceURI, voice.rate);
+    const spoke = await speak(state.phrase.text, voice.lang, voice.voiceURI, voice.rate, voiceOwner);
     // Refused for want of an offline voice (D155): said where the press was.
     if (!spoke) {
       state.error = t("speech_no_offline_voice");
@@ -598,13 +622,18 @@ export function mountLookupBox(hosts, deps, { readOnly = false, foldAt = LINES_O
     // vocabulary once that is known.
     const head = element("div", "lookup-head");
     head.append(element("span", "lookup-phrase", state.phrase.text));
+    speaker = null;
     if (canSpeak() && deps.voice() !== null) {
-      const speaker = button("lookup-speak", "");
-      speaker.setAttribute("aria-label", t("bubble_speak"));
-      speaker.title = t("bubble_speak");
-      speaker.append(speakerIcon());
-      speaker.addEventListener("click", () => void speakPhrase());
-      head.append(speaker);
+      const press = button("lookup-speak", "");
+      press.setAttribute("aria-label", t("bubble_speak"));
+      press.title = t("bubble_speak");
+      press.append(speakerIcon());
+      // Rebuilt with every render, so it wears the voice's standing again
+      // (D287) when the phrase sounding is this box's own.
+      reflectSpeech(press, speechOwner() === voiceOwner ? speechPhase() : "idle");
+      press.addEventListener("click", () => void speakPhrase());
+      head.append(press);
+      speaker = press;
     }
     // The standing where the field writes only: where it reads, "Saved (N)"
     // first on the shelf says the same thing (Michał's cosmetic round).

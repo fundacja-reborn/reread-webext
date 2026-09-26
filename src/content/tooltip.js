@@ -104,6 +104,7 @@ import { editedMeanings } from "../lib/meanings.js";
 import { t } from "../lib/i18n.js";
 import { afterPress, isSaved } from "../lib/lookup.js";
 import { renderShelf } from "../lib/lookup-shelf.js";
+import { reflectSpeech } from "../lib/tts.js";
 import { compileUserCss } from "../lib/user-css.js";
 
 const GAP = 8;
@@ -426,7 +427,7 @@ const TOUCH_SIZES = `
     --type-cta: 15px;
     --gap-actions: 0.63em;
     --pad-action: 0.57em 0.43em;
-    --pull-action: -0.43em;
+    --pull-action: calc(-0.43 * var(--type-action) * var(--bubble-scale, 1));
     --pad-cta: 0.53em 1.07em;
     --icon: 1.43em;
     --type-door: 16px;
@@ -470,7 +471,10 @@ export const STYLE = `
     --type-cta: 13px;
     --gap-actions: 0.43em;
     --pad-action: 0.17em 0.33em;
-    --pull-action: -0.33em;
+    /* The first action's pull, an absolute length rather than an em: it is
+       spent by the row (its margin), and the label's padding it gives back is
+       in the button's smaller type - the two ems would not agree. */
+    --pull-action: calc(-0.33 * var(--type-action) * var(--bubble-scale, 1));
     --pad-cta: 0.23em 0.77em;
     --icon: 1.33em;
     /* The dictionaries' shelf's measures (lib/lookup-shelf.js, the fifth
@@ -1042,8 +1046,11 @@ export const STYLE = `
   /* A label carries padding so that a focus ring has somewhere to go, and the
      first one gives it back: the row has to start on the same vertical line as
      the gloss above it. Save, the launcher and Settings bring their own box
-     and need no pulling. */
-  .actions button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"]) { margin-left: var(--pull-action); }
+     and need no pulling. The pull is the row's margin, not the button's: the
+     row is the fold's clip box, and a button pulled past its edge is cut
+     there - the speaker's ink (D287) lost its left side that way. Pulled at
+     the row, the button stands inside the box. */
+  .actions:has(> button:first-child:not([data-action="save"]):not([data-action="reader"]):not([data-action="settings"])) { margin-left: var(--pull-action); }
   .actions button:hover:not(:disabled) { opacity: 1; }
   .actions button:focus-visible {
     opacity: 1;
@@ -1102,6 +1109,18 @@ export const STYLE = `
     width: var(--icon);
     height: var(--icon);
     display: block;
+  }
+  /* The speaker's two standings (D287): busy while the device's voice is
+     being prepared - seconds on an e-ink tablet, where the button used to
+     change nothing and a second press cancelled the wait - and pressed while
+     it speaks, when a press stops it. Both wear the filled door's dress, ink
+     on which the paper writes: one repaint, nothing animated, so an e-ink
+     panel draws it, in the pair the schemes hand the doors. */
+  .actions button[data-action="speak"][aria-busy="true"],
+  .actions button[data-action="speak"][aria-pressed="true"] {
+    background: var(--door-ink);
+    color: var(--door-paper);
+    opacity: 1;
   }
 
   /* The exception, and the only real call to action a bubble has: Save is the
@@ -1477,6 +1496,7 @@ export const STYLE = `
  * @property {(hint: Hint | null) => void} setHint
  * @property {() => void} expand
  * @property {(actions: Action[]) => void} setActions
+ * @property {(phase: import("../lib/tts.js").SpeechPhase) => void} setSpeech
  * @property {(rect: DOMRect) => void} follow
  * @property {() => void} reveal
  * @property {() => void} hide
@@ -2740,6 +2760,17 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
   }
 
   /**
+   * Where the voice is, as the page that owns this bubble last said (D287,
+   * `lib/tts.js`): the speaker is painted from it when the row is built and
+   * again whenever it changes. Held here rather than asked of the engine,
+   * because the bubble touches no API of its own - everything it knows
+   * arrives through its methods.
+   *
+   * @type {import("../lib/tts.js").SpeechPhase}
+   */
+  let speech = "idle";
+
+  /**
    * @param {(Action | "cancel")[]} actions
    */
   function renderActions(actions) {
@@ -2761,6 +2792,10 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
         button.setAttribute("aria-label", name);
         button.title = name;
         button.append(action === "speak" ? speakerIcon() : action === "copy" ? copyIcon() : readerIcon());
+        // The speaker wears the voice's standing from the moment it is built
+        // (D287): the row is rebuilt over a bubble that may be mid-phrase,
+        // and the standing must not blink off with it.
+        if (action === "speak") reflectSpeech(button, speech);
         // The copy icon is a disclosure: it says so, and keeps saying the
         // truth when the buttons are rebuilt over an open row.
         if (action === "copy") {
@@ -3142,6 +3177,17 @@ export function createTooltip({ onAction, onHide, covered, onEditing, userCss })
       place();
     },
 
+    /**
+     * Where the voice is, from the page that owns this bubble (D287): the
+     * speaker is repainted at once, and again whenever the row is rebuilt.
+     *
+     * @param {import("../lib/tts.js").SpeechPhase} phase
+     */
+    setSpeech(phase) {
+      speech = phase;
+      const speaker = actionsElement?.querySelector('button[data-action="speak"]');
+      if (speaker instanceof HTMLButtonElement) reflectSpeech(speaker, speech);
+    },
     follow(rect) {
       if (host === null || bubble === null) return;
       // The phrase moved (a scroll, D82); the bubble keeps its place beside

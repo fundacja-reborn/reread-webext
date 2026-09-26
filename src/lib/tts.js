@@ -305,6 +305,137 @@ export function speaking() {
 }
 
 /**
+ * Where the voice is (D287): `idle` with nothing of ours on its way,
+ * `pending` from a press until the engine's own `start`, `speaking` from
+ * there to `end`. The wait before `start` is real: the voice list may take a
+ * moment (`voicesSoon`), and a cold engine takes seconds - an e-ink tablet
+ * binds Android's speech service and loads a voice on the first press of a
+ * session, five to ten seconds during which the button used to change
+ * nothing, and a second press, taken for a stop, cancelled the wait. Every
+ * speaker paints its button from this phase (`reflectSpeech`) and refuses a
+ * press while pending: nobody wants to interrupt a voice being prepared.
+ *
+ * @typedef {"idle" | "pending" | "speaking"} SpeechPhase
+ */
+
+/** @type {SpeechPhase} */
+let phase = "idle";
+
+/**
+ * Whose press the phase belongs to: the token the speaker handed `speak` -
+ * its button, or a symbol of its own - so that a page with several speakers
+ * paints the one that is sounding and rests the others. Null at rest.
+ *
+ * @type {unknown}
+ */
+let owner = null;
+
+/**
+ * The owner the watchers were last told of, so that a new press under the
+ * same phase is still news to them.
+ *
+ * @type {unknown}
+ */
+let announced = null;
+
+/** @type {Set<(phase: SpeechPhase, owner: unknown) => void>} */
+const watchers = new Set();
+
+/**
+ * How long a press may stay pending before it is given up. An engine that
+ * answers nothing - no `start`, no `error` - would otherwise hold every
+ * speaker's button busy for good, with every press refused. A phrase is
+ * seconds long and a cold start is seconds long; half a minute is past both.
+ */
+export const PENDING_CEILING = 30000;
+
+/** @type {ReturnType<typeof setTimeout> | null} */
+let ceiling = null;
+
+/**
+ * The presses still awaiting the voice list, counted so that an older press
+ * refused (no offline voice) does not put the button to rest under a newer
+ * one still on its way.
+ */
+let inFlight = 0;
+
+/**
+ * Bumped by every stop: a press that finds it changed when the voice list
+ * arrives was stopped while it waited - the bubble closed, the switch
+ * flipped - and is abandoned rather than spoken late over nothing.
+ */
+let generation = 0;
+
+/**
+ * @param {SpeechPhase} next
+ */
+function setPhase(next) {
+  if (next !== "pending" && ceiling !== null) {
+    clearTimeout(ceiling);
+    ceiling = null;
+  }
+  if (next === "pending" && ceiling === null) {
+    ceiling = setTimeout(() => {
+      ceiling = null;
+      if (phase === "pending") stop();
+    }, PENDING_CEILING);
+  }
+  if (phase === next && owner === announced) return;
+  phase = next;
+  const of = owner;
+  announced = of;
+  if (next === "idle") {
+    owner = null;
+    announced = null;
+  }
+  for (const watcher of watchers) watcher(next, of);
+}
+
+/**
+ * @returns {SpeechPhase} where the voice is right now
+ */
+export function speechPhase() {
+  return phase;
+}
+
+/**
+ * @returns {unknown} the token of the press the voice belongs to; null at rest
+ */
+export function speechOwner() {
+  return owner;
+}
+
+/**
+ * @param {(phase: SpeechPhase, owner: unknown) => void} watcher told of every
+ *   change of phase, and of every new press, with the token of the press the
+ *   phase belongs to - at `idle`, the one that just ended
+ * @returns {() => void} forgets the watcher
+ */
+export function watchSpeech(watcher) {
+  watchers.add(watcher);
+  return () => {
+    watchers.delete(watcher);
+  };
+}
+
+/**
+ * Paints a speaker's button with the phase: `aria-busy` while the voice is
+ * being prepared, `aria-pressed` while it speaks (the press that stops it),
+ * neither at rest. The attributes are what the stylesheets draw the two
+ * standings from - ink on paper, one repaint, nothing animated, so that an
+ * e-ink panel draws them - and what a screen reader says of the button. A
+ * page paints the sounding button alone; every other speaker rests.
+ *
+ * @param {{ setAttribute(name: string, value: string): void, removeAttribute(name: string): void }} button
+ * @param {SpeechPhase} of
+ */
+export function reflectSpeech(button, of) {
+  if (of === "pending") button.setAttribute("aria-busy", "true");
+  else button.removeAttribute("aria-busy");
+  button.setAttribute("aria-pressed", of === "speaking" ? "true" : "false");
+}
+
+/**
  * Somebody else on this page speaking through the same queue, and able to step
  * aside for a phrase. Exactly one such reader exists: the reader page reading
  * a whole article aloud (D87, `reader/read-aloud.js`), which registers itself
@@ -372,25 +503,39 @@ function voicesSoon() {
  * @param {string | undefined} voiceURI the choice stored for that language, if any
  * @param {number} [rate] the speed the reader set, as the engine's factor
  *   (1 = the voice's own normal speed); the config stores it as a percent
+ * @param {unknown} [by] the speaker's token (D287): its button, or a symbol
+ *   of its own - what the watchers are told the phase belongs to
  * @returns {Promise<boolean>} whether anything was handed to the engine -
  *   false with nothing to say, with speech off, and where the device has
  *   voices but no offline one for the language (the caller says so; this
  *   module only refuses)
  */
-export async function speak(text, lang, voiceURI, rate = 1) {
+export async function speak(text, lang, voiceURI, rate = 1, by = null) {
   if (!canSpeak() || text.length === 0) return false;
+  // Pending from the press, not from the hand-over: the voice list may take
+  // a moment, and the button is to say so from the first instant.
+  const pressed = generation;
+  inFlight += 1;
+  owner = by;
+  setPhase("pending");
   const voices = await voicesSoon();
-  // The switch may have flipped while the list was loading.
-  if (!canSpeak()) return false;
-  // The settings page's promise (D155): a language this device could only
-  // read through the browser's network voices is a language it does not
-  // read. Asked before anybody is told to step aside - a refusal must not
-  // interrupt what the page is saying.
-  if (!offlineAvailable(voices, lang)) return false;
+  inFlight -= 1;
+  // The press ends without a word when a stop came while the list loaded
+  // (the bubble closed, the switch flipped: a phrase spoken late over a
+  // closed bubble is the extension talking to itself), when the switch is
+  // off, or when this device reads the language only through the browser's
+  // network voices - the settings page's promise (D155), asked before
+  // anybody is told to step aside, so that a refusal never interrupts what
+  // the page is saying. The button rests then, unless a newer press is
+  // still on its way or a phrase of ours is still out loud.
+  if (pressed !== generation || !canSpeak() || !offlineAvailable(voices, lang)) {
+    if (inFlight === 0 && mine === null) setPhase("idle");
+    return false;
+  }
   // Whoever else is using this queue on this page steps aside first, or the
   // phrase would be spoken after whatever they are saying (see `shareVoice`).
   sharing?.();
-  stop();
+  cancelMine();
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang;
@@ -398,10 +543,15 @@ export async function speak(text, lang, voiceURI, rate = 1) {
   const voice = offlineVoice(voices, lang, voiceURI);
   if (voice !== null) utterance.voice = voice;
 
+  // Each only if the module has not moved on: a cancelled utterance reports
+  // in after `mine` already names its successor.
+  utterance.addEventListener("start", () => {
+    if (mine === utterance) setPhase("speaking");
+  });
   const done = () => {
-    // Only if the module has not moved on: a cancelled utterance reports in
-    // after `mine` already names its successor.
-    if (mine === utterance) mine = null;
+    if (mine !== utterance) return;
+    mine = null;
+    setPhase("idle");
   };
   utterance.addEventListener("end", done);
   utterance.addEventListener("error", done);
@@ -412,9 +562,22 @@ export async function speak(text, lang, voiceURI, rate = 1) {
 }
 
 /**
- * Stops our utterance - and only ever ours, see `mine`.
+ * Stops our utterance - and only ever ours, see `mine` - and puts every
+ * speaker's button to rest. A press still awaiting the voice list is
+ * abandoned too (`generation`): closing the bubble means no phrase now.
  */
 export function stop() {
+  generation += 1;
+  cancelMine();
+  setPhase("idle");
+}
+
+/**
+ * Takes our utterance off the engine's queue, if one is there. The phase is
+ * the caller's to set: a phrase replacing another must not blink the button
+ * through rest on the way.
+ */
+function cancelMine() {
   if (mine === null) return;
   mine = null;
   speechSynthesis.cancel();

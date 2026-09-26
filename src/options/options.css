@@ -2672,3 +2672,14 @@ summary::marker {
     grid-column: 1 / -1;
   }
 }
+
+/* The voice sample's button in its two standings (D287): busy while the
+   device's voice is being prepared - the first press of a session on an
+   e-ink tablet takes seconds - and pressed while the sample sounds. Ink on
+   paper for both: one repaint, nothing animated, so an e-ink panel draws it. */
+#tts-listen[aria-busy="true"],
+#tts-listen[aria-pressed="true"] {
+  border-color: var(--page-fg);
+  background: var(--page-fg);
+  color: var(--page-bg);
+}
