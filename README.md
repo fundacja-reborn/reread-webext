@@ -216,6 +216,8 @@ By the same foundation:
 
 Found a bug, missing something, or want to say how re/read works for you? [Open an issue](https://github.com/fundacja-reborn/reread-webext/issues), or write to [@reapps_eu on Mastodon](https://mastodon.social/@reapps_eu). Both go straight to the people who make it - the switches that turn off reading aloud and the bubble came from exactly such a message.
 
+A security problem - anything that could make what you read leave your device, or let a page run code inside the extension - goes through private reporting, not a public issue: see [SECURITY.md](SECURITY.md).
+
 ## Support
 
 re/read is built by a non-profit foundation - no investors, no ads, no tracking. If you find it useful and want to support its continued development, every donation helps us build software free from commercial pressure.
