@@ -42,6 +42,10 @@
  * @property {boolean} [paged] whether the document is read by pages (D233):
  *   then the browser has nothing to scroll by itself, and the arrows, Home
  *   and End - dead keys otherwise - turn the page too
+ * @property {boolean} [bubble] whether the press was aimed at the bubble
+ *   (D285): the focus stands inside it - its list, a box or a button of it -
+ *   so read by pages the key is the bubble's, and its list scrolls under
+ *   the key the way it does in the scroll layout
  */
 
 /**
@@ -76,6 +80,16 @@ export function pageTurn(press) {
   // A dialog over the article - the contents, the search - pages its own
   // list. The article behind it is not what the press is about.
   if (press.dialog) return null;
+  // Read by pages, a press aimed at the bubble is the bubble's (D285): left
+  // to the browser, the key scrolls the list the press went into - the very
+  // thing it does in the scroll layout, where these keys were never the
+  // reader's; taken, it turned the page under the bubble. Aimed at the page,
+  // the key turns it, bubble or no bubble, and the caller closes the bubble
+  // first: the turn takes the phrase out of the window, and a bubble without
+  // its phrase has nothing to stand over. In the scroll layout the bubble
+  // rides with its phrase and the page keys stay the reader's (D127): the
+  // browser's own screenful would land behind the stuck chrome.
+  if (press.paged === true && press.bubble === true) return null;
   if (press.editable || TYPING.has(press.tag)) return null;
 
   // The Mac's own paging pair, for the keyboards that have no page keys

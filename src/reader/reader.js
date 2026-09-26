@@ -27,7 +27,16 @@ import {
   supported as highlightsSupported,
   unregister as unregisterHighlight,
 } from "../content/highlighter.js";
-import { bubbleOpen, dismiss, reportRead, rescan, restretch, start, stop as stopReadingSide } from "../content/reading.js";
+import {
+  bubbleOpen,
+  bubbleOwns,
+  dismiss,
+  reportRead,
+  rescan,
+  restretch,
+  start,
+  stop as stopReadingSide,
+} from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
 import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
@@ -1962,6 +1971,10 @@ function onPageKey(event) {
     reading: readingState() !== "off",
     dialog: document.querySelector("dialog[open]") !== null,
     paged: paged(),
+    // Aimed at the bubble - the focus inside it - the key is the bubble's
+    // (D285): left to the browser, it scrolls the bubble's list. The shadow
+    // root is closed, so the target of such a press is the bubble's host.
+    bubble: bubbleOwns(event.target),
   };
   // Scrolled, a book's text ends where the stretch on screen ends: a key
   // that moves the text on, pressed with the window already standing at
@@ -1981,6 +1994,13 @@ function onPageKey(event) {
   // Read by pages (D233), a turn is a page of the table, not a screenful:
   // the arithmetic below is the scroll layout's.
   if (paged()) {
+    // The turn takes the phrase out of the window, and a bubble without its
+    // phrase closes with the page it stood on (D285) - the wheel and the
+    // swipe do the same. Never mid-stretch (D239): a key pressed with the
+    // other hand while a range is being dragged turns the page under the
+    // range, which then grows onto it. Scrolled, the bubble rides with its
+    // phrase (D82).
+    if (bubbleOpen() && !stretching) dismiss();
     turnPage(turn);
     return;
   }
@@ -3035,9 +3055,11 @@ const TURN_STOPS =
  * not with the pen in hand, not under a room or an open panel, not on
  * anything that answers presses itself, and not while a range is being
  * stretched - a selection drawn along a line travels sideways exactly like
- * a swipe. An open bubble stands over the text it was raised from, so the
- * page waits: the tap that puts it away is the gesture that comes first,
- * exactly as it does in the thirds.
+ * a swipe. A finger that landed on the bubble is scrolling its list, or
+ * resting on it, and turns nothing (D285); one that landed on the text with
+ * a bubble open is reading on, and the bubble closes with the page it stood
+ * on - unlike the tap in the thirds, which could mean either "close" or
+ * "turn" and so only closes.
  *
  * @param {import("../lib/reader/pages.js").TapSignature} tap
  * @param {EventTarget | null} target what the pointer landed on
@@ -3046,10 +3068,12 @@ const TURN_STOPS =
  */
 function swipeTurn(tap, target, sideways) {
   if (!paged() || markerOn || pressHadWork || roomShown !== null || stretching) return;
-  if (bubbleOpen()) return;
+  if (bubbleOwns(target)) return;
   if (target instanceof Element && target.closest(TURN_STOPS) !== null) return;
   const turn = swipeIntent(tap, sideways);
-  if (turn !== null) turnPage(turn);
+  if (turn === null) return;
+  if (bubbleOpen()) dismiss();
+  turnPage(turn);
 }
 
 /**
@@ -3250,12 +3274,21 @@ let wheelTurnedAt = -Infinity;
 
 // The wheel turns pages the way it scrolls: a notch on, a notch back, a
 // flick one page and not a chapter (`wheelTurn`, with its cooldown). Not
-// over the chrome or a dialog, whose own lists scroll under the wheel.
+// over the chrome or a dialog, whose own lists scroll under the wheel, and
+// not over the bubble (D285): its list scrolls under the wheel the way it
+// does in the scroll layout, and at the list's end, or over a bubble with no
+// list, nothing happens - the cursor rests on a bubble often, and a page
+// turned under it would run away from the eye. Over the text the wheel
+// turns the page and closes the bubble first: the turn takes the phrase out
+// of the window, and a bubble left open over a page nobody can see is a
+// bubble nothing can settle the page under (`settlePage`). The closed shadow
+// root retargets every event out of the bubble to its host.
 document.addEventListener(
   "wheel",
   (event) => {
     if (!paged() || roomShown !== null) return;
     const target = event.target instanceof Element ? event.target : null;
+    if (bubbleOwns(target)) return;
     if (target !== null && target.closest(".reader-chrome, dialog, .speech-bar, .mark-bar, .note-popover") !== null) return;
     const now = performance.now();
     const turn = wheelTurn(
@@ -3265,6 +3298,9 @@ document.addEventListener(
     );
     if (turn === null) return;
     wheelTurnedAt = now;
+    // Never mid-stretch (D239): the wheel turned under a range being dragged
+    // is how the range grows onto the next page.
+    if (bubbleOpen() && !stretching) dismiss();
     turnPage(turn);
   },
   { passive: true },

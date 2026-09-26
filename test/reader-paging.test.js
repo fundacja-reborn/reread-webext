@@ -144,6 +144,40 @@ describe("pageTurn", () => {
     assert.equal(press("ArrowRight", { paged: true, dialog: true }), null);
     assert.equal(press("ArrowDown", { paged: true, ctrl: true }), null);
   });
+
+  it("leaves a press aimed at the bubble to the bubble when the document is read by pages", () => {
+    // The report behind D285: a click into the bubble's dictionary list and
+    // an arrow turned the page under the bubble instead of scrolling the
+    // list. Aimed at the bubble - the focus inside it, which a press into
+    // the list now gives it, so the press reports the bubble's host - every
+    // key that turns a page is left to the browser, which scrolls the list
+    // with it as it does in the scroll layout.
+    const aimed = { paged: true, bubble: true, tag: "DIV" };
+    for (const key of ["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft", "Home", "End", "PageDown", "PageUp", " "]) {
+      assert.equal(press(key, aimed), null, key);
+    }
+    assert.equal(press(" ", { ...aimed, shift: true }), null);
+    assert.equal(press("ArrowDown", { ...aimed, mac: true, alt: true }), null);
+    // Aimed at the page, the key turns it, bubble or no bubble - the caller
+    // closes the bubble first.
+    assert.equal(press("ArrowDown", { paged: true, bubble: false }), "down");
+    assert.equal(press("PageDown", { paged: true }), "down");
+  });
+
+  it("keeps the page keys in the scroll layout whatever the press was aimed at", () => {
+    // Scrolled, the bubble rides with its phrase (D82) and the browser's own
+    // screenful would land behind the stuck chrome (D127): the page keys
+    // stay the reader's even with the focus inside the bubble. The plain
+    // arrows were never the reader's there, and the browser scrolls the
+    // bubble's list with them by itself; the space bar is a press on
+    // whatever holds the focus (`PAGE_ITSELF`), as before.
+    const aimed = { bubble: true, tag: "DIV" };
+    assert.equal(press("PageDown", aimed), "down");
+    assert.equal(press("PageUp", { ...aimed, paged: false }), "up");
+    assert.equal(press("ArrowDown", { ...aimed, mac: true, alt: true }), "down");
+    assert.equal(press("ArrowDown", aimed), null);
+    assert.equal(press(" ", aimed), null);
+  });
 });
 
 describe("pageStep", () => {

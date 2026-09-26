@@ -381,6 +381,21 @@ export function bubbleOpen() {
 }
 
 /**
+ * Whether an event was aimed at the bubble - the reader page asks before it
+ * turns a page on a wheel, a key or a swipe (D285): over the bubble the wheel
+ * is the bubble's, so is a finger that landed on it, and so is a key while
+ * the focus stands inside it. The shadow root is closed, so every event out
+ * of the bubble is retargeted to its host, which is what the target is
+ * compared against.
+ *
+ * @param {EventTarget | null} target
+ * @returns {boolean}
+ */
+export function bubbleOwns(target) {
+  return tooltip.owns(target);
+}
+
+/**
  * Whether the vocabulary lives without the engine (D158, everywhere since
  * D162): the trim is on and a pair is chosen to file phrases under. Then the
  * mirror is adopted, saved phrases underline and recall, dictionary lines
