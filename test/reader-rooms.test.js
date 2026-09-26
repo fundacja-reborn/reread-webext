@@ -151,7 +151,8 @@ describe("the room over the reading (D243)", () => {
     const reader = await source("reader/reader.js");
     assert.match(bodyOf(reader, "onPageKey"), /if \(roomShown !== null\) return;/, "a page key turns a page nobody can see");
     assert.match(bodyOf(reader, "onBareTap"), /roomShown !== null/, "a tap turns a page under the room");
-    assert.match(reader, /if \(!paged\(\) \|\| roomShown !== null\) return;/, "the wheel turns pages under the room");
+    // The room's guard shares the line with the bubble's (D285).
+    assert.match(reader, /if \(!paged\(\) \|\| roomShown !== null \|\| bubbleOpen\(\)\) return;/, "the wheel turns pages under the room");
   });
 
   it("opens both doors of the reader into the room, and leaves the rooms their own screen", async () => {

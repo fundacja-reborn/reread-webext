@@ -144,6 +144,36 @@ describe("pageTurn", () => {
     assert.equal(press("ArrowRight", { paged: true, dialog: true }), null);
     assert.equal(press("ArrowDown", { paged: true, ctrl: true }), null);
   });
+
+  it("waits under a bubble when the document is read by pages", () => {
+    // The report behind D285: a click into the bubble's dictionary list and
+    // an arrow turned the page under the bubble instead of scrolling the
+    // list. Every key that turns a page waits - left to the browser, the
+    // keys scroll the list the press went into, as they do in the scroll
+    // layout - whatever has focus, the body included: a press into the
+    // list focuses nothing, so the body is what the key reports.
+    for (const key of ["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft", "Home", "End", "PageDown", "PageUp", " "]) {
+      assert.equal(press(key, { paged: true, bubble: true }), null, key);
+      assert.equal(press(key, { paged: true, bubble: true, tag: "DIV" }), null, `${key} with the bubble's host focused`);
+    }
+    assert.equal(press(" ", { paged: true, bubble: true, shift: true }), null);
+    assert.equal(press("ArrowDown", { paged: true, bubble: true, mac: true, alt: true }), null);
+    // And turns again the moment the bubble is gone.
+    assert.equal(press("ArrowDown", { paged: true, bubble: false }), "down");
+    assert.equal(press("PageDown", { paged: true }), "down");
+  });
+
+  it("keeps the page keys under a bubble in the scroll layout", () => {
+    // Scrolled, the bubble rides with its phrase (D82) and the browser's own
+    // screenful would land behind the stuck chrome (D127): the page keys
+    // stay the reader's. The plain arrows were never the reader's there,
+    // and the browser scrolls the bubble's list with them by itself.
+    assert.equal(press("PageDown", { bubble: true }), "down");
+    assert.equal(press("PageUp", { paged: false, bubble: true }), "up");
+    assert.equal(press(" ", { bubble: true }), "down");
+    assert.equal(press("ArrowDown", { mac: true, alt: true, bubble: true }), "down");
+    assert.equal(press("ArrowDown", { bubble: true }), null);
+  });
 });
 
 describe("pageStep", () => {

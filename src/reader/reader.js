@@ -1962,6 +1962,10 @@ function onPageKey(event) {
     reading: readingState() !== "off",
     dialog: document.querySelector("dialog[open]") !== null,
     paged: paged(),
+    // Read by pages, an open bubble holds the page still under the keys
+    // (D285) the way it holds it under a swipe: left to the browser, they
+    // scroll the bubble's own list.
+    bubble: bubbleOpen(),
   };
   // Scrolled, a book's text ends where the stretch on screen ends: a key
   // that moves the text on, pressed with the window already standing at
@@ -3250,11 +3254,16 @@ let wheelTurnedAt = -Infinity;
 
 // The wheel turns pages the way it scrolls: a notch on, a notch back, a
 // flick one page and not a chapter (`wheelTurn`, with its cooldown). Not
-// over the chrome or a dialog, whose own lists scroll under the wheel.
+// over the chrome or a dialog, whose own lists scroll under the wheel - and
+// not while a bubble stands (D285): its list scrolls under the wheel the
+// way it does in the scroll layout, and the page waits for the press that
+// puts the bubble away, exactly as it waits under a swipe (`swipeTurn`). A
+// turn taken under a bubble left it open over the page just left, where
+// nobody could see it and nothing could settle the page (`settlePage`).
 document.addEventListener(
   "wheel",
   (event) => {
-    if (!paged() || roomShown !== null) return;
+    if (!paged() || roomShown !== null || bubbleOpen()) return;
     const target = event.target instanceof Element ? event.target : null;
     if (target !== null && target.closest(".reader-chrome, dialog, .speech-bar, .mark-bar, .note-popover") !== null) return;
     const now = performance.now();
