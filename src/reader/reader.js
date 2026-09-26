@@ -73,6 +73,7 @@ import { NO_BASE, buildArticle } from "../lib/reader/article.js";
 import { bookFrame } from "../lib/reader/book-frame.js";
 import { MAX_DOWNLOAD_BYTES, pictureSources, picturesState, picturesSummary } from "../lib/reader/pictures.js";
 import { sourceOf, webAddress } from "../lib/reader/source.js";
+import { bodyPieces, joinGroups, marksHeld, tornGroups } from "../lib/reader/split-body.js";
 import {
   ARTICLES_ENTRY,
   archiveAccount,
@@ -1553,16 +1554,52 @@ function timeLabel(words) {
 }
 
 /**
+ * The page parsed inert, with the address it came from as its base.
+ *
+ * @param {import("../lib/protocol.js").Page} page
+ */
+function parsePage(page) {
+  const parsed = new DOMParser().parseFromString(page.html, "text/html");
+  setBase(parsed, page.url);
+  return parsed;
+}
+
+/**
+ * Readability over the page - and over it once more when its first answer
+ * holds some of a set of same-shaped boxes and not the others, joined this
+ * time (`lib/reader/split-body.js`, D286: a body cut into two or three boxes
+ * by advertising slots, of which Readability keeps the best box alone).
+ *
+ * Readability rewrites the document it is given. That document is a
+ * throwaway parse of somebody else's page, which is the only kind it should
+ * ever get - never a live one - and the second run gets a parse of its own
+ * for the same reason: nothing of the first is worth keeping but the strings
+ * read off it. The second answer replaces the first only when it holds more
+ * of the boxes; a page whose article came out whole is read once, as before.
+ *
+ * @param {import("../lib/protocol.js").Page} page
+ * @returns {ReadabilityArticle | null}
+ */
+function extractArticle(page) {
+  const parsed = parsePage(page);
+  const pieces = bodyPieces(parsed);
+  const found = new Readability(parsed).parse();
+  if (found === null || typeof found.textContent !== "string") return found;
+  const torn = tornGroups(pieces, found.textContent);
+  if (torn.length === 0) return found;
+
+  const again = parsePage(page);
+  joinGroups(bodyPieces(again), torn);
+  const second = new Readability(again).parse();
+  if (second === null || typeof second.textContent !== "string") return found;
+  return marksHeld(torn, second.textContent) > marksHeld(torn, found.textContent) ? second : found;
+}
+
+/**
  * @param {import("../lib/protocol.js").Page} page
  */
 function renderLive(page) {
-  const parsed = new DOMParser().parseFromString(page.html, "text/html");
-  setBase(parsed, page.url);
-
-  // Readability rewrites the document it is given. That document is this
-  // throwaway parse of somebody else's page, which is the only kind it should
-  // ever get - never a live one.
-  const found = new Readability(parsed).parse();
+  const found = extractArticle(page);
   if (found === null || typeof found.content !== "string") {
     showNotice(t("reader_no_article"));
     if (shown === null) void showLibrary();
