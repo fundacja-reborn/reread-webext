@@ -469,7 +469,8 @@ describe("the settings page's type", () => {
     assert.doesNotMatch(clear, /aria-expanded/, "the search line's Clear claims to fold something");
     // And every More in the markup that does fold says so from the start.
     const folds = [...markup.matchAll(/<button[^>]*class="note-more[^>]*>/g)].map((m) => m[0]).filter((tag) => /aria-controls=/.test(tag));
-    assert.ok(folds.length >= 9, `only ${folds.length} folding Mores in the markup`);
+    // Eight since D289: the Backups subsection's opening stands whole.
+    assert.ok(folds.length >= 8, `only ${folds.length} folding Mores in the markup`);
     for (const tag of folds) assert.match(tag, /aria-expanded="false"/, `a folding More without its state: ${tag.slice(0, 80)}`);
   });
 });

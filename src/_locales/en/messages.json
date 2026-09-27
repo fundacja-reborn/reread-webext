@@ -2020,7 +2020,7 @@
 
   "options_copies_intro_more": {
     "message": "The copies are written again at every change: when you save or delete a phrase, a highlight or a page in the reading list. They protect the data when the browser clears its storage or when a database goes wrong. The database is IndexedDB and the copies are in the extension's storage (storage.local) - both inside the browser's profile, not in files on your computer.",
-    "description": "Behind the Details fold of the Backups subsection: when the copies are written, what they protect against, and where they and the database actually are."
+    "description": "The rest of the Backups subsection's opening paragraph, right after options_copies_intro (in the open since D289, no fold): when the copies are written, what they protect against, and where they and the database actually are."
   },
 
   "options_copies_head_name": {
