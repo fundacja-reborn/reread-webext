@@ -1739,6 +1739,27 @@
           />
         </svg>
       </a>
+      <!-- The third door, to the review page of the store this browser
+           installed re/read from (D290): the page's own scheme says which,
+           the address lives in `lib/sources.js`, and the row stays hidden
+           until `linkStoreReview` knows the store - Safari has no listing to
+           point at yet. No address in the markup for the same reason. The
+           words carry the store's own address, the rule for every link that
+           leaves the extension (D192), so they are put in by the page with the
+           address, not marked for the catalogue swap. -->
+      <a class="row-link" id="support-rate" target="_blank" rel="noopener noreferrer" hidden>
+        <span id="support-rate-words">Rate re/read on addons.mozilla.org</span>
+        <svg class="row-link-mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path
+            d="M6.5 3.5H3.25v9.25h9.25V9.5M9.75 3.25h3v3M12.5 3.75 7.75 8.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </a>
     </div>
     </section>
 

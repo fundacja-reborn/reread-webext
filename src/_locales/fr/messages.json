@@ -2238,6 +2238,12 @@
   },
   "options_support_donate": { "message": "Faire un don via Wise" },
   "options_support_more": { "message": "D'autres façons de soutenir" },
+  "options_support_rate": {
+    "message": "Noter re/read sur $HOST$",
+    "placeholders": {
+      "host": { "content": "$1", "example": "addons.mozilla.org" }
+    }
+  },
 
   "options_badge_reading": { "message": "ce que vous lisez" },
   "options_delete_confirm": { "message": "Sûr ?" },

@@ -2143,6 +2143,12 @@
   },
   "options_support_donate": { "message": "Über Wise spenden" },
   "options_support_more": { "message": "Weitere Möglichkeiten zu unterstützen" },
+  "options_support_rate": {
+    "message": "re/read auf $HOST$ bewerten",
+    "placeholders": {
+      "host": { "content": "$1", "example": "addons.mozilla.org" }
+    }
+  },
 
   "options_badge_reading": { "message": "das lesen Sie gerade" },
   "options_delete_confirm": { "message": "Sicher?" },
