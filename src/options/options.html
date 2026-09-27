@@ -1343,7 +1343,12 @@
          table of what each holds, the one of them that is a choice, and what
          a copy does not protect against. It used to be three explanations a
          screen apart - a paragraph under the table, a fold on the switch, and
-         the switch's own hint - each saying a piece of the same thing. -->
+         the switch's own hint - each saying a piece of the same thing.
+         The whole of it in the open since D289 (Michał, 2026-09-27): the
+         part that stood behind Details is three lines, and it is the one
+         fact the table cannot say - where the copies are and what they do
+         not survive - which is what the file's row and the note below are
+         answers to. One paragraph, both sentences, no fold. -->
     <section aria-labelledby="copies" data-keywords="options_keywords_copy">
     <header>
       <h3 id="copies" data-i18n="options_storage_copies">Backups</h3>
@@ -1352,13 +1357,14 @@
         <span data-i18n="options_copies_intro"
           >re/read keeps copies of your phrases, your highlights and your reading list in the
           extension's own storage, apart from the database.</span
-        ><span class="note-tail">&nbsp;<button type="button" class="note-more" aria-expanded="false" aria-controls="more-copies" data-i18n="options_details">Details</button></span>
-      </p>
-      <p class="explain row-more" id="more-copies" data-i18n="options_copies_intro_more" hidden>
-        The copies are written again at every change: when you save or delete a phrase, a highlight
-        or a page in the reading list. They protect the data when the browser clears its storage or
-        when a database goes wrong. The database is IndexedDB and the copies are in the extension's
-        storage (storage.local) - both inside the browser's profile, not in files on your computer.
+        >
+        <span data-i18n="options_copies_intro_more"
+          >The copies are written again at every change: when you save or delete a phrase, a
+          highlight or a page in the reading list. They protect the data when the browser clears
+          its storage or when a database goes wrong. The database is IndexedDB and the copies are
+          in the extension's storage (storage.local) - both inside the browser's profile, not in
+          files on your computer.</span
+        >
       </p>
     </header>
 

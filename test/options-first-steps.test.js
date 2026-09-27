@@ -192,15 +192,17 @@ describe("the data section", () => {
     const at = markup.indexOf('<h3 id="copies"');
     assert.ok(at > 0, "the copies have no heading of their own");
     const block = markup.slice(at, markup.indexOf("</section>", at));
-    // One sentence in the open, the rest of it behind one More - the three
-    // explanations that stood a screen apart (a paragraph under the table,
-    // the switch's own fold, and the switch's hint) are one now.
-    assert.match(block, /data-i18n="options_copies_intro"/, "the subsection opens on nothing");
-    assert.match(block, /aria-controls="more-copies"/, "the rest of it has no way in");
+    // The three explanations that stood a screen apart (a paragraph under
+    // the table, the switch's own fold, and the switch's hint) are one now -
+    // and since D289 the whole of it stands in the open, both sentences in
+    // one paragraph: what stood behind Details is three lines and the one
+    // fact the table cannot say.
+    assert.match(block, /<p class="explain">\s*<span data-i18n="options_copies_intro"\s*>[\s\S]*?<\/span\s*>\s*<span data-i18n="options_copies_intro_more"\s*>[\s\S]*?<\/span\s*>\s*<\/p>/, "the two sentences do not stand in the open, in one paragraph");
+    assert.doesNotMatch(block, /more-copies|row-more/, "part of the explanation is behind a fold again");
     assert.doesNotMatch(markup, /options_copies_safe|options_library_copy_more|options_storage_to_file/, "an explanation the round gathered still stands on its own");
     // And the switch itself moved under the heading it belongs to.
     assert.ok(block.includes('id="s-libraryCopy"'), "the one copy that is a choice stands elsewhere");
-    assert.equal((block.match(/class="note-more"/g) ?? []).length, 1, "the subsection says the same thing behind two folds");
+    assert.equal((block.match(/class="note-more"/g) ?? []).length, 0, "the subsection folds something away");
   });
 
   it("says each copy in a table with named columns (D260)", async () => {
