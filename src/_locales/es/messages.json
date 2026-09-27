@@ -791,6 +791,30 @@
   "reader_backup_nothing": {
     "message": "No hay nada que importar en ese archivo."
   },
+  "reader_last_backup": {
+    "message": "Última copia: $WHEN$.",
+    "placeholders": {
+      "when": { "content": "$1", "example": "hace 3 semanas" }
+    }
+  },
+  "reader_last_backup_more": {
+    "message": "Más desde entonces: $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "3 artículos, 14 frases guardadas, 9 resaltados" }
+    }
+  },
+  "reader_last_backup_nothing": {
+    "message": "Nada más desde entonces."
+  },
+  "reader_last_backup_never": {
+    "message": "Todavía no hay archivo de copia."
+  },
+  "reader_last_backup_here": {
+    "message": "En este dispositivo: $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "12 artículos, 856 frases guardadas, 41 resaltados" }
+    }
+  },
   "reader_marks_backup_elsewhere": {
     "message": "Los resaltados viajan en la copia de seguridad de todo, que la lista de lectura exporta e importa - también los de los libros."
   },
@@ -1561,6 +1585,12 @@
     "message": "Lista de lectura"
   },
 
+  "options_copies_file": {
+    "message": "Archivo de copia (Exportar en la lista de lectura)"
+  },
+  "options_copies_file_holds": {
+    "message": "la lista de lectura, las frases, los resaltados y los ajustes"
+  },
   "options_copies_none": {
     "message": "todavía ninguna"
   },

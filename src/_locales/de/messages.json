@@ -760,6 +760,30 @@
   "reader_backup_nothing": {
     "message": "In dieser Datei gibt es nichts zu importieren."
   },
+  "reader_last_backup": {
+    "message": "Letzte Sicherung: $WHEN$.",
+    "placeholders": {
+      "when": { "content": "$1", "example": "vor 3 Wochen" }
+    }
+  },
+  "reader_last_backup_more": {
+    "message": "Seitdem dazugekommen: $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "3 Artikel, 14 gespeicherte Einträge, 9 Markierungen" }
+    }
+  },
+  "reader_last_backup_nothing": {
+    "message": "Seitdem ist nichts dazugekommen."
+  },
+  "reader_last_backup_never": {
+    "message": "Noch keine Sicherungsdatei."
+  },
+  "reader_last_backup_here": {
+    "message": "Auf diesem Gerät: $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "12 Artikel, 856 gespeicherte Einträge, 41 Markierungen" }
+    }
+  },
   "reader_marks_backup_elsewhere": {
     "message": "Markierungen reisen in der Sicherung von allem, die die Leseliste schreibt und liest - auch die von Büchern."
   },
@@ -1510,6 +1534,12 @@
     "message": "Leseliste"
   },
 
+  "options_copies_file": {
+    "message": "Sicherungsdatei (Exportieren in der Leseliste)"
+  },
+  "options_copies_file_holds": {
+    "message": "die Leseliste, die Einträge, die Markierungen und die Einstellungen"
+  },
   "options_copies_none": {
     "message": "noch keine"
   },

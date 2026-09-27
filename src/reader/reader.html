@@ -983,6 +983,15 @@
                  quotes are (Michał's call), and the format fold below points
                  there. -->
           </p>
+          <!-- When the backup was last written and how much more is here
+               since (D288, `lib/store/export-stamp.js`): a hint under the
+               button it is about, filled by script whenever the list
+               appears. The hint's grey while nothing presses; the text's
+               own ink (data-tone="due") once a month has passed with
+               something new, or while no file was ever written and
+               something is here to lose. A reminder is this line and
+               nothing else - no dialog, no notification, no badge. -->
+          <p class="hint last-backup" id="library-last-backup" hidden></p>
           <!-- The pictures kept with articles (D145) ride in the backup only
                when asked: with them the file is a .zip - the same .json and
                the pictures beside it - and it can be many times the size.

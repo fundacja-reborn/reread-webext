@@ -17,8 +17,9 @@ beyond what the add-on stores themselves report to us.
 
 Everything the extension keeps is stored in your browser's local extension storage on
 your device: four IndexedDB databases (`reread-vocab`, `reread-articles`, `reread-dicts`,
-`reread-models`) and the extension's `storage.local`, which holds the settings and the
-safety copies of the vocabulary, the highlights and the reading list. None of it is synced
+`reread-models`) and the extension's `storage.local`, which holds the settings, the
+safety copies of the vocabulary, the highlights and the reading list, and the date of your
+last backup export with the counts it held. None of it is synced
 to any account, and none of it can be read by the pages you visit (what a page can see of
 the extension's work on it is described under *Page content*); you can look at all of it in
 the browser's developer tools, under the extension's own origin.

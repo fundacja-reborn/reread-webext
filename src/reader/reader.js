@@ -40,7 +40,7 @@ import {
 import { applyReading } from "../lib/appearance.js";
 import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
-import { webext } from "../lib/browser.js";
+import { inPrivateContext, webext } from "../lib/browser.js";
 import { fileSize, localizePage, megabytes, plural, speedFactor, t, uiLocale } from "../lib/i18n.js";
 import { whenIdle } from "../lib/idle.js";
 import { privateNote } from "../lib/private-note.js";
@@ -222,10 +222,11 @@ import {
   fromManifest,
   isNewerBackup,
 } from "../lib/store/backup-file.js";
+import { backupReminder, readExportStamp, stampOf, writeExportStamp } from "../lib/store/export-stamp.js";
 import { booksOf, fromMarksCopy, isMarksCopy, marksImportPlan, missingByKind } from "../lib/store/marks-copy.js";
 import { MARKS_FILENAME, toMarksFile } from "../lib/store/marks-file.js";
 import { fromSettingsFile } from "../lib/store/settings-file.js";
-import { allPhrases } from "../lib/store/vocab.js";
+import { allPhrases, phraseTotal } from "../lib/store/vocab.js";
 import { fromVocabularyFile } from "../lib/store/vocabulary-file.js";
 import { completeLibraryCopy, restoreLibrary } from "../lib/store/library-copy.js";
 import {
@@ -505,6 +506,7 @@ const importSettings = /** @type {HTMLInputElement | null} */ (
   document.getElementById("library-import-settings")
 );
 const transferLine = document.getElementById("library-transfer-status");
+const lastBackupLine = document.getElementById("library-last-backup");
 const exportPicturesRow = document.getElementById("library-export-pictures-row");
 const exportPictures = /** @type {HTMLInputElement | null} */ (
   document.getElementById("library-export-pictures")
@@ -5677,6 +5679,7 @@ async function showLibrary() {
   document.title = t("reader_title");
   scrollTo(0, 0);
   await refreshLibrary();
+  void refreshBackupLine();
 }
 
 /**
@@ -5914,6 +5917,38 @@ function renderExportControls() {
   if (exportBooksLabel !== null) {
     exportBooksLabel.textContent = plural(shelf.count, "reader_export_books", [megabytes(shelf.bytes)]);
   }
+}
+
+/**
+ * The line under Export (D288): when the backup was last written and how
+ * much more is here since, off the stamp the export leaves and four counts -
+ * the articles and the books as the list just read them, the phrases as one
+ * count off their store, the highlights summed over their rows. Refreshed
+ * when the list appears and after what changes the counts on this page - an
+ * export, an import, a deletion - not on every refresh of the list: a page
+ * turned or a segment switched changes nothing the line says, and the
+ * highlights' rows are the one read here the plain list does not make
+ * (D283).
+ */
+async function refreshBackupLine() {
+  if (lastBackupLine === null) return;
+  const [stamp, phrases, rows] = await Promise.all([
+    readExportStamp(),
+    phraseTotal().catch(() => 0),
+    allMarksRows().catch(() => ({ marks: new Map(), notes: new Map() })),
+  ]);
+  let highlights = 0;
+  for (const marks of rows.marks.values()) highlights += marks.length;
+  const reminder = backupReminder(
+    stamp,
+    { phrases, articles: libraryShown.metas.length, books: libraryShown.bookRows.length, highlights },
+    Date.now(),
+    uiLocale(),
+  );
+  lastBackupLine.hidden = reminder === null;
+  lastBackupLine.textContent = reminder?.text ?? "";
+  if (reminder?.due === true) lastBackupLine.dataset["tone"] = "due";
+  else delete lastBackupLine.dataset["tone"];
 }
 
 /**
@@ -6739,6 +6774,7 @@ async function removeRow(button, url, kind) {
     showNotice(t("reader_list_write_failed"));
   }
   await refreshLibrary();
+  void refreshBackupLine();
 
   const successor = deletes()[Math.min(at, deletes().length - 1)];
   if (successor instanceof HTMLButtonElement) successor.focus();
@@ -6799,6 +6835,17 @@ async function exportList() {
     // only when they went in: "0 books" would say the file leaves them
     // out, which the list's own point says already.
     const highlights = docs.reduce((sum, doc) => sum + doc.marks.length, 0);
+    // The stamp under the button (D288): the moment the file was handed to
+    // the browser and how much the device held - the shelf whole, whatever
+    // the books' box said. Not from a private window: its database is the
+    // session's (PRIVACY), and a file of that must not stand as the last
+    // backup of everything.
+    if (!inPrivateContext()) {
+      await writeExportStamp(
+        stampOf(Date.now(), { phrases: phrases.length, articles: articles.length, books: shelf.length, highlights }),
+      );
+    }
+    void refreshBackupLine();
     const parts = [
       plural(articles.length, "reader_backup_articles"),
       ...(withBooks ? [plural(books.length, "reader_backup_books")] : []),
@@ -7718,6 +7765,7 @@ async function runBackup() {
     transferStatus(sentences.join(" "));
     closeImportOffer();
     await refreshLibrary();
+    void refreshBackupLine();
   } catch {
     // The offer stays open: an error must not eat the file the reader
     // already picked and read.
@@ -7825,6 +7873,7 @@ async function runImport() {
 
     closeImportOffer();
     await refreshLibrary();
+    void refreshBackupLine();
   } catch {
     // The offer stays open: an error must not eat the file the reader
     // already picked and read.
@@ -9415,6 +9464,7 @@ async function runBookImport(file, kind) {
           .join(" "),
       );
       await refreshLibrary();
+      void refreshBackupLine();
     } else {
       bookImportStatus(
         outcome.reason === "drm"

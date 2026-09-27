@@ -1066,6 +1066,30 @@
   "reader_backup_nothing": {
     "message": "W tym pliku nie ma nic do zaimportowania."
   },
+  "reader_last_backup": {
+    "message": "Ostatnia kopia: $WHEN$.",
+    "placeholders": {
+      "when": { "content": "$1", "example": "3 tygodnie temu" }
+    }
+  },
+  "reader_last_backup_more": {
+    "message": "Od tamtej pory przybyło: $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "3 artykuły, 14 zapisanych fraz, 9 zakreśleń" }
+    }
+  },
+  "reader_last_backup_nothing": {
+    "message": "Od tamtej pory nic nie przybyło."
+  },
+  "reader_last_backup_never": {
+    "message": "Nie ma jeszcze kopii w pliku."
+  },
+  "reader_last_backup_here": {
+    "message": "Na tym urządzeniu: $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "12 artykułów, 856 zapisanych fraz, 41 zakreśleń" }
+    }
+  },
   "reader_marks_backup_elsewhere": {
     "message": "Zakreślenia jadą w kopii wszystkiego, którą zapisuje i wczytuje czytelnia – także zakreślenia książek."
   },
@@ -2146,6 +2170,12 @@
     "message": "Czytelnia"
   },
 
+  "options_copies_file": {
+    "message": "Plik kopii (Eksportuj w czytelni)"
+  },
+  "options_copies_file_holds": {
+    "message": "czytelnia, frazy, zakreślenia i ustawienia"
+  },
   "options_copies_none": {
     "message": "jeszcze jej nie ma"
   },

@@ -80,6 +80,7 @@ import { testLoadModel } from "../lib/models/validate.js";
 import { Message } from "../lib/protocol.js";
 import { ensurePersistent, isWebKit, persistenceNote, readStorage } from "../lib/storage-report.js";
 import { readBackupSummary } from "../lib/store/backup.js";
+import { readExportStamp } from "../lib/store/export-stamp.js";
 import { listArticles } from "../lib/store/articles.js";
 import { listBooks } from "../lib/store/books.js";
 import {
@@ -1062,6 +1063,16 @@ async function renderStorage() {
         : plural(copy.docs, "options_copies_docs", [megabytes(copy.bytes)])
       : t("options_copies_off"),
     copy === null || copy.writtenAt === null ? null : when(copy.writtenAt),
+  );
+  // The file itself (D288): the one copy that leaves the profile, written
+  // by a press in the reading list and stamped there - the one date in the
+  // table that says when the reader did something, not when the extension
+  // did. Before a first export the row reads like a copy not yet made.
+  const stamp = await readExportStamp();
+  tellCopy(
+    "storage-export",
+    stamp === null ? null : t("options_copies_file_holds"),
+    stamp === null ? null : when(stamp.at),
   );
 }
 

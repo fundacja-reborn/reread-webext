@@ -1066,6 +1066,30 @@
   "reader_backup_nothing": {
     "message": "У цьому файлі немає чого імпортувати."
   },
+  "reader_last_backup": {
+    "message": "Остання копія: $WHEN$.",
+    "placeholders": {
+      "when": { "content": "$1", "example": "3 тижні тому" }
+    }
+  },
+  "reader_last_backup_more": {
+    "message": "Відтоді додалося: $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "3 статті, 14 збережених фраз, 9 позначень" }
+    }
+  },
+  "reader_last_backup_nothing": {
+    "message": "Відтоді нічого не додалося."
+  },
+  "reader_last_backup_never": {
+    "message": "Файлу копії ще немає."
+  },
+  "reader_last_backup_here": {
+    "message": "На цьому пристрої: $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "12 статей, 856 збережених фраз, 41 позначення" }
+    }
+  },
   "reader_marks_backup_elsewhere": {
     "message": "Позначення подорожують у резервній копії всього, яку записує й читає список читання - позначення книг також."
   },
@@ -2146,6 +2170,12 @@
     "message": "Список читання"
   },
 
+  "options_copies_file": {
+    "message": "Файл копії (Експортувати у списку читання)"
+  },
+  "options_copies_file_holds": {
+    "message": "список читання, фрази, позначення й налаштування"
+  },
   "options_copies_none": {
     "message": "ще немає"
   },
