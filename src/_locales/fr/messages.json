@@ -791,6 +791,30 @@
   "reader_backup_nothing": {
     "message": "Il n'y a rien à importer dans ce fichier."
   },
+  "reader_last_backup": {
+    "message": "Dernière sauvegarde : $WHEN$.",
+    "placeholders": {
+      "when": { "content": "$1", "example": "il y a 3 semaines" }
+    }
+  },
+  "reader_last_backup_more": {
+    "message": "En plus depuis : $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "3 articles, 14 phrases enregistrées, 9 surlignages" }
+    }
+  },
+  "reader_last_backup_nothing": {
+    "message": "Rien de plus depuis."
+  },
+  "reader_last_backup_never": {
+    "message": "Pas encore de fichier de sauvegarde."
+  },
+  "reader_last_backup_here": {
+    "message": "Sur cet appareil : $LIST$.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "12 articles, 856 phrases enregistrées, 41 surlignages" }
+    }
+  },
   "reader_marks_backup_elsewhere": {
     "message": "Les surlignages voyagent dans la sauvegarde de tout, écrite et lue depuis la liste de lecture - ceux des livres aussi."
   },
@@ -1561,6 +1585,12 @@
     "message": "Liste de lecture"
   },
 
+  "options_copies_file": {
+    "message": "Fichier de sauvegarde (Exporter dans la liste de lecture)"
+  },
+  "options_copies_file_holds": {
+    "message": "la liste de lecture, les phrases, les surlignages et les paramètres"
+  },
   "options_copies_none": {
     "message": "pas encore"
   },

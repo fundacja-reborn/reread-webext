@@ -1669,6 +1669,15 @@ body.reader:has(#library:not([hidden])) {
   padding: 0.35rem 1rem;
 }
 
+/* The last backup's line (D288): the hint's grey while nothing presses, the
+   text's own ink once a month has passed with something new here, or while
+   no file was ever written. Ink is the whole difference - on e-ink a darker
+   line, nowhere a frame: the framed status under it is for what a press
+   did, and this line is about what a press would be for. */
+.last-backup[data-tone="due"] {
+  color: var(--page-fg);
+}
+
 /* The transfer section's description as a list (Michał, 2026-09-13): the
    four points under the pictures box, and the format fold's glossary in
    the same dress. The indent of the settings page's "First steps" list;

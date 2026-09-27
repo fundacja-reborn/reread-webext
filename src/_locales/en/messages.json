@@ -999,6 +999,35 @@
     "message": "There is nothing to import in that file.",
     "description": "The reading list's answer to a backup with nothing in any part."
   },
+  "reader_last_backup": {
+    "message": "Last backup: $WHEN$.",
+    "description": "Under Export in the reading list (D288): when the backup of everything was last written, as a relative time in the reader's language - 'today', 'yesterday', '3 weeks ago', 'last month'. reader_last_backup_more or reader_last_backup_nothing follows it in the same line.",
+    "placeholders": {
+      "when": { "content": "$1", "example": "3 weeks ago" }
+    }
+  },
+  "reader_last_backup_more": {
+    "message": "More since then: $LIST$.",
+    "description": "After reader_last_backup: how much more the device holds than the last backup did, as the export report's list of counted parts (articles, books, saved phrases, highlights; empty parts left out). Growth, not a list of additions: a part with more deleted than saved since the file is left out.",
+    "placeholders": {
+      "list": { "content": "$1", "example": "3 articles, 14 saved phrases, 9 highlights" }
+    }
+  },
+  "reader_last_backup_nothing": {
+    "message": "Nothing more since then.",
+    "description": "After reader_last_backup when no part has grown since the last backup."
+  },
+  "reader_last_backup_never": {
+    "message": "No backup file yet.",
+    "description": "Under Export in the reading list (D288) while no backup of everything was ever written and something is here to lose; reader_last_backup_here follows it in the same line. Not shown over an empty list."
+  },
+  "reader_last_backup_here": {
+    "message": "On this device: $LIST$.",
+    "description": "After reader_last_backup_never: what the device holds, as the export report's list of counted parts (articles, books, saved phrases, highlights; empty parts left out).",
+    "placeholders": {
+      "list": { "content": "$1", "example": "12 articles, 856 saved phrases, 41 highlights" }
+    }
+  },
   "reader_marks_backup_elsewhere": {
     "message": "Highlights travel in the backup of everything, exported and imported on the reading list - for books too.",
     "description": "The one sentence on the highlights page about the backup since D213: the highlights are in the backup of everything, which the reading list exports and imports. The page's own export is the .md notes file."
@@ -1892,6 +1921,14 @@
     "message": "Reading list"
   },
 
+  "options_copies_file": {
+    "message": "Backup file (Export in the reading list)",
+    "description": "The fourth row of the backups table (D288): the file Export writes, the one copy that leaves the browser's profile. Its date is the last export's; before one the row reads like a copy not yet made (options_copies_none and a dash)."
+  },
+  "options_copies_file_holds": {
+    "message": "the reading list, the phrases, the highlights and the settings",
+    "description": "The backup file's contents cell in the backups table once a backup was written: the four parts the file always holds. Books and pictures ride in it only when their boxes are ticked, which the note under the table says."
+  },
   "options_copies_none": {
     "message": "none yet"
   },

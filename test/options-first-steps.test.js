@@ -208,16 +208,18 @@ describe("the data section", () => {
     const at = markup.indexOf('<table class="copies">');
     assert.ok(at > 0, "the copies are not a table");
     const block = markup.slice(at, markup.indexOf("</table>", at));
-    for (const id of ["storage-backup", "storage-marks-backup", "storage-library-copy"]) {
+    // Three copies kept in the browser, and since D288 the file Export
+    // writes as the fourth row - the one copy that leaves the profile.
+    for (const id of ["storage-backup", "storage-marks-backup", "storage-library-copy", "storage-export"]) {
       assert.ok(block.includes(`id="${id}"`), `${id} is not in the copies table`);
     }
     // Named columns rather than three values a reader has to infer.
     for (const key of ["options_copies_head_name", "options_copies_head_holds", "options_copies_head_when"]) {
       assert.match(block, new RegExp(`<th scope="col" data-i18n="${key}"`), `the table has no ${key} column`);
     }
-    assert.equal((block.match(/<th scope="row" class="copy-name"/g) ?? []).length, 3, "a copy does not say what it is");
-    assert.equal((block.match(/class="copy-holds"/g) ?? []).length, 3, "a copy does not say what it holds");
-    assert.equal((block.match(/class="copy-when"/g) ?? []).length, 3, "a copy does not say when it was written");
+    assert.equal((block.match(/<th scope="row" class="copy-name"/g) ?? []).length, 4, "a copy does not say what it is");
+    assert.equal((block.match(/class="copy-holds"/g) ?? []).length, 4, "a copy does not say what it holds");
+    assert.equal((block.match(/class="copy-when"/g) ?? []).length, 4, "a copy does not say when it was written");
 
     const options = await source("options/options.js");
     assert.match(options, /date\.textContent = at \?\? "\\u2014";/, "a copy with no date says nothing where the date stands");

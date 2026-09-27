@@ -468,5 +468,16 @@ export async function allPhrases() {
  * @returns {Promise<boolean>}
  */
 export async function hasPhrases() {
-  return (await withPhrases("readonly", (store) => promisify(store.count()))) > 0;
+  return (await phraseTotal()) > 0;
+}
+
+/**
+ * How many phrases are saved - every pair, the learned ones too - as one
+ * count off the store: the reading list compares it with the count the last
+ * backup held (D288), and a date per row would be a read of every row.
+ *
+ * @returns {Promise<number>}
+ */
+export async function phraseTotal() {
+  return withPhrases("readonly", (store) => promisify(store.count()));
 }

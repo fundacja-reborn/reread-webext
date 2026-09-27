@@ -116,4 +116,32 @@ describe("the backup of everything on the reading list page", () => {
     // against the library by the same rule.
     assert.match(script, /marksImportPlan\(laid\.documents/, "the highlights' plan is gone with the copy");
   });
+
+  it("stamps the backup of everything at the press - the shelf whole, never from a private window, never for the selection's file (D288)", async () => {
+    const script = await source("reader/reader.js");
+    const exporting = bodyOf(script, "exportList");
+    assert.match(
+      exporting,
+      /downloadFile\(archive, BACKUP_FILENAME, "application\/zip"\);[\s\S]*?if \(!inPrivateContext\(\)\) \{\s*await writeExportStamp\(\s*stampOf\(Date\.now\(\), \{ phrases: phrases\.length, articles: articles\.length, books: shelf\.length, highlights \}\),\s*\);\s*\}\s*void refreshBackupLine\(\);/,
+      "the stamp is not written after the file, from the counts the report speaks, outside a private window",
+    );
+    assert.equal(bodyOf(script, "exportSelection").includes("writeExportStamp("), false, "the selection's file stamps the backup of everything");
+    // The line is read where the list appears and after what changes its
+    // counts on this page - never on every refresh of the list, whose
+    // plain reads must stay the light ones (D283).
+    assert.match(bodyOf(script, "showLibrary"), /await refreshLibrary\(\);\s*void refreshBackupLine\(\);/, "the line is not refreshed when the list appears");
+    assert.match(bodyOf(script, "removeRow"), /await refreshLibrary\(\);\s*void refreshBackupLine\(\);/, "a deletion leaves the line stale");
+    assert.match(bodyOf(script, "runBackup"), /await refreshLibrary\(\);\s*void refreshBackupLine\(\);/, "a backup import leaves the line stale");
+    assert.match(bodyOf(script, "runImport"), /await refreshLibrary\(\);\s*void refreshBackupLine\(\);/, "a list import leaves the line stale");
+    assert.doesNotMatch(bodyOf(script, "refreshLibrary"), /refreshBackupLine\(\)/, "every refresh of the list reads the highlights' rows");
+    const refreshing = bodyOf(script, "refreshBackupLine");
+    assert.match(refreshing, /readExportStamp\(\),\s*phraseTotal\(\)\.catch\(\(\) => 0\),\s*allMarksRows\(\)/, "the counts are not one read each");
+    assert.match(refreshing, /lastBackupLine\.dataset\["tone"\] = "due"/, "the ink is not the line's tone");
+    const markup = await source("reader/reader.html");
+    assert.match(markup, /<\/p>\s*(?:<!--[\s\S]*?-->\s*)?<p class="hint last-backup" id="library-last-backup" hidden><\/p>\s*(?:<!--[\s\S]*?-->\s*)?<p class="hint transfer-option" id="library-export-pictures-row" hidden>/, "the line does not stand under the buttons, ahead of the boxes");
+    // The settings' table lists the file beside the copies kept in the browser.
+    const settings = await source("options/options.html");
+    assert.match(settings, /<tr id="storage-library-copy">[\s\S]*?<\/tr>\s*(?:<!--[\s\S]*?-->\s*)?<tr id="storage-export">\s*<th scope="row" class="copy-name" data-i18n="options_copies_file">/, "the backups table lacks the file's row");
+    assert.match(bodyOf(await source("options/options.js"), "renderStorage"), /const stamp = await readExportStamp\(\);\s*tellCopy\(\s*"storage-export",\s*stamp === null \? null : t\("options_copies_file_holds"\),\s*stamp === null \? null : when\(stamp\.at\),\s*\);/, "the file's row is not filled from the stamp");
+  });
 });
