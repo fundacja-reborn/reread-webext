@@ -226,6 +226,8 @@ re/read is built by a non-profit foundation - no investors, no ads, no tracking.
 
 → [**More ways to support**](https://reapps.eu/#support)
 
+→ [**Rate re/read on addons.mozilla.org**](https://addons.mozilla.org/firefox/addon/reread/reviews/) or [**on the Chrome Web Store**](https://chromewebstore.google.com/detail/cdeoicfidedlcapagmimcmmeeoplfcla/reviews) - a rating costs nothing and helps other readers find it. The same door is on the Settings page, under Support, aimed at the store your browser installed from.
+
 ---
 
 Built with privacy in mind by [Fundacja Reborn](https://reborn.org.pl) (Poland).

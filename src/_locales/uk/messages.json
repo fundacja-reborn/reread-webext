@@ -2875,6 +2875,12 @@
   },
   "options_support_donate": { "message": "Зробити внесок через Wise" },
   "options_support_more": { "message": "Інші способи підтримки" },
+  "options_support_rate": {
+    "message": "Оцінити re/read на $HOST$",
+    "placeholders": {
+      "host": { "content": "$1", "example": "addons.mozilla.org" }
+    }
+  },
 
   "options_badge_reading": { "message": "це ви читаєте" },
   "options_delete_confirm": { "message": "Точно?" },

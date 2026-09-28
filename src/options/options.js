@@ -43,7 +43,7 @@ import { describeDictDownloadProblem, downloadArchive } from "../lib/dict/downlo
 import { describeLinkProblem, parseDictionaryLink } from "../lib/dict/link.js";
 import { describeHostProblem, parseHostname } from "../lib/host.js";
 import { sameSite } from "../lib/site.js";
-import { dictionarySourcesLink } from "../lib/sources.js";
+import { dictionarySourcesLink, storeReviewLink } from "../lib/sources.js";
 import { readLiveDictionaries, refreshLiveDictionaries } from "../lib/dict/live.js";
 import {
   aliasesOf,
@@ -625,6 +625,25 @@ function linkDictionarySources() {
     anchor.href = href;
     anchor.textContent = label;
   }
+}
+
+/**
+ * The Support card's door to the review page of the store this browser
+ * installed re/read from (D290). The page's own scheme says which store:
+ * `moz-extension:` is Firefox and its add-ons site, `chrome-extension:` is
+ * every Chromium and the Chrome Web Store, which Brave and Edge install from
+ * too. A scheme the addresses do not know - Safari, until there is a listing -
+ * keeps the row hidden. The words name the store's address, the rule for every
+ * link that leaves the extension (D192); a link the reader follows, not a
+ * request the extension makes.
+ */
+function linkStoreReview() {
+  const link = storeReviewLink(location.protocol);
+  const anchor = document.getElementById("support-rate");
+  if (link === null || !(anchor instanceof HTMLAnchorElement)) return;
+  anchor.href = link.href;
+  fill("support-rate-words", t("options_support_rate", [link.label]));
+  anchor.hidden = false;
 }
 
 /**
@@ -3633,6 +3652,7 @@ async function render() {
   renderLanguageChoices("link-from", config.sourceLang ?? "");
   renderLanguageChoices("link-to", config.targetLang ?? "");
   linkDictionarySources();
+  linkStoreReview();
 
   const { source } = registrySource();
   const host = source === "" ? "" : new URL(source).host;

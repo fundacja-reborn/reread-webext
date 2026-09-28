@@ -2628,6 +2628,13 @@
   },
   "options_support_donate": { "message": "Donate via Wise" },
   "options_support_more": { "message": "More ways to support" },
+  "options_support_rate": {
+    "message": "Rate re/read on $HOST$",
+    "description": "The Support card's door to the review page of the store this browser installed re/read from (D290). $HOST$ is the store's own address as the reader sees it (addons.mozilla.org or chromewebstore.google.com), put in by the page and never translated, so that the reader can tell where the press leads.",
+    "placeholders": {
+      "host": { "content": "$1", "example": "addons.mozilla.org" }
+    }
+  },
 
   "options_badge_reading": { "message": "what you are reading" },
   "options_delete_confirm": {

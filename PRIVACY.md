@@ -1,6 +1,6 @@
 # Privacy policy for re/read
 
-Last updated: 12 September 2026. This document is kept in the extension's repository, so
+Last updated: 27 September 2026. This document is kept in the extension's repository, so
 every change to it is a commit anyone can read: [`PRIVACY.md`](https://github.com/fundacja-reborn/reread-webext/blob/main/PRIVACY.md).
 
 ## The short version
@@ -123,6 +123,13 @@ yourself is followed where it leads, and the Settings page names the host it end
 The custom CSS you can type on the settings page is
 checked before it is stored, and a rule that would load anything (url(), @import, @font-face)
 is refused - so it cannot become a third address either.
+
+A few ordinary links leave the extension's own pages: on the Settings page, under
+**Support**, the foundation's site, its donation page and the review page of the add-on
+store your browser installed re/read from; in the popup, the foundation's support page; at
+the foot of the Settings page, the source code on GitHub. They are links, not requests:
+nothing is fetched until you press one, a press opens that site in a new tab the way any
+link would, and the extension sends it nothing about you.
 
 You do not have to take our word for it: watch the network panel in the browser's
 developer tools, read the source code (the extension is published unminified, exactly as it

@@ -2875,6 +2875,12 @@
   },
   "options_support_donate": { "message": "Przekaż darowiznę przez Wise" },
   "options_support_more": { "message": "Więcej sposobów wsparcia" },
+  "options_support_rate": {
+    "message": "Oceń re/read na $HOST$",
+    "placeholders": {
+      "host": { "content": "$1", "example": "addons.mozilla.org" }
+    }
+  },
 
   "options_badge_reading": { "message": "to czytasz" },
   "options_delete_confirm": { "message": "Na pewno?" },
