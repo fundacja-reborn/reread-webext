@@ -73,7 +73,7 @@ import { NO_BASE, buildArticle } from "../lib/reader/article.js";
 import { bookFrame } from "../lib/reader/book-frame.js";
 import { MAX_DOWNLOAD_BYTES, pictureSources, picturesState, picturesSummary } from "../lib/reader/pictures.js";
 import { sourceOf, webAddress } from "../lib/reader/source.js";
-import { bodyPieces, joinGroups, marksHeld, tornGroups } from "../lib/reader/split-body.js";
+import { bodyBoxes, lostParts, mendBody, partsHeld } from "../lib/reader/split-body.js";
 import {
   ARTICLES_ENTRY,
   archiveAccount,
@@ -1592,33 +1592,39 @@ function parsePage(page) {
 
 /**
  * Readability over the page - and over it once more when its first answer
- * holds some of a set of same-shaped boxes and not the others, joined this
- * time (`lib/reader/split-body.js`, D286: a body cut into two or three boxes
- * by advertising slots, of which Readability keeps the best box alone).
+ * holds a part of the body and not the rest, mended this time
+ * (`lib/reader/split-body.js`). Two things are mended: a body cut into boxes
+ * of one shape by advertising slots, of which Readability keeps the best box
+ * alone (D286), and the paragraphs of a page that has them as `<div>`s - a
+ * snapshot of archive.today - of which it drops the ones with many links
+ * (D291).
  *
  * Readability rewrites the document it is given. That document is a
  * throwaway parse of somebody else's page, which is the only kind it should
  * ever get - never a live one - and the second run gets a parse of its own
  * for the same reason: nothing of the first is worth keeping but the strings
  * read off it. The second answer replaces the first only when it holds more
- * of the boxes; a page whose article came out whole is read once, as before.
+ * of the paragraphs in question; a page whose article came out whole is read
+ * once, as before.
  *
  * @param {import("../lib/protocol.js").Page} page
  * @returns {ReadabilityArticle | null}
  */
 function extractArticle(page) {
   const parsed = parsePage(page);
-  const pieces = bodyPieces(parsed);
+  const boxes = bodyBoxes(parsed);
   const found = new Readability(parsed).parse();
   if (found === null || typeof found.textContent !== "string") return found;
-  const torn = tornGroups(pieces, found.textContent);
-  if (torn.length === 0) return found;
+  const lost = lostParts(boxes, found.textContent);
+  if (lost === null) return found;
 
   const again = parsePage(page);
-  joinGroups(bodyPieces(again), torn);
+  mendBody(bodyBoxes(again), lost);
   const second = new Readability(again).parse();
   if (second === null || typeof second.textContent !== "string") return found;
-  return marksHeld(torn, second.textContent) > marksHeld(torn, found.textContent) ? second : found;
+  return partsHeld(boxes, lost, second.textContent) > partsHeld(boxes, lost, found.textContent)
+    ? second
+    : found;
 }
 
 /**
