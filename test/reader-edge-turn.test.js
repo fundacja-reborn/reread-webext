@@ -153,8 +153,8 @@ describe("the page turned at the window's edge under a stretched range (D239)", 
     assert.match(bodyOf(await source("content/reading.js"), "onScroll"), /if \(anchored\) return;/, "a turn under an open bubble closes it");
   });
 
-  it("is promised in the README", async () => {
-    const readme = await source("../README.md");
-    assert.match(readme, /a highlight or a selection dragged to the foot of the page turns it after a moment and goes on onto the next page/, "the README does not promise the turn at the edge");
+  it("is promised in the user guide", async () => {
+    const guide = await source("../docs/GUIDE.md");
+    assert.match(guide, /a highlight or a selection dragged to the foot of the page turns it after a moment and goes on onto the next page/, "the guide does not promise the turn at the edge");
   });
 });

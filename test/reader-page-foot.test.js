@@ -109,10 +109,10 @@ describe("the page's foot (D238)", () => {
     }
   });
 
-  it("is promised in the README as a setting, on by default (D249)", async () => {
-    const readme = await source("../README.md");
-    assert.match(readme, /\*\*Show the page footer with reading progress\*\* under \*\*Pages layout\*\* in the settings, on by default/, "the README still promises a quiet foot the reader no longer has");
-    assert.match(readme, /the page being read keeps its first line and only its last lines go behind the bar/, "the README does not say what a bar does to the page");
+  it("is promised in the user guide as a setting, on by default (D249)", async () => {
+    const guide = await source("../docs/GUIDE.md");
+    assert.match(guide, /\*\*Show the page footer with reading progress\*\* under \*\*Pages layout\*\* in the settings, on by default/, "the guide still promises a quiet foot the reader no longer has");
+    assert.match(guide, /the page being read keeps its first line and only its last lines go behind the bar/, "the guide does not say what a bar does to the page");
   });
 });
 
@@ -237,8 +237,8 @@ describe("the way to the contents in the page's foot, and the contents as a shee
     }
     const markup = await source("options/options.html");
     assert.match(markup, /the "Contents" button is shown there too\.\s*<\/p>/, "the settings page's own words lag behind the catalogue");
-    const readme = await source("../README.md");
-    assert.match(readme, /a small \*\*Contents\*\* button is shown at the other end of the same line/, "the README does not say where the button is");
-    assert.match(readme, /is a panel at the left side of the window, as tall as the window/, "the README does not say the contents are a panel");
+    const guide = await source("../docs/GUIDE.md");
+    assert.match(guide, /a small \*\*Contents\*\* button is shown at the other end of the same line/, "the guide does not say where the button is");
+    assert.match(guide, /is a panel at the left side of the window, as tall as the window/, "the guide does not say the contents are a panel");
   });
 });
