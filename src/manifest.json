@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "re/read - read offline, translate and learn",
+  "name": "re/read - read offline, keep a library, learn",
   "short_name": "re/read",
   "version": "0.5.83",
   "description": "__MSG_extension_description__",
