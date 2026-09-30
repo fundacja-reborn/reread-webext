@@ -115,7 +115,7 @@ describe("the foot of the reader's page over a long book", () => {
     assert.match(curtain, /: t\("reader_page_of", \[counted\.page\.toLocaleString\(\), counted\.pages\.toLocaleString\(\)\]\);/);
   });
 
-  it("is said in the setting's note, in every language, and in the README", () => {
+  it("is said in the setting's note, in every language, and in the user guide", () => {
     const expected = { en: "12%", pl: "12%", de: "12 %", fr: "12 %", es: "12 %", uk: "12%" };
     for (const [lang, example] of Object.entries(expected)) {
       const catalogue = JSON.parse(read(`src/_locales/${lang}/messages.json`));
@@ -125,6 +125,6 @@ describe("the foot of the reader's page over a long book", () => {
       // The bare percent wears the same spacing as the example.
       assert.equal(catalogue["reader_percent"]?.message, example.replace("12", "$PERCENT$"), lang);
     }
-    assert.match(read("README.md"), /In a long book the count is how much of the whole book you have read, in whole percent/);
+    assert.match(read("docs/GUIDE.md"), /In a long book the count is how much of the whole book you have read, in whole percent/);
   });
 });

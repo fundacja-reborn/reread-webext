@@ -183,10 +183,11 @@ describe("the typography rows (D225) - the stylesheet", () => {
 });
 
 describe("the typography rows (D225) - the promises", () => {
-  it("are named in the README and the hyphenation in PRIVACY", async () => {
+  it("are named in the README, explained in the user guide, and the hyphenation in PRIVACY", async () => {
     const readme = await source("README.md");
     assert.match(readme, /line spacing, left-aligned or justified lines, hyphenation/);
-    assert.match(readme, /a page that declares no language is not hyphenated/);
+    const guide = await source("docs/GUIDE.md");
+    assert.match(guide, /a page that declares no language is not hyphenated/);
     const privacy = await source("PRIVACY.md");
     assert.match(privacy, /^## Hyphenation$/m);
     assert.match(privacy, /hyphenation_component_installer\.cc/);

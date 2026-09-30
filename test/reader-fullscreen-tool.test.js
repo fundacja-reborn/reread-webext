@@ -126,5 +126,6 @@ describe("the bar's full-screen tool", () => {
       assert.doesNotMatch(await source(`_locales/${locale}/messages.json`), /reader_fullscreen_bar/, `${locale} still names the folded bar`);
     }
     assert.doesNotMatch(await source("../README.md"), /folds the reader's own bar away/, "the README still promises a fold on the press");
+    assert.doesNotMatch(await source("../docs/GUIDE.md"), /folds the reader's own bar away/, "the guide still promises a fold on the press");
   });
 });

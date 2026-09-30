@@ -175,12 +175,12 @@ describe("the gesture that turns a page by touch (D250)", () => {
     }
   });
 
-  it("is promised in the README, defaults and all", async () => {
-    const readme = await readFile(new URL("../README.md", ROOT), "utf8");
-    assert.match(readme, /\*\*Turning pages by touch\*\* offers a tap on the left or right third of the page, sliding a\s*finger sideways, or nothing at all/, "the README does not offer the three gestures");
-    assert.match(readme, /a slide by default on a narrow screen[\s\S]*?and a\s*tap on a wide one/, "the README does not say which is the default where");
-    assert.match(readme, /on a phone it must not begin at the very edge of the screen, where the system's own\s*back gesture lives/, "the README keeps the edge of a phone's screen a surprise");
-    assert.match(readme, /A tap turns a page only when it is short, still and away from the edges of the screen/, "the README promises a tap that turns wherever it lands");
+  it("is promised in the user guide, defaults and all", async () => {
+    const guide = await readFile(new URL("../docs/GUIDE.md", ROOT), "utf8");
+    assert.match(guide, /\*\*Turning pages by touch\*\* offers a tap on the left or right third of the page, sliding a\s*finger sideways, or nothing at all/, "the guide does not offer the three gestures");
+    assert.match(guide, /a slide by default on a narrow screen[\s\S]*?and a\s*tap on a wide one/, "the guide does not say which is the default where");
+    assert.match(guide, /on a phone it must not begin at the very edge of the screen, which the system keeps for its own\s*back gesture/, "the guide keeps the edge of a phone's screen a surprise");
+    assert.match(guide, /A tap turns a page only when it is short, still and away from the edges of the screen/, "the guide promises a tap that turns wherever it lands");
   });
 
   it("gathers the Pages layout's three settings under one heading", async () => {

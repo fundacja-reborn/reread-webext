@@ -101,10 +101,10 @@ describe("pages while nobody has chosen a layout (D279)", () => {
     assert.match(markup, /These work in the reading view when its layout is Pages\. Pages is the default; you choose\s+Pages or Scroll in the Aa panel\./, "the settings page's own words lag behind the catalogue");
   });
 
-  it("is promised in the README: the default, the note and the drag up and down", async () => {
-    const readme = await source("../README.md");
-    assert.match(readme, /\*\*Pages\*\* is the default: the first time a text is opened, a note at the top says that it is divided into pages and has a \*\*Scroll\*\* button/);
-    assert.match(readme, /Sliding a finger up shows the next page too, and down the previous one/);
-    assert.match(readme, /a mouse that moves with its button down is selecting text and never turns a page/);
+  it("is promised in the user guide: the default, the note and the drag up and down", async () => {
+    const guide = await source("../docs/GUIDE.md");
+    assert.match(guide, /\*\*Pages\*\* is the default: the first time a text is opened, a note at the top says that it is divided into pages and has a \*\*Scroll\*\* button/);
+    assert.match(guide, /Sliding a finger up shows the next page too, and down the previous one/);
+    assert.match(guide, /a mouse that moves with its button down is selecting text and never turns a page/);
   });
 });

@@ -101,12 +101,12 @@ describe("the signal that a page has turned (D251)", () => {
     }
   });
 
-  it("is promised in the README, with what it does not touch", async () => {
-    const readme = await readFile(new URL("../README.md", ROOT), "utf8");
-    assert.match(readme, /\*\*Page turn effect\*\*, in the same section of the settings, shows that the page has turned/, "the README does not offer the effect");
-    assert.match(readme, /Three values, and the reader picks: a smooth slide, which is the default/, "the README does not say the effect is chosen rather than inferred");
-    assert.match(readme, /a dark flash of the text area, for e-ink screens[\s\S]*?a distinct dark flash on an ordinary one/, "the README does not say what the flash looks like on each screen");
-    assert.match(readme, /Nothing happens when your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection/, "the README promises a signal where there is none");
+  it("is promised in the user guide, with what it does not touch", async () => {
+    const guide = await readFile(new URL("../docs/GUIDE.md", ROOT), "utf8");
+    assert.match(guide, /\*\*Page turn effect\*\*, in the same section of the settings, shows that the page has turned/, "the guide does not offer the effect");
+    assert.match(guide, /Three values, and the reader picks: a smooth slide, which is the default/, "the guide does not say the effect is chosen rather than inferred");
+    assert.match(guide, /a dark flash of the text area, for e-ink screens[\s\S]*?a distinct dark flash on an ordinary one/, "the guide does not say what the flash looks like on each screen");
+    assert.match(guide, /Nothing happens when your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection/, "the guide promises a signal where there is none");
   });
 
   it("offers the effect on the settings page, in every language", async () => {
