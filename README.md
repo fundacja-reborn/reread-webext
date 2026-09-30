@@ -1,6 +1,6 @@
 # re/read
 
-A browser extension for reading - especially for reading in a language you are learning. Select a word or phrase to see its translation and save it; saved phrases are underlined on every page you visit, and one click marks a phrase as learned. Any page can be opened in the built-in reader and kept in the offline reading list; EPUB books can be imported and read the same way, translation bubble included. Everything is local: translation, dictionaries, vocabulary and the reading list are stored in the browser's local database on your device, work with no network, and nothing you read or select is ever sent anywhere.
+A browser extension for reading. Save any web page to an offline reading list and open it in the built-in reader; import EPUB books and Markdown files and read them the same way, with highlights, notes and reading aloud. When you read in a language you are learning, select a word or phrase to see its translation and save it: saved phrases are underlined on every page you visit, and one click marks a phrase as learned. Everything is local: the reading list, translation, dictionaries and vocabulary are stored in the browser's local database on your device, work with no network, and nothing you read or select is ever sent anywhere.
 
 Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/reread/) or the [Chrome Web Store](https://chromewebstore.google.com/detail/cdeoicfidedlcapagmimcmmeeoplfcla)** (Brave and Edge use the same page); the [Install](#install) section has the details.
 
@@ -10,32 +10,49 @@ Works in Firefox (desktop and Android) and in Chrome/Chromium. **Install it from
 
 ## Features at a glance
 
-- Select a word or phrase on any page to see its translation in a bubble. The translation engine runs on your device.
+- Save any web page to an offline reading list. A saved article opens with no network, even after the original page is gone.
+- Import EPUB books and Markdown files into the reading list and read them the same way.
+- A reader that shows any page as a clean article, with themes, fonts, and a Pages or Scroll layout.
+- A highlighter with notes, and a page that lists every highlight.
+- Reading aloud with the device's offline voices.
+- Search inside a document and across the reading list.
+- Export any saved document as EPUB or Markdown, and everything at once as one backup file.
+- Select a word or phrase to see its translation in a bubble. The translation engine runs on your device.
 - About a hundred language pairs, downloaded once from the settings page.
 - Dictionaries next to the translation: more than four hundred WikDict pairs, or your own StarDict files.
 - Save a phrase from the bubble. Saved phrases are underlined on every page you visit.
 - Mark a phrase as learned with one click. It stays on a Learned list and can come back.
 - A saved phrases page with filters, edits, counts, and TSV import and export, Anki included.
-- A reader that shows any page as a clean article, with themes, fonts, and a Pages or Scroll layout.
-- An offline reading list: saved articles open with no network, even after the original page is gone.
-- EPUB books and Markdown files imported into the reading list and read the same way.
-- A highlighter with notes, and a page that lists every highlight.
-- Reading aloud with the device's offline voices, in the bubble and in the reader.
-- Search inside a document and across the reading list.
-- Export any saved document as EPUB or Markdown, and everything at once as one backup file.
-- Works without a translation model: with dictionaries only, or in your own language.
+- Translation is optional: with the model switched off, re/read is a reading list and a reader, with dictionaries if you want them.
 - Interface in six languages. No account, no server, no telemetry.
 
 The [user guide](docs/GUIDE.md) describes every screen, button and setting.
 
 ## Features
 
+**Reader and reading list**
+
+- **Offline reading list.** A saved article is stored in full on your device and opens with no network, also when the original page is gone. Pages opened in the reader are saved by default; pictures are downloaded only on request. Every row shows the text's length and how long it takes at your reading speed.
+- **EPUB books.** Import a book into the reading list and read it as one text, with its table of contents, footnotes and pictures. A long book is loaded part by part as you read on.
+- **Markdown texts.** Import a `.md` file (a note from re/notes or Obsidian, or a document exported from the reader) and it joins the list like a book.
+- **Reader mode.** Opens the page as a clean article in the extension's own tab: from the right-click menu, from the bubble, with `Alt`+`Shift`+`R`, or from the toolbar popup. The reader's menu has the table of contents, search, full screen, export and a link to the original page.
+- **Reading position.** Every saved document reopens where you stopped.
+- **Highlighter.** Highlights snap to whole words, can span paragraphs, come in four colours and take notes. A Highlights page lists every mark, exports them as Markdown, and keeps a highlight even when its article is deleted. A note can also be written on a whole document.
+- **Read aloud.** A whole article or book in the reader, or a phrase from the translation bubble, with the word being spoken highlighted, pause and resume, sentence skip and speed control. Only the device's offline voices are used.
+- **Search.** Inside the open document and across the reading list: titles, sites, your notes and, on request, the stored texts, with snippets.
+- **Export a document.** Any saved article or book can be exported as an EPUB or a Markdown file, from the reader's menu or from a selection in the reading list. An exported `.md` file imports back.
+- **Appearance.** Light, sepia, dark and e-ink themes; serif, sans or any font installed on the device; text size, column width, line spacing, left-aligned or justified lines, hyphenation, paragraph style, and links as plain text.
+- **Pages or scroll.** The reader shows a text by whole pages (the default) or as one scrolling column. Pages are turned with keys, the mouse wheel or a finger, and a footer shows the reading progress. A page turn effect for e-ink screens can be a slide, a dark flash or nothing.
+
+![Two windows. Left: an article in the reader - Mark as read and Delete above the title, then the author, the site the article came from with an icon that opens the original, its length with the number of saved phrases found in it, a line about its pictures with the Download and show in the text button, and a small bubble over another form of a saved word, naming the saved word. Right: the reader's menu - Contents, Search in text, Highlights, Mark as read, Download pictures, Export as EPUB, Export as Markdown, Delete from the reading list, Full screen, Saved phrases, Offline reading list, Open the original, Settings](docs/screenshots/article-and-menu.webp)
+
+![Two windows. Left: a paragraph being highlighted in pink, with the pins at its ends and the highlighter's toolbar at the foot of the page - Copy, Note, the four colours, Delete, and the arrows that turn the page. Right: the reader's Aa panel - theme with E-ink among the choices, the Pages or Scroll layout, type, size, width, line spacing, alignment, hyphenation, paragraphs, links as plain text or active, the highlighter's colours, the underline, and the voice that reads aloud with its speed](docs/screenshots/highlighter-and-appearance.webp)
+
 **Translation**
 
 - **Bubble on selection.** Select a word or phrase to see its translation. The engine (Bergamot - the technology behind Firefox's built-in page translation) is included in the extension and runs on your device, so translation works with no network.
 - **About a hundred language pairs.** Models are downloaded once from the settings page, or added from your own files, and stored locally. An installed pair shows an Update button when Mozilla publishes a new build.
 - **Dictionaries beside the engine.** A translation model has to pick one meaning; a dictionary lists them all. StarDict dictionaries (a catalogue of more than four hundred WikDict pairs installable with one click, or your own files) appear in the bubble under the translation, and clicking a line attaches that meaning to the saved phrase.
-- **Read aloud.** A phrase from the bubble, or a whole article or book in the reader, with the word being spoken highlighted, pause and resume, sentence skip and speed control. Only the device's offline voices are used.
 
 **Vocabulary**
 
@@ -47,23 +64,6 @@ The [user guide](docs/GUIDE.md) describes every screen, button and setting.
 - **TSV import and export.** Move vocabulary to Anki or between devices; importing the same file twice never duplicates a phrase. **Export for Anki** adds the sentence each phrase was saved in.
 
 ![Two windows. Left: the saved phrases page - the language pair, the To learn and Learned lists, a filter, and one row per phrase with its meaning, the sentence it was saved in, its two counts, and buttons to hear it, edit it or mark it Learned. Right: the highlights page - every highlight with its quote, the title of its document and the day it was made, and buttons to open it in the document, hear it, copy it, add a note or delete it](docs/screenshots/saved-phrases-and-highlights.webp)
-
-**Reader and reading list**
-
-- **Reader mode.** Opens the page as a clean article in the extension's own tab: from the right-click menu, from the bubble, with `Alt`+`Shift`+`R`, or from the toolbar popup. The reader's menu has the table of contents, search, full screen, export and a link to the original page.
-- **Offline reading list.** A saved article is stored in full on your device and opens with no network, also when the original page is gone. Pages opened in the reader are saved by default; pictures are downloaded only on request. Every row shows the text's length and how long it takes at your reading speed.
-- **EPUB books.** Import a book into the reading list and read it as one text, with its table of contents, footnotes and pictures. A long book is loaded part by part as you read on.
-- **Markdown texts.** Import a `.md` file (a note from re/notes or Obsidian, or a document exported from the reader) and it joins the list like a book.
-- **Reading position.** Every saved document reopens where you stopped.
-- **Export a document.** Any saved article or book can be exported as an EPUB or a Markdown file, from the reader's menu or from a selection in the reading list. An exported `.md` file imports back.
-- **Highlighter.** Highlights snap to whole words, can span paragraphs, come in four colours and take notes. A Highlights page lists every mark, exports them as Markdown, and keeps a highlight even when its article is deleted. A note can also be written on a whole document.
-- **Search.** Inside the open document and across the reading list: titles, sites, your notes and, on request, the stored texts, with snippets.
-- **Appearance.** Light, sepia, dark and e-ink themes; serif, sans or any font installed on the device; text size, column width, line spacing, left-aligned or justified lines, hyphenation, paragraph style, and links as plain text.
-- **Pages or scroll.** The reader shows a text by whole pages (the default) or as one scrolling column. Pages are turned with keys, the mouse wheel or a finger, and a footer shows the reading progress. A page turn effect for e-ink screens can be a slide, a dark flash or nothing.
-
-![Two windows. Left: an article in the reader - Mark as read and Delete above the title, then the author, the site the article came from with an icon that opens the original, its length with the number of saved phrases found in it, a line about its pictures with the Download and show in the text button, and a small bubble over another form of a saved word, naming the saved word. Right: the reader's menu - Contents, Search in text, Highlights, Mark as read, Download pictures, Export as EPUB, Export as Markdown, Delete from the reading list, Full screen, Saved phrases, Offline reading list, Open the original, Settings](docs/screenshots/article-and-menu.webp)
-
-![Two windows. Left: a paragraph being highlighted in pink, with the pins at its ends and the highlighter's toolbar at the foot of the page - Copy, Note, the four colours, Delete, and the arrows that turn the page. Right: the reader's Aa panel - theme with E-ink among the choices, the Pages or Scroll layout, type, size, width, line spacing, alignment, hyphenation, paragraphs, links as plain text or active, the highlighter's colours, the underline, and the voice that reads aloud with its speed](docs/screenshots/highlighter-and-appearance.webp)
 
 **Data and interface**
 

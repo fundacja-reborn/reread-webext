@@ -4,7 +4,150 @@ This guide describes re/read screen by screen: what each screen shows, what each
 
 Names in bold are the names of buttons, rows and settings as the extension shows them in English.
 
-**Contents:** [The bubble and the underlines](#the-bubble-and-the-underlines) · [Reading without a translation model](#reading-without-a-translation-model) · [The saved phrases page](#the-saved-phrases-page) · [The toolbar popup](#the-toolbar-popup) · [The reader](#the-reader) · [The offline reading list](#the-offline-reading-list) · [Books and other files](#books-and-other-files) · [Highlights and notes](#highlights-and-notes) · [Reading aloud](#reading-aloud) · [Backup and safety copies](#backup-and-safety-copies) · [The settings page](#the-settings-page) · [Firefox on Android](#firefox-on-android) · [Keyboard shortcuts](#keyboard-shortcuts)
+**Contents:** [The offline reading list](#the-offline-reading-list) · [Books and other files](#books-and-other-files) · [The reader](#the-reader) · [Highlights and notes](#highlights-and-notes) · [Reading aloud](#reading-aloud) · [The bubble and the underlines](#the-bubble-and-the-underlines) · [Reading without a translation model](#reading-without-a-translation-model) · [The saved phrases page](#the-saved-phrases-page) · [The toolbar popup](#the-toolbar-popup) · [Backup and safety copies](#backup-and-safety-copies) · [The settings page](#the-settings-page) · [Firefox on Android](#firefox-on-android) · [Keyboard shortcuts](#keyboard-shortcuts)
+
+## The offline reading list
+
+The reading list opens from the toolbar popup, from the reader's menu, and from the right-click menu on any page (**re/read** → **Offline reading list**). It is split into **To read** and **Read**, with a search box and one row per saved article or book.
+
+**What is saved.** A saved article is stored in full on your device: it opens with no network, also when the original page has moved or disappeared. Pages opened in the reader are saved by default; the setting **Save pages you open to the offline reading list** turns that off, and a single page can then still be saved with **Save to reading list** in the reader. A page already in the list is never overwritten.
+
+**Length.** Every row shows how long the text is: its words, and about how many minutes they take at your own reading speed, which you type once in the settings (**Reading speed** under **Reading view**; 200 words a minute until you do), so you can pick what to read next by its length. A book's row shows how many words the whole book holds and about how many hours it takes. The same numbers appear under the title in the reader, together with how many of your saved phrases were found in the text.
+
+**Mark as read, delete.** Both are shown next to the title and under the last line of a document in the reader, and in the reader's menu. Deleting a document removes everything stored for it (text, pictures, highlights and notes, reading position) from the database and from the reading list's safety copy. Saved phrases are not part of a document: a phrase you saved while reading an article stays in your vocabulary, with no record of where it came from.
+
+**Search across the list.** The search box searches titles, sites and your notes on documents, and, with **Search in the texts too** ticked, the stored texts, with snippets; clicking a snippet opens the document at that place. A row found by its note shows the note under the title.
+
+**Select.** **Select** ticks articles or books, for a backup of only those (see [Backup and safety copies](#backup-and-safety-copies)) or for exporting each as a file of its own (see [Export a document](#export-a-document)).
+
+### Pictures
+
+Pictures are not saved by default; a saved article contains only text until you ask for them. **Download pictures** in the reader's menu, or **Download and show in the text** on the line under the article's title, stores an article's pictures with it, on one press, scaled down to screen size where that saves space. The pictures are downloaded from the addresses the article's pictures point at, once, without cookies or referrer (see [PRIVACY.md](../PRIVACY.md)). Once they are stored, the line under the title disappears and the menu row changes to **Remove pictures**, which deletes them again. The reading list shows how many pictures an article or a book keeps and how much space they take.
+
+### Private tabs in Firefox
+
+In a private tab Firefox gives the extension's pages (reading list, reader, saved phrases) a separate database and deletes it when the private session ends. The pages fill it from the safety copies, so the reading list and the highlights show there as they are, but an article saved, a book imported, a highlight made or anything deleted in a private tab is gone with the session: the copies are read in private browsing and never written. Saved phrases are the one exception: they go through the extension's background, which is never private, and are kept. The pages show a notice about this at the top. Nothing is lost, because the database of your normal tabs is unchanged; open re/read from a normal tab again (Firefox shows a mask icon in private mode).
+
+## Books and other files
+
+### EPUB books
+
+**Import** on the reading list takes an `.epub` file and adds the book to the list. The import takes the text and the pictures in the file: no publisher styling, no fonts, and no DRM; a protected book is not imported, and a message says why. Links inside the book's text, its own contents page included, are not followed. A file imported again becomes a second copy.
+
+**Table of contents.** **Contents** in the reader's menu shows the table of contents saved in the book file (`nav.xhtml` in EPUB 3, `toc.ncx` in EPUB 2), the same one other reading apps show, read once at import. When the file has no table, or only a few rows, such as the cover and the title page, while the text has more chapter headings, the chapter headings found in the text are listed instead. A book that was already in the reading list keeps the table it has; to get the one from the file, import the file again. When a long book has neither a table in its file nor chapter headings, **Contents** lists places in the book instead: each row shows the first words found at that place and how far into the book it is, in percent. This list is made when the book is opened and is not stored.
+
+**Reading a long book.** A long book is read as one text. By pages, turning the last page shown carries on with the book. Scrolled, scrolling on at the very end of the loaded text opens what follows, and scrolling back at its very beginning opens what came before, with `PgDn`/`PgUp`, the space bar, the arrow keys, the mouse wheel, a trackpad or a finger. The scrolling has to start at the end of the text: fast scrolling that only reaches the end opens nothing, and neither does a key held down. **Continue reading** under the text and **Earlier text** over it do the same with one press.
+
+**Footnotes.** A footnote's text is stored with the book at import and opens in a small card next to its number; the page does not scroll anywhere.
+
+**Pictures.** The pictures in the book file are kept with it and shown in the text, scaled down to screen size where that saves space, with no network involved. The list shows how many pictures a book keeps and how much space they take, and **Remove pictures** in the reader's menu deletes them.
+
+### Markdown texts
+
+**Import** on the reading list also takes a `.md` file: a note from re/notes or Obsidian, or a document exported from the reader's menu (below). It joins the list the way a book does: headings as the table of contents, footnotes as pop-up notes, links to the web kept, pictures kept only as the addresses written in the file (nothing is fetched for them). The first heading is the title; a front matter block's title, author and language are read too. Raw HTML in the file goes through the same filter as any page. A file imported again becomes a second copy, as a book does.
+
+### Export a document
+
+Any saved article or imported book can be exported as a file of its own. **Export as EPUB** in the reader's menu writes a book file for e-readers and reading apps: the text as the reader shows it, the pictures kept with the document, the same table of contents the reader shows (an article's headings, a book's chapters), and a book's footnotes as pop-up notes. **Export as Markdown (.md)** writes a plain-text page with headings, lists, quotes and links (an article's pictures by their web addresses) for notes and other apps. The same two buttons are inside the reading list's selection, one file per ticked document. The file is named after the title and written from the stored copy on this device; nothing is fetched for it. An exported `.md` file imports back the same way (see [Markdown texts](#markdown-texts)), so a document can be exported and imported again without loss.
+
+## The reader
+
+### Opening a page in the reader
+
+The reader shows a page as a clean article in the extension's own tab. It opens from the right-click menu (**re/read** → **Open in reading view**), from the page icon in the translation bubble, with `Alt`+`Shift`+`R`, or from the toolbar popup. Translation, saving and underlining work in the reader as on any page.
+
+Under the title the reader shows the author, and the site the article came from with an arrow beside it that opens the original page in a new tab. The next line gives the length of the text: its words, and about how many minutes they take at your own reading speed, which you type once in the settings (200 words a minute until you do), together with how many of your saved phrases were found in the text. A book's line shows how many words the whole book holds and about how many hours it takes. An article whose pictures are not stored yet has one more line, with how many pictures it has and a **Download and show in the text** button.
+
+### The reader's menu
+
+The ⋮ button in the reader's bar opens the menu:
+
+- **Contents**: the table of contents (an article's headings, a book's chapters). It is a panel at the left side of the window, as tall as the window, so a long table of contents is easy to scroll; on a wide window the text stays visible next to it.
+- **Search in text**: search inside the open document (see [Search](#search)).
+- **Highlights**: the highlights of this document (see [Highlights and notes](#highlights-and-notes)).
+- **Mark as read** and **Delete from the reading list**, for a document that is in the reading list: the same two buttons that are next to the title and under the last line, so they are available anywhere in a long article or book. After the first press **Delete from the reading list** changes to **Sure?**, and the second press deletes the document.
+- **Download pictures**, which changes to **Remove pictures** once the pictures are stored (see [Pictures](#pictures)).
+- **Export as EPUB** and **Export as Markdown (.md)** (see [Export a document](#export-a-document)).
+- **Add a note to this document**, which reads **Edit this document's note** once a note is written (see [A note on a whole document](#a-note-on-a-whole-document)).
+- **Full screen** (below).
+- **Saved phrases**, **Offline reading list** and **Settings**: the extension's other pages.
+- **Open the original**: the page the article came from, in a new tab.
+
+### Full screen
+
+**Full screen** in the reader's menu gives the article the whole screen: the browser hides its own bars until you press Back or `Esc`. The row reads **Exit full screen** meanwhile and does the same. A browser accepts the request only from a press, never from a page on its own, so after the browser reopens the reader's tab the row has to be pressed again.
+
+Where the bar has room for it (a desktop, a tablet or an e-reader; a phone held upright usually does not), the bar of every page (the reader in each of its views, the saved phrases, the settings) also carries a full-screen button next to the menu: one press asks for the whole screen, and the same button, or Back, or `Esc` on a desktop, leaves it. The bar itself stays where it is, pinned to the top of every page; the small tab at the edge of the reader's bar is what hides that bar.
+
+The settings and the saved phrases opened from the reader's own menu keep the full screen: they are shown inside the reader's own page, so nothing is reloaded and the browser's bars stay hidden. Back, the back gesture or the arrow in their bar brings the reading back exactly where it was. Opened any other way (from the toolbar popup, from the bubble on a web page, or from the browser's own add-ons manager) they are pages of their own.
+
+On Android see also [Full screen on a phone](#full-screen-on-a-phone).
+
+### Appearance: the Aa panel
+
+The **Aa** button in the reader's bar opens the appearance panel:
+
+- **Theme**: light, sepia, dark and e-ink. The e-ink theme is black on white in the greys an e-ink screen can show, with stronger highlighter colours and nothing animated.
+- **Layout**: **Pages** or **Scroll** (see [Pages and scroll](#pages-and-scroll)).
+- **Type**: serif or sans, or any font installed on the device, typed by name in the settings (**Custom font** under **Reading view**) and offered here as **Custom**.
+- **Size**, **Width** and **Line spacing** of the text.
+- **Alignment**: left-aligned or justified lines.
+- **Hyphenation**: the browser's own, in the language the page or book declares. Which languages it covers depends on the browser and the system, a page that declares no language is not hyphenated, and nothing is downloaded for it (see [PRIVACY.md](../PRIVACY.md), "Hyphenation").
+- **Paragraphs**: set apart by a blank line, by an indented first line as in a book, or by both.
+- **Links**: active, or shown as plain text, so that a book is shown without blue links.
+- **Highlighter**: the colour the highlighter marks with.
+- **Underline**: three thicknesses for the dotted underline of saved phrases.
+- **Voice** and its speed, for reading aloud.
+
+A small tab at the edge of the reader's bar hides the bar; the tab stays at the window's edge, and pressing it again brings the bar back.
+
+### Pages and scroll
+
+The **Layout** row of the Aa panel chooses between **Pages** and **Scroll**. **Pages** is the default: the first time a text is opened, a note at the top says that it is divided into pages and has a **Scroll** button for going back to scrolling; the note is shown until you press that button, close the note, or choose a layout in the Aa panel.
+
+Read by pages, the text moves only by whole pages, each beginning and ending with a whole line. A finger, the arrow keys, `PgDn`/`PgUp`, `Home`/`End` and the mouse wheel turn it; a finger or a wheel cannot scroll it part-way. With **Scroll**, the text is one long column; `PgDn`/`PgUp` and the space bar move it by a screenful with the last line kept on top, whole lines under the bar.
+
+**Turning pages by touch.** What a finger does is chosen in the settings, under **Pages layout**: **Turning pages by touch** offers a tap on the left or right third of the page, sliding a finger sideways, or nothing at all. Until you choose, it is a slide by default on a narrow screen, where the hand holding the device rests on the glass and only a gesture that moves is safe from it, and a tap on a wide one, where nothing rests on the screen. A slide left shows the next page; on a phone it must not begin at the very edge of the screen, which the system keeps for its own back gesture. Sliding a finger up shows the next page too, and down the previous one (the movement a hand makes to scroll), with either of the two touch settings; a mouse that moves with its button down is selecting text and never turns a page. A tap turns a page only when it is short, still and away from the edges of the screen, so that a thumb holding a phone turns nothing; a pen never turns a page.
+
+**The page footer.** A page count is shown at the foot of the window (**Show the page footer with reading progress** under **Pages layout** in the settings, on by default); switched off, the count is shown in the reader's bar next to re/read on a wide screen, and it is read by screen readers either way. When the text has a table of contents, a small **Contents** button is shown at the other end of the same line, under the first letters of the text; it opens the same panel as **Contents** in the reader's menu. In a long book the count is how much of the whole book you have read, in whole percent, the same number the book's row in the reading list shows, because only the pages of the text around you are laid out, and a page number of the whole book could not be given.
+
+**Bars at the foot of the page.** When the read-aloud or highlighter bar is at the foot, or the page footer is switched on, the page being read keeps its first line and only its last lines go behind the bar. With the highlighter switched on, a tap on the text makes or changes a highlight, so the highlighter's toolbar carries two arrows for turning the page: the lines the toolbar covers move to the page after it, and the arrows turn to it.
+
+**Selections and the bubble.** Read by pages, a highlight or a selection dragged to the foot of the page turns it after a moment and goes on onto the next page (a line appears on the page's edge while the turn is waiting; the same works upward at the head); the page keys and the mouse wheel turn pages without closing a selection being dragged or a highlight being edited. While the translation bubble is open, the mouse wheel over the bubble scrolls its dictionary list, and so do the keys after a click into the list; over the text, the wheel, the keys and a finger sliding on the page close the bubble and turn the page (a tap on the text only closes it).
+
+**Page turn effect**, in the same section of the settings, shows that the page has turned, which is easy to miss when you are reading the middle of one. Three values, and the reader picks: a smooth slide, which is the default; a dark flash of the text area, for e-ink screens (barely visible on the panel it is meant for, where it also helps clear ghosting, and a distinct dark flash on an ordinary one); or nothing at all. Nothing happens when your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection to the edge of the page. The effect was made for e-ink screens, where a page turn is one clean refresh, and it is independent of the theme.
+
+### Reading position
+
+Every saved document reopens where you stopped.
+
+### Search
+
+**Search in text** in the reader's menu searches inside the open document: articles, whole books, live pages too. In a book the results are grouped by chapter. The reading list has its own search across every saved document (see [The offline reading list](#the-offline-reading-list)).
+
+## Highlights and notes
+
+**Making a highlight.** The highlighter in the reader marks a passage of the text. Highlights snap to whole words, can span paragraphs, come in a choice of colours and are stored with the saved copy of the document. Tap a highlight and drag either of its two pins to make it shorter or longer, word by word. The highlighter's toolbar at the foot of the page has **Copy**, **Note**, the four colours, **Delete**, and two arrows that turn the page.
+
+**The Highlights page** lists every mark with its note, and a highlight from a book with the title of its chapter (the search inside a book groups its results by chapter the same way). Each row can be read aloud, copied, opened in its document or deleted. **Export as notes (.md)** writes the highlights as a Markdown file of quotes and notes for your own notes; that file cannot be imported as highlights.
+
+**A highlight whose text has moved** (a paragraph added above it, a book imported again) is found by its quote and shown at the right place. When the quoted text itself has changed, a message says so instead of the wrong words being marked.
+
+**Highlights in the backup.** The highlights are included in the backup of everything (see [Backup and safety copies](#backup-and-safety-copies)), for books too: a book can be deleted and imported again from the same `.epub` file without losing its highlights (nothing already there is changed or removed). When the backup's highlights are imported into a book that is already in the list, each one is placed where its words are in the book as it is now, wherever in the book that is; a highlight whose words cannot be found exactly once stays on the Highlights page, and the import report says how many.
+
+**A highlight without its article.** A highlight whose article is no longer in the reading list is kept: you can open the original page, delete the highlight, or delete all highlights of that page.
+
+### A note on a whole document
+
+A note can also be written on a whole document, not only on a highlight. **Add a note to this document** in the reader's menu opens the same note window over the document's title, and the row reads **Edit this document's note** once one is written. The note is shown under the title in the reader, with a button beside it that opens it for editing, and on that document's Highlights page. It goes into the exported Markdown file under the document's title, is included in the backup with the highlights (a document that already has a note keeps it), and stays when the same page is saved again.
+
+## Reading aloud
+
+A whole article or book can be read aloud in the reader, with **Read aloud** in the reader's bar, and a phrase from the bubble, with its **Read aloud** button. In the reader the word being spoken is highlighted as it is read, and the read-aloud bar has pause and resume, sentence skip and speed control; the keys are listed under [Keyboard shortcuts](#keyboard-shortcuts). A long book is read aloud without a break: after the last sentence of the loaded text, the text that follows is opened and reading aloud continues, until you pause or stop it or the book ends. The rows of the saved phrases page and of the Highlights page can be read aloud as well.
+
+Only the device's offline voices are used: the online voices some browsers add (Chrome's "Google ..." voices, for example) are never listed and never used, and when the device has no offline voice for a language, nothing is read aloud and a message says so. With the translation model off, dictionary meanings are read aloud in the voice of their language.
+
+The **Reading aloud** section of the settings has a voice for each language (**Voice for reading aloud**) and the **Voice speed**. Its switch **Show the read-aloud buttons** turns reading aloud off altogether when unticked: no speaker in the bubble, no **Read aloud** button in the reader, none in the lists. The voice and the speed you chose are remembered and apply again when you turn it back on.
 
 ## The bubble and the underlines
 
@@ -92,149 +235,6 @@ The popup opens from the re/read button in the browser's toolbar; on Firefox for
 - the reader for the current page, the offline reading list, the saved phrases page and the settings.
 
 The extension's own pages (reader, reading list, highlights, saved phrases, settings) share one tab instead of opening a new one each time.
-
-## The reader
-
-### Opening a page in the reader
-
-The reader shows a page as a clean article in the extension's own tab. It opens from the right-click menu (**re/read** → **Open in reading view**), from the page icon in the translation bubble, with `Alt`+`Shift`+`R`, or from the toolbar popup. Translation, saving and underlining work in the reader as on any page.
-
-Under the title the reader shows the author, and the site the article came from with an arrow beside it that opens the original page in a new tab. The next line gives the length of the text: its words, and about how many minutes they take at your own reading speed, which you type once in the settings (200 words a minute until you do), together with how many of your saved phrases were found in the text. A book's line shows how many words the whole book holds and about how many hours it takes. An article whose pictures are not stored yet has one more line, with how many pictures it has and a **Download and show in the text** button.
-
-### The reader's menu
-
-The ⋮ button in the reader's bar opens the menu:
-
-- **Contents**: the table of contents (an article's headings, a book's chapters). It is a panel at the left side of the window, as tall as the window, so a long table of contents is easy to scroll; on a wide window the text stays visible next to it.
-- **Search in text**: search inside the open document (see [Search](#search)).
-- **Highlights**: the highlights of this document (see [Highlights and notes](#highlights-and-notes)).
-- **Mark as read** and **Delete from the reading list**, for a document that is in the reading list: the same two buttons that are next to the title and under the last line, so they are available anywhere in a long article or book. After the first press **Delete from the reading list** changes to **Sure?**, and the second press deletes the document.
-- **Download pictures**, which changes to **Remove pictures** once the pictures are stored (see [Pictures](#pictures)).
-- **Export as EPUB** and **Export as Markdown (.md)** (see [Export a document](#export-a-document)).
-- **Add a note to this document**, which reads **Edit this document's note** once a note is written (see [A note on a whole document](#a-note-on-a-whole-document)).
-- **Full screen** (below).
-- **Saved phrases**, **Offline reading list** and **Settings**: the extension's other pages.
-- **Open the original**: the page the article came from, in a new tab.
-
-### Full screen
-
-**Full screen** in the reader's menu gives the article the whole screen: the browser hides its own bars until you press Back or `Esc`. The row reads **Exit full screen** meanwhile and does the same. A browser accepts the request only from a press, never from a page on its own, so after the browser reopens the reader's tab the row has to be pressed again.
-
-Where the bar has room for it (a desktop, a tablet or an e-reader; a phone held upright usually does not), the bar of every page (the reader in each of its views, the saved phrases, the settings) also carries a full-screen button next to the menu: one press asks for the whole screen, and the same button, or Back, or `Esc` on a desktop, leaves it. The bar itself stays where it is, pinned to the top of every page; the small tab at the edge of the reader's bar is what hides that bar.
-
-The settings and the saved phrases opened from the reader's own menu keep the full screen: they are shown inside the reader's own page, so nothing is reloaded and the browser's bars stay hidden. Back, the back gesture or the arrow in their bar brings the reading back exactly where it was. Opened any other way (from the toolbar popup, from the bubble on a web page, or from the browser's own add-ons manager) they are pages of their own.
-
-On Android see also [Full screen on a phone](#full-screen-on-a-phone).
-
-### Appearance: the Aa panel
-
-The **Aa** button in the reader's bar opens the appearance panel:
-
-- **Theme**: light, sepia, dark and e-ink. The e-ink theme is black on white in the greys an e-ink screen can show, with stronger highlighter colours and nothing animated.
-- **Layout**: **Pages** or **Scroll** (see [Pages and scroll](#pages-and-scroll)).
-- **Type**: serif or sans, or any font installed on the device, typed by name in the settings (**Custom font** under **Reading view**) and offered here as **Custom**.
-- **Size**, **Width** and **Line spacing** of the text.
-- **Alignment**: left-aligned or justified lines.
-- **Hyphenation**: the browser's own, in the language the page or book declares. Which languages it covers depends on the browser and the system, a page that declares no language is not hyphenated, and nothing is downloaded for it (see [PRIVACY.md](../PRIVACY.md), "Hyphenation").
-- **Paragraphs**: set apart by a blank line, by an indented first line as in a book, or by both.
-- **Links**: active, or shown as plain text, so that a book is shown without blue links.
-- **Highlighter**: the colour the highlighter marks with.
-- **Underline**: three thicknesses for the dotted underline of saved phrases.
-- **Voice** and its speed, for reading aloud.
-
-A small tab at the edge of the reader's bar hides the bar; the tab stays at the window's edge, and pressing it again brings the bar back.
-
-### Pages and scroll
-
-The **Layout** row of the Aa panel chooses between **Pages** and **Scroll**. **Pages** is the default: the first time a text is opened, a note at the top says that it is divided into pages and has a **Scroll** button for going back to scrolling; the note is shown until you press that button, close the note, or choose a layout in the Aa panel.
-
-Read by pages, the text moves only by whole pages, each beginning and ending with a whole line. A finger, the arrow keys, `PgDn`/`PgUp`, `Home`/`End` and the mouse wheel turn it; a finger or a wheel cannot scroll it part-way. With **Scroll**, the text is one long column; `PgDn`/`PgUp` and the space bar move it by a screenful with the last line kept on top, whole lines under the bar.
-
-**Turning pages by touch.** What a finger does is chosen in the settings, under **Pages layout**: **Turning pages by touch** offers a tap on the left or right third of the page, sliding a finger sideways, or nothing at all. Until you choose, it is a slide by default on a narrow screen, where the hand holding the device rests on the glass and only a gesture that moves is safe from it, and a tap on a wide one, where nothing rests on the screen. A slide left shows the next page; on a phone it must not begin at the very edge of the screen, which the system keeps for its own back gesture. Sliding a finger up shows the next page too, and down the previous one (the movement a hand makes to scroll), with either of the two touch settings; a mouse that moves with its button down is selecting text and never turns a page. A tap turns a page only when it is short, still and away from the edges of the screen, so that a thumb holding a phone turns nothing; a pen never turns a page.
-
-**The page footer.** A page count is shown at the foot of the window (**Show the page footer with reading progress** under **Pages layout** in the settings, on by default); switched off, the count is shown in the reader's bar next to re/read on a wide screen, and it is read by screen readers either way. When the text has a table of contents, a small **Contents** button is shown at the other end of the same line, under the first letters of the text; it opens the same panel as **Contents** in the reader's menu. In a long book the count is how much of the whole book you have read, in whole percent, the same number the book's row in the reading list shows, because only the pages of the text around you are laid out, and a page number of the whole book could not be given.
-
-**Bars at the foot of the page.** When the read-aloud or highlighter bar is at the foot, or the page footer is switched on, the page being read keeps its first line and only its last lines go behind the bar. With the highlighter switched on, a tap on the text makes or changes a highlight, so the highlighter's toolbar carries two arrows for turning the page: the lines the toolbar covers move to the page after it, and the arrows turn to it.
-
-**Selections and the bubble.** Read by pages, a highlight or a selection dragged to the foot of the page turns it after a moment and goes on onto the next page (a line appears on the page's edge while the turn is waiting; the same works upward at the head); the page keys and the mouse wheel turn pages without closing a selection being dragged or a highlight being edited. While the translation bubble is open, the mouse wheel over the bubble scrolls its dictionary list, and so do the keys after a click into the list; over the text, the wheel, the keys and a finger sliding on the page close the bubble and turn the page (a tap on the text only closes it).
-
-**Page turn effect**, in the same section of the settings, shows that the page has turned, which is easy to miss when you are reading the middle of one. Three values, and the reader picks: a smooth slide, which is the default; a dark flash of the text area, for e-ink screens (barely visible on the panel it is meant for, where it also helps clear ghosting, and a distinct dark flash on an ordinary one); or nothing at all. Nothing happens when your system asks for less motion, and nothing when the page is turned by reading aloud or by dragging a selection to the edge of the page. The effect was made for e-ink screens, where a page turn is one clean refresh, and it is independent of the theme.
-
-### Reading position
-
-Every saved document reopens where you stopped.
-
-### Search
-
-**Search in text** in the reader's menu searches inside the open document: articles, whole books, live pages too. In a book the results are grouped by chapter. The reading list has its own search across every saved document (see [The offline reading list](#the-offline-reading-list)).
-
-## The offline reading list
-
-The reading list opens from the toolbar popup, from the reader's menu, and from the right-click menu on any page (**re/read** → **Offline reading list**). It is split into **To read** and **Read**, with a search box and one row per saved article or book.
-
-**What is saved.** A saved article is stored in full on your device: it opens with no network, also when the original page has moved or disappeared. Pages opened in the reader are saved by default; the setting **Save pages you open to the offline reading list** turns that off, and a single page can then still be saved with **Save to reading list** in the reader. A page already in the list is never overwritten.
-
-**Length.** Every row shows how long the text is: its words, and about how many minutes they take at your own reading speed, which you type once in the settings (**Reading speed** under **Reading view**; 200 words a minute until you do), so you can pick what to read next by its length. A book's row shows how many words the whole book holds and about how many hours it takes. The same numbers appear under the title in the reader, together with how many of your saved phrases were found in the text.
-
-**Mark as read, delete.** Both are shown next to the title and under the last line of a document in the reader, and in the reader's menu. Deleting a document removes everything stored for it (text, pictures, highlights and notes, reading position) from the database and from the reading list's safety copy. Saved phrases are not part of a document: a phrase you saved while reading an article stays in your vocabulary, with no record of where it came from.
-
-**Search across the list.** The search box searches titles, sites and your notes on documents, and, with **Search in the texts too** ticked, the stored texts, with snippets; clicking a snippet opens the document at that place. A row found by its note shows the note under the title.
-
-**Select.** **Select** ticks articles or books, for a backup of only those (see [Backup and safety copies](#backup-and-safety-copies)) or for exporting each as a file of its own (see [Export a document](#export-a-document)).
-
-### Pictures
-
-Pictures are not saved by default; a saved article contains only text until you ask for them. **Download pictures** in the reader's menu, or **Download and show in the text** on the line under the article's title, stores an article's pictures with it, on one press, scaled down to screen size where that saves space. The pictures are downloaded from the addresses the article's pictures point at, once, without cookies or referrer (see [PRIVACY.md](../PRIVACY.md)). Once they are stored, the line under the title disappears and the menu row changes to **Remove pictures**, which deletes them again. The reading list shows how many pictures an article or a book keeps and how much space they take.
-
-### Private tabs in Firefox
-
-In a private tab Firefox gives the extension's pages (reading list, reader, saved phrases) a separate database and deletes it when the private session ends. The pages fill it from the safety copies, so the reading list and the highlights show there as they are, but an article saved, a book imported, a highlight made or anything deleted in a private tab is gone with the session: the copies are read in private browsing and never written. Saved phrases are the one exception: they go through the extension's background, which is never private, and are kept. The pages show a notice about this at the top. Nothing is lost, because the database of your normal tabs is unchanged; open re/read from a normal tab again (Firefox shows a mask icon in private mode).
-
-## Books and other files
-
-### EPUB books
-
-**Import** on the reading list takes an `.epub` file and adds the book to the list. The import takes the text and the pictures in the file: no publisher styling, no fonts, and no DRM; a protected book is not imported, and a message says why. Links inside the book's text, its own contents page included, are not followed. A file imported again becomes a second copy.
-
-**Table of contents.** **Contents** in the reader's menu shows the table of contents saved in the book file (`nav.xhtml` in EPUB 3, `toc.ncx` in EPUB 2), the same one other reading apps show, read once at import. When the file has no table, or only a few rows, such as the cover and the title page, while the text has more chapter headings, the chapter headings found in the text are listed instead. A book that was already in the reading list keeps the table it has; to get the one from the file, import the file again. When a long book has neither a table in its file nor chapter headings, **Contents** lists places in the book instead: each row shows the first words found at that place and how far into the book it is, in percent. This list is made when the book is opened and is not stored.
-
-**Reading a long book.** A long book is read as one text. By pages, turning the last page shown carries on with the book. Scrolled, scrolling on at the very end of the loaded text opens what follows, and scrolling back at its very beginning opens what came before, with `PgDn`/`PgUp`, the space bar, the arrow keys, the mouse wheel, a trackpad or a finger. The scrolling has to start at the end of the text: fast scrolling that only reaches the end opens nothing, and neither does a key held down. **Continue reading** under the text and **Earlier text** over it do the same with one press.
-
-**Footnotes.** A footnote's text is stored with the book at import and opens in a small card next to its number; the page does not scroll anywhere.
-
-**Pictures.** The pictures in the book file are kept with it and shown in the text, scaled down to screen size where that saves space, with no network involved. The list shows how many pictures a book keeps and how much space they take, and **Remove pictures** in the reader's menu deletes them.
-
-### Markdown texts
-
-**Import** on the reading list also takes a `.md` file: a note from re/notes or Obsidian, or a document exported from the reader's menu (below). It joins the list the way a book does: headings as the table of contents, footnotes as pop-up notes, links to the web kept, pictures kept only as the addresses written in the file (nothing is fetched for them). The first heading is the title; a front matter block's title, author and language are read too. Raw HTML in the file goes through the same filter as any page. A file imported again becomes a second copy, as a book does.
-
-### Export a document
-
-Any saved article or imported book can be exported as a file of its own. **Export as EPUB** in the reader's menu writes a book file for e-readers and reading apps: the text as the reader shows it, the pictures kept with the document, the same table of contents the reader shows (an article's headings, a book's chapters), and a book's footnotes as pop-up notes. **Export as Markdown (.md)** writes a plain-text page with headings, lists, quotes and links (an article's pictures by their web addresses) for notes and other apps. The same two buttons are inside the reading list's selection, one file per ticked document. The file is named after the title and written from the stored copy on this device; nothing is fetched for it. An exported `.md` file imports back the same way (see [Markdown texts](#markdown-texts)), so a document can be exported and imported again without loss.
-
-## Highlights and notes
-
-**Making a highlight.** The highlighter in the reader marks a passage of the text. Highlights snap to whole words, can span paragraphs, come in a choice of colours and are stored with the saved copy of the document. Tap a highlight and drag either of its two pins to make it shorter or longer, word by word. The highlighter's toolbar at the foot of the page has **Copy**, **Note**, the four colours, **Delete**, and two arrows that turn the page.
-
-**The Highlights page** lists every mark with its note, and a highlight from a book with the title of its chapter (the search inside a book groups its results by chapter the same way). Each row can be read aloud, copied, opened in its document or deleted. **Export as notes (.md)** writes the highlights as a Markdown file of quotes and notes for your own notes; that file cannot be imported as highlights.
-
-**A highlight whose text has moved** (a paragraph added above it, a book imported again) is found by its quote and shown at the right place. When the quoted text itself has changed, a message says so instead of the wrong words being marked.
-
-**Highlights in the backup.** The highlights are included in the backup of everything (see [Backup and safety copies](#backup-and-safety-copies)), for books too: a book can be deleted and imported again from the same `.epub` file without losing its highlights (nothing already there is changed or removed). When the backup's highlights are imported into a book that is already in the list, each one is placed where its words are in the book as it is now, wherever in the book that is; a highlight whose words cannot be found exactly once stays on the Highlights page, and the import report says how many.
-
-**A highlight without its article.** A highlight whose article is no longer in the reading list is kept: you can open the original page, delete the highlight, or delete all highlights of that page.
-
-### A note on a whole document
-
-A note can also be written on a whole document, not only on a highlight. **Add a note to this document** in the reader's menu opens the same note window over the document's title, and the row reads **Edit this document's note** once one is written. The note is shown under the title in the reader, with a button beside it that opens it for editing, and on that document's Highlights page. It goes into the exported Markdown file under the document's title, is included in the backup with the highlights (a document that already has a note keeps it), and stays when the same page is saved again.
-
-## Reading aloud
-
-A phrase can be read aloud from the bubble, with the **Read aloud** button, and a whole article or book in the reader, with **Read aloud** in the reader's bar. In the reader the word being spoken is highlighted as it is read, and the read-aloud bar has pause and resume, sentence skip and speed control; the keys are listed under [Keyboard shortcuts](#keyboard-shortcuts). A long book is read aloud without a break: after the last sentence of the loaded text, the text that follows is opened and reading aloud continues, until you pause or stop it or the book ends. The rows of the saved phrases page and of the Highlights page can be read aloud as well.
-
-Only the device's offline voices are used: the online voices some browsers add (Chrome's "Google ..." voices, for example) are never listed and never used, and when the device has no offline voice for a language, nothing is read aloud and a message says so. With the translation model off, dictionary meanings are read aloud in the voice of their language.
-
-The **Reading aloud** section of the settings has a voice for each language (**Voice for reading aloud**) and the **Voice speed**. Its switch **Show the read-aloud buttons** turns reading aloud off altogether when unticked: no speaker in the bubble, no **Read aloud** button in the reader, none in the lists. The voice and the speed you chose are remembered and apply again when you turn it back on.
 
 ## Backup and safety copies
 
