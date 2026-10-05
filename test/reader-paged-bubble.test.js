@@ -101,4 +101,13 @@ describe("a bubble over a document read by pages (D285)", () => {
     // a road that forgot would show up here as a turn under an open bubble.
     assert.doesNotMatch(bodyOf(reader, "turnPage"), /dismiss\(\)|bubbleOpen\(\)/, "the turn closes the bubble itself, and the roads no longer have to");
   });
+
+  it("never cuts the pages again under a bubble (D295)", async () => {
+    const reader = await source("reader/reader.js");
+    // The bubble's keyboard shrinks the band for a few seconds; a table cut
+    // for it, and again for the band without it, was two cuts of the whole
+    // part under an edit box. The kept table stands, as under a finger
+    // (D238), and the bubble's leaving settles the page.
+    assert.match(bodyOf(reader, "pagesNow"), /if \(same && \(pointerHeld \|\| bubbleOpen\(\)\)\) \{\s*settleWanted = true;\s*return kept;/, "the pages are cut again under a bubble");
+  });
 });

@@ -2684,7 +2684,14 @@ function pagesNow() {
     return kept;
   }
   const same = kept !== null && kept.epoch === epoch;
-  if (same && pointerHeld) {
+  // Under a finger (D238) and under a bubble (D295) the table it has: the
+  // bubble's keyboard shrinks the visual viewport and so the band, and the
+  // pages were cut again for the keyboard's band and once more for the
+  // band without it - two cuts of the whole part for a band that stood for
+  // a few seconds, under an edit box, on an e-ink reader. `settlePage`
+  // waits under a bubble anyway; the bubble's leaving settles the page, and
+  // the band the keyboard gives back is the one the kept table was cut for.
+  if (same && (pointerHeld || bubbleOpen())) {
     settleWanted = true;
     return kept;
   }
