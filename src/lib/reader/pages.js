@@ -686,12 +686,40 @@ export const EDGE_TURN_FIRST_MS = 700;
 export const EDGE_TURN_REPEAT_MS = 1200;
 
 /**
- * How tall the edge zones are at the least: the foot's zone is everything
- * below the page's last full line - the curtain, the margin, the foot's
- * strip, a bar - which can be next to nothing when the last line ends on
- * the margin, and the head's zone is the chrome and this much of the band.
+ * The zones never reach into the text (D294, Michał's report from the Boox,
+ * 2026-10-05): until then the head's zone was the chrome and the top 24
+ * pixels of the band - the whole first line of the page at a reading size,
+ * so a hold on a word there, slid along the line to take the next word,
+ * turned the page back under the finger - and the foot's began exactly
+ * where the last full line's box ends, a millimetre under its glyphs, where
+ * a fingertip selecting that line lands as often as not; and where the
+ * strip under the line was thin, the zone was pushed up into the line to
+ * stay 24 pixels tall.
+ *
+ * So the zone is the strip beyond the line: above the first line's box,
+ * below the last full line's - the margin, the curtain, the chrome, the
+ * foot's strip, a bar (the pointer is captured, so a bar hears nothing) -
+ * entered a fingertip's offset past the line where the strip has that much
+ * room (`EDGE_CLEARANCE`), and at the line's very edge where it has not.
+ * The clearance is only ever taken from a strip that keeps `EDGE_ZONE_MIN`
+ * of zone within the window, so a thin strip stays a zone and the line
+ * stays text. The other half of the rule - that the pointer has to have
+ * travelled toward the edge from where it landed - is `edgeReached`.
  */
 export const EDGE_ZONE_MIN = 24;
+export const EDGE_CLEARANCE = 16;
+
+/**
+ * How far past the line's edge the zone begins, given the strip of window
+ * beyond the line: the clearance, as much of it as leaves the zone its
+ * least height, and nothing when the strip has not even that.
+ *
+ * @param {number} strip how much window lies beyond the line, CSS pixels
+ * @returns {number}
+ */
+function zoneInset(strip) {
+  return Math.max(0, Math.min(EDGE_CLEARANCE, strip - EDGE_ZONE_MIN));
+}
 
 /** @typedef {"down" | "up"} EdgeZone */
 
@@ -700,7 +728,8 @@ export const EDGE_ZONE_MIN = 24;
  * the range cannot leave the part, whose next page is another document.
  *
  * @param {number} y the pointer, window coordinates
- * @param {number} head where the page's first line stands
+ * @param {number} head where the page's first line stands - the top of its
+ *   box; the strip of window above it is the chrome and the margin
  * @param {number} foot where the page's last full line ends - the
  *   curtain's edge, or the band's foot
  * @param {number} bottom the window's foot
@@ -708,9 +737,41 @@ export const EDGE_ZONE_MIN = 24;
  * @returns {EdgeZone | null}
  */
 export function edgeZone(y, head, foot, bottom, turns) {
-  if (y >= Math.min(foot, bottom - EDGE_ZONE_MIN)) return turns.down ? "down" : null;
-  if (y < head + EDGE_ZONE_MIN) return turns.up ? "up" : null;
+  if (y >= foot + zoneInset(bottom - foot)) return turns.down ? "down" : null;
+  if (y < head - zoneInset(head)) return turns.up ? "up" : null;
   return null;
+}
+
+/**
+ * How far the pointer has to have travelled toward the edge, from where it
+ * landed, before its stay in the zone counts (`edgeReached`, D294). A
+ * fingertip lands below the word it is aimed at, so a hold on the page's
+ * last line can begin inside the foot's zone (tight leading, a pin of a
+ * mark that ends on that line) - and a hold that begins there and goes
+ * sideways is selecting that line, not asking for the next page. The
+ * travel is what the hand adds on purpose: Kindle's "drag to the edge" is a
+ * drag, and a finger that never moved toward the edge never dragged there.
+ * About two and a half millimetres on a phone or an e-ink panel, about
+ * half a line at a reading size: a slide along the last line that drifts
+ * does not reach it, a finger that means to does easily.
+ */
+export const EDGE_REACH = 16;
+
+/**
+ * Whether a pointer standing in a zone has reached it: travelled
+ * `EDGE_REACH` toward that edge from where it landed. Measured from the
+ * landing rather than from the stay's start, so a zone entered by a slide
+ * from the lines above is reached at once (the slide is the travel), and a
+ * hold that began in the zone is reached only once it moves on toward the
+ * edge.
+ *
+ * @param {EdgeZone} zone
+ * @param {number} fromY where the pointer landed, window coordinates
+ * @param {number} y where it stands
+ * @returns {boolean}
+ */
+export function edgeReached(zone, fromY, y) {
+  return (zone === "down" ? y - fromY : fromY - y) >= EDGE_REACH;
 }
 
 /**

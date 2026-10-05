@@ -68,7 +68,11 @@ describe("the page turned at the window's edge under a stretched range (D239)", 
     // The stay: entering a zone starts it and draws the line; the same
     // zone keeps it; leaving ends it.
     const move = bodyOf(reader, "onStretch");
-    assert.match(move, /if \(zone === null\) \{\s*disarmEdge\(\);\s*return;/, "leaving the zone keeps the turn armed");
+    // In the zone and arrived there (D294): the stay is measured from
+    // where the pointer landed, and a hold that began under the last line
+    // and went sideways never arms.
+    assert.match(move, /const landed = pressPoint;\s*if \(zone === null \|\| landed === null \|\| !edgeReached\(zone, landed\.y, y\)\) \{\s*disarmEdge\(\);\s*return;/, "leaving the zone keeps the turn armed, or a hold begun in the zone arms it");
+    assert.match(reader, /if \(pointersDown\.size === 0\) pressPoint = \{ x: event\.clientX, y: event\.clientY \};/, "the landing the stay is measured from is not the first pointer's");
     assert.match(move, /if \(stay !== null && stay\.zone === zone\) \{[\s\S]*return;/, "a move within the zone restarts its clock");
     assert.match(move, /edgeStay = \{ zone, x, y, enteredAt: performance\.now\(\), turnedAt: null, timer: 0 \};\s*showEdgeLine\(zone\);\s*scheduleEdgeTurn\(\);/, "entering the zone does not draw the line and start the clock");
     // The clock's ring: the pure rule decides, the page turns, the stay
@@ -85,15 +89,18 @@ describe("the page turned at the window's edge under a stretched range (D239)", 
     assert.match(bodyOf(reader, "disarmEdge"), /window\.clearTimeout\(stay\.timer\);\s*edgeStay = null;\s*if \(pageEdge !== null\) pageEdge\.hidden = true;/, "disarming leaves the clock or the line");
   });
 
-  it("sticks the range's end to the page's edge in a zone, and to the pointer elsewhere", async () => {
+  it("sticks the range's end to the page's edge under an armed stay, and to the pointer elsewhere", async () => {
     const reader = await source("reader/reader.js");
     const point = bodyOf(reader, "stretchPoint");
-    assert.match(point, /if \(!paged\(\)\) return \{ x, y \};/, "the scroll layout has an edge to stick to");
-    assert.match(point, /if \(zone === null\) return \{ x, y \};/, "the pointer is moved outside the zones");
+    // The stay, not the zone (D294): a pointer that only landed in the
+    // zone selects the words under it, and `onStretch` read this move
+    // before the stretch is read, so the stay is this move's.
+    assert.match(point, /^[\s\S]*?const stay = edgeStay;\s*if \(stay === null\) return \{ x, y \};/, "the pointer is moved outside the zones, or in a zone it has not reached");
+    assert.doesNotMatch(point, /edgeZoneAt\(/, "the stretch is read at the edge of a zone the pointer only landed in");
     // The last full line's end at the foot, the first line's start at the
     // head - the far side of the column in a right-to-left text.
     assert.match(point, /const rtl = article !== null && getComputedStyle\(article\)\.direction === "rtl";/, "a right-to-left text's line ends on the wrong side");
-    assert.match(point, /zone === "down"[\s\S]*x: rtl \? column\.left \+ 3 : column\.right - 3, y: lastLineEnd\(pages, pageShown\(pages\), band\) - half/, "the foot's zone does not stick to the last line's end");
+    assert.match(point, /stay\.zone === "down"[\s\S]*x: rtl \? column\.left \+ 3 : column\.right - 3, y: lastLineEnd\(pages, pageShown\(pages\), band\) - half/, "the foot's zone does not stick to the last line's end");
     assert.match(point, /return \{ x: rtl \? column\.right - 3 : column\.left \+ 3, y: band\.top \+ half \};/, "the head's zone does not stick to the first line's start");
     // The last full line ends at the curtain's edge, or at the band's foot
     // where the curtain has nothing to cover.
@@ -155,6 +162,8 @@ describe("the page turned at the window's edge under a stretched range (D239)", 
 
   it("is promised in the user guide", async () => {
     const guide = await source("../docs/GUIDE.md");
-    assert.match(guide, /a highlight or a selection dragged to the foot of the page turns it after a moment and goes on onto the next page/, "the guide does not promise the turn at the edge");
+    assert.match(guide, /a highlight or a selection dragged past the last line to the foot of the page turns it after a moment and goes on onto the next page/, "the guide does not promise the turn at the edge");
+    // The other half of the promise (D294): the lines themselves are safe.
+    assert.match(guide, /Selecting words on the first or the last line turns nothing: the page turns only for a finger that has left the line and moved on toward the edge/, "the guide does not promise the first and last line to the selection");
   });
 });
