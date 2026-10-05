@@ -114,6 +114,7 @@ import {
   atEdgeFor,
   blobTrusted,
   curtainTop,
+  edgeReached,
   edgeSwipe,
   edgeTurn,
   edgeWheel,
@@ -3184,6 +3185,17 @@ let gestureNow = null;
 let stretching = false;
 
 /**
+ * Where the pointer carrying the gesture landed (D294): what a stay at the
+ * window's edge is measured from (`edgeReached`) - a stretch has to have
+ * travelled toward the edge from here before the edge turns the page. The
+ * first pointer down, so a second finger resting on the glass mid-gesture
+ * does not move it.
+ *
+ * @type {{ x: number, y: number } | null}
+ */
+let pressPoint = null;
+
+/**
  * The pointers on the glass, by `pointerId`: when and where each landed,
  * how wide its contact was, and what kind of pointer it is (D250).
  *
@@ -3253,6 +3265,10 @@ document.addEventListener(
         blobSettled = true;
       }
     }
+    // The landing a stay at the edge is measured from (D294): the first
+    // pointer's, so a second finger resting on the glass mid-gesture does
+    // not move it.
+    if (pointersDown.size === 0) pressPoint = { x: event.clientX, y: event.clientY };
     // A gesture begins as nobody's: the stretch says for itself when the
     // hold takes and the range starts moving under the finger.
     stretching = false;
@@ -3454,6 +3470,14 @@ window.addEventListener("blur", onPointerLift);
  * none at its head: the range cannot leave the part, whose next page is
  * another document. The pages are never cut again meanwhile (`pointerHeld`).
  *
+ * The zones lie beyond the text, never on its first or last line, and a
+ * stay counts only for a pointer that travelled toward the edge from where
+ * it landed (D294, `edgeZone` and `edgeReached` in `pages.js`): a hold on
+ * the first line slid along it to take the next word turned the page back,
+ * and one on the last line turned it on (Michał's report from the Boox,
+ * 2026-10-05) - a phrase on either line could only be gathered a tap at a
+ * time.
+ *
  * @type {{ zone: import("../lib/reader/pages.js").EdgeZone, x: number, y: number, enteredAt: number, turnedAt: number | null, timer: number } | null}
  */
 let edgeStay = null;
@@ -3507,7 +3531,12 @@ function onStretch(x, y) {
   stretching = true;
   if (!paged()) return;
   const zone = edgeZoneAt(y);
-  if (zone === null) {
+  // In a zone, and arrived there (D294): travelled toward that edge from
+  // where the pointer landed. A hold that began under the last line and
+  // went sideways is selecting the line; one that goes on down is asking
+  // for the next page.
+  const landed = pressPoint;
+  if (zone === null || landed === null || !edgeReached(zone, landed.y, y)) {
     disarmEdge();
     return;
   }
@@ -3584,28 +3613,30 @@ function showEdgeLine(zone) {
 }
 
 /**
- * Where a stretch is read while the pointer stands in an edge zone (the
- * gesture's `stretchPoint`): the end of the page's last full line for the
- * foot, the start of its first line for the head - the range grows to the
- * page's edge, never to a word behind the curtain. The pointer's own point
- * everywhere else. The line's end is at the column's far side, which is
- * the left one in a right-to-left text.
+ * Where a stretch is read while the pointer stays at an edge (the gesture's
+ * `stretchPoint`): the end of the page's last full line for the foot, the
+ * start of its first line for the head - the range grows to the page's
+ * edge, never to a word behind the curtain. The pointer's own point
+ * everywhere else - outside the zones, and in a zone the pointer only
+ * landed in and has not reached (D294): the stay says, because the stay is
+ * what has been through `edgeReached`, and `onStretch` has read this very
+ * move before this is asked. The line's end is at the column's far side,
+ * which is the left one in a right-to-left text.
  *
  * @param {number} x
  * @param {number} y
  * @returns {{ x: number, y: number }}
  */
 function stretchPoint(x, y) {
-  if (!paged()) return { x, y };
-  const zone = edgeZoneAt(y);
-  if (zone === null) return { x, y };
+  const stay = edgeStay;
+  if (stay === null) return { x, y };
   const pages = pagesNow();
   const column = (contentElement ?? pageMain)?.getBoundingClientRect();
   if (pages === null || column === undefined) return { x, y };
   const band = pageBand();
   const rtl = article !== null && getComputedStyle(article).direction === "rtl";
   const half = readingLine() / 2;
-  if (zone === "down") {
+  if (stay.zone === "down") {
     return { x: rtl ? column.left + 3 : column.right - 3, y: lastLineEnd(pages, pageShown(pages), band) - half };
   }
   return { x: rtl ? column.right - 3 : column.left + 3, y: band.top + half };

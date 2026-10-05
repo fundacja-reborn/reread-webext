@@ -4,6 +4,8 @@ import { describe, it } from "node:test";
 import {
   BLOB_SAMPLES,
   CURTAIN_OVERLAP,
+  EDGE_CLEARANCE,
+  EDGE_REACH,
   EDGE_TURN_FIRST_MS,
   EDGE_TURN_REPEAT_MS,
   EDGE_ZONE_MIN,
@@ -20,6 +22,7 @@ import {
   WHEEL_COOLDOWN_MS,
   blobTrusted,
   curtainTop,
+  edgeReached,
   edgeTurn,
   edgeZone,
   flashAllowed,
@@ -715,28 +718,49 @@ describe("pagePercent", () => {
   });
 });
 
-describe("edgeZone (D239)", () => {
+describe("edgeZone (D239, D294)", () => {
   // A window 800 tall: the page's first line at 72, its last full line
-  // ending at 740 (the curtain's edge), pages both ways.
+  // ending at 740 (the curtain's edge), pages both ways. Both strips beyond
+  // the lines - 72 above, 60 below - have room for the clearance.
   const both = { up: true, down: true };
 
-  it("is the foot below the last full line, and the head within its reach of the first", () => {
-    assert.equal(edgeZone(740, 72, 740, 800, both), "down");
+  it("begins a clearance past the last full line and past the first, and never on the line", () => {
+    assert.equal(edgeZone(740 + EDGE_CLEARANCE, 72, 740, 800, both), "down");
     assert.equal(edgeZone(790, 72, 740, 800, both), "down");
-    assert.equal(edgeZone(739, 72, 740, 800, both), null);
-    assert.equal(edgeZone(72 + EDGE_ZONE_MIN - 1, 72, 740, 800, both), "up");
-    assert.equal(edgeZone(72 + EDGE_ZONE_MIN, 72, 740, 800, both), null);
-    // Above the first line - the margin, the chrome - is the head's zone too.
+    assert.equal(edgeZone(740 + EDGE_CLEARANCE - 1, 72, 740, 800, both), null);
+    // The last line, and the leading under it, are text: a fingertip
+    // selecting the line lands there (D294).
+    assert.equal(edgeZone(740, 72, 740, 800, both), null);
+    assert.equal(edgeZone(730, 72, 740, 800, both), null);
+    assert.equal(edgeZone(72 - EDGE_CLEARANCE - 1, 72, 740, 800, both), "up");
+    assert.equal(edgeZone(72 - EDGE_CLEARANCE, 72, 740, 800, both), null);
+    // The first line is text too - until D294 the head's zone reached 24
+    // pixels into the band, which is the whole line.
+    assert.equal(edgeZone(72, 72, 740, 800, both), null);
+    assert.equal(edgeZone(72 + 12, 72, 740, 800, both), null);
     assert.equal(edgeZone(10, 72, 740, 800, both), "up");
     assert.equal(edgeZone(400, 72, 740, 800, both), null);
   });
 
-  it("keeps the foot's zone at least its reach tall when the curtain is next to nothing", () => {
-    // The last line ends on the margin: the curtain has nothing to cover
-    // and the foot would be a strip of nothing - the window's lowest
-    // pixels make the zone instead.
-    assert.equal(edgeZone(800 - EDGE_ZONE_MIN, 72, 798, 800, both), "down");
-    assert.equal(edgeZone(800 - EDGE_ZONE_MIN - 1, 72, 798, 800, both), null);
+  it("takes only as much clearance as leaves the zone its least height, and none from a thin strip", () => {
+    // Thirty under the last line - the air and the count's line: six of
+    // clearance, so the zone keeps its 24.
+    assert.equal(edgeZone(770 + 6, 72, 770, 800, both), "down");
+    assert.equal(edgeZone(770 + 5, 72, 770, 800, both), null);
+    // A strip of the least height or less is the whole zone, from the
+    // line's edge - and never a pixel into the line, however thin: until
+    // D294 the window's lowest 24 pixels made the zone instead, which on
+    // a page whose last line ended near the margin was the line itself.
+    assert.equal(edgeZone(776, 72, 776, 800, both), "down");
+    assert.equal(edgeZone(775, 72, 776, 800, both), null);
+    assert.equal(edgeZone(798, 72, 798, 800, both), "down");
+    assert.equal(edgeZone(797, 72, 798, 800, both), null);
+    // The head the same way: a folded bar leaves the tab and the air
+    // above the first line - 32 - so eight of clearance; a bare 20 none.
+    assert.equal(edgeZone(32 - 8 - 1, 32, 740, 800, both), "up");
+    assert.equal(edgeZone(32 - 8, 32, 740, 800, both), null);
+    assert.equal(edgeZone(19, 20, 740, 800, both), "up");
+    assert.equal(edgeZone(20, 20, 740, 800, both), null);
   });
 
   it("is dead at the part's ends", () => {
@@ -744,6 +768,28 @@ describe("edgeZone (D239)", () => {
     assert.equal(edgeZone(10, 72, 740, 800, { up: false, down: true }), null);
     // The other edge keeps its zone.
     assert.equal(edgeZone(10, 72, 740, 800, { up: true, down: false }), "up");
+  });
+});
+
+describe("edgeReached (D294)", () => {
+  it("counts a stay only for a pointer that travelled toward the edge from where it landed", () => {
+    assert.equal(edgeReached("down", 500, 500 + EDGE_REACH), true);
+    assert.equal(edgeReached("down", 500, 500 + EDGE_REACH - 1), false);
+    // A hold that began in the zone and went sideways: selecting the line.
+    assert.equal(edgeReached("down", 500, 500), false);
+    // Away from the edge is never toward it.
+    assert.equal(edgeReached("down", 500, 480), false);
+    assert.equal(edgeReached("up", 500, 500 - EDGE_REACH), true);
+    assert.equal(edgeReached("up", 500, 500 - EDGE_REACH + 1), false);
+    assert.equal(edgeReached("up", 500, 520), false);
+  });
+
+  it("is about half a line, so a slide along the last line that drifts does not reach it", () => {
+    // The clearance and the reach are one fingertip's offset each: a
+    // finger that lands a clearance under the line and has to travel the
+    // reach is two offsets past the glyphs before the page turns.
+    assert.equal(EDGE_REACH, EDGE_CLEARANCE);
+    assert.ok(EDGE_REACH >= 12 && EDGE_REACH <= 20, "the reach is a fingertip's offset, not a line or a pixel");
   });
 });
 
