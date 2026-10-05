@@ -7,10 +7,14 @@
  * rather than in the router so that no future caller can do the first without
  * the others. Both copies are rebuilt in full from what the database just
  * said; a cache that patched itself would be a second version of the truth,
- * and neither is allowed to have opinions. And before every write the store
- * is settled: a vocabulary the browser deleted comes back from its copy
- * first, so a save can never land on a freshly emptied store and rebuild the
- * copy from that one phrase.
+ * and neither is allowed to have opinions. The mirror is rebuilt before the
+ * write answers - the pages read it to underline - and the copy after the
+ * writes go quiet (D295, `backupScheduler`): nothing reads it until the
+ * database is gone, and rebuilding it inside every save cost the bubble
+ * seconds on an e-ink reader with a few thousand phrases. And before every
+ * write the store is settled: a vocabulary the browser deleted comes back
+ * from its copy first, so a save can never land on a freshly emptied store
+ * and rebuild the copy from that one phrase.
  *
  * Nothing here catches: the message router turns an exception into `internal`,
  * and a database that cannot be opened is exactly that.
@@ -20,7 +24,8 @@ import { normalize } from "../lib/normalize.js";
 import { chosenPair, readConfig } from "../lib/config.js";
 import { mergeCounts, mergeSentences } from "../lib/counting.js";
 import { ErrorCode, fail, ok } from "../lib/protocol.js";
-import { ensureBackup, rebuildBackup, restoreVocabulary } from "../lib/store/backup.js";
+import { readBackupEnsured, writeBackupEnsured } from "../lib/session.js";
+import { backupScheduler, ensureBackup, rebuildBackup, restoreVocabulary } from "../lib/store/backup.js";
 import { migrateSemicolonsOnce, sweepSemicolonBackup } from "../lib/store/semicolon-migration.js";
 import { mirrorWithForms } from "../lib/store/forms.js";
 import { writeMirror } from "../lib/store/mirror.js";
@@ -78,16 +83,51 @@ async function rebuildMirror(config) {
 }
 
 /**
+ * The copy that outlives the database, rebuilt once the writes go quiet
+ * (D295): a write schedules it and answers without it. The rebuild reads
+ * the whole store and writes every row into `storage.local`, and the
+ * storage event carries the old and the new copy into every listening page
+ * - the one part of a save that grows with the vocabulary and that nobody
+ * waits for.
+ */
+const backup = backupScheduler({ rebuild: rebuildBackup });
+
+/**
  * The two copies that follow every write to the database - the pages' mirror
  * and the copy that outlives the database - both rebuilt in full from what
- * the database just said.
+ * the database just said: the mirror now, because the pages read it to
+ * underline what was just kept, the copy after the writes go quiet.
  *
  * @param {import("../lib/config.js").Config} config
  * @returns {Promise<void>}
  */
 async function afterWrite(config) {
   await rebuildMirror(config);
-  await rebuildBackup();
+  backup.schedule();
+}
+
+/**
+ * The copy written for a vocabulary that has none (`ensureBackup`), looked
+ * for once per browser session (D295): the case is one start per
+ * installation - the first after the update that brought the copy - and
+ * the look costs the whole copy read and checked, at every start of an
+ * event page that the browser puts down after half a minute of quiet. The
+ * flag lives in `storage.session`, which outlives the event page and not
+ * the browser; a session store that will not answer is read as no flag,
+ * and the look is made as it always was.
+ *
+ * @returns {Promise<void>}
+ */
+async function ensureBackupOnce() {
+  let ensured = false;
+  try {
+    ensured = await readBackupEnsured();
+  } catch {
+    ensured = false;
+  }
+  if (ensured) return;
+  await ensureBackup();
+  await writeBackupEnsured().catch(() => undefined);
 }
 
 /**
@@ -118,7 +158,7 @@ function settled() {
 const started = settled()
   .then(async (restored) => {
     if (restored > 0) await rebuildMirror(await readConfig());
-    await ensureBackup();
+    await ensureBackupOnce();
     await migrateSemicolonsOnce();
     await sweepSemicolonBackup();
   })
@@ -274,9 +314,11 @@ export async function deleteLearned() {
  * here fresh as on every save: the page sends what it has, and this is the
  * one place that knows whether the reader wanted a sentence kept. A
  * sentence filled in is vocabulary, not a count, so the copy is rebuilt
- * for it - a deletion of the database must not lose it again - and the
- * mirror is not, for the counts' own reason: it carries no sentence, and
- * rewriting it would repaint every open tab for nothing.
+ * for it - a deletion of the database must not lose it again, and it is
+ * rebuilt the way every write has it rebuilt since D295, once the writes
+ * go quiet - and the mirror is not, for the counts' own reason: it
+ * carries no sentence, and rewriting it would repaint every open tab for
+ * nothing.
  *
  * @param {import("../lib/protocol.js").CountPhrasesRequest} request
  * @returns {Promise<import("../lib/protocol.js").Result<null>>}
@@ -293,7 +335,7 @@ export async function countPhrases(request) {
   const sentences = config.saveSentence ? mergeSentences(request) : null;
   const filled = sentences === null || sentences.size === 0 ? 0 : await fillSentences(pair, sentences);
   if (restored > 0) await afterWrite(config);
-  else if (filled > 0) await rebuildBackup();
+  else if (filled > 0) backup.schedule();
   return ok(null);
 }
 

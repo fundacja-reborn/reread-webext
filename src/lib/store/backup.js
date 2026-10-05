@@ -190,6 +190,83 @@ export async function rebuildBackup(deps = defaults()) {
 }
 
 /**
+ * How long the copy waits after a write for the next one before it is
+ * rebuilt (D295). Long enough to fold the burst a page makes into one
+ * rebuild - a save from the bubble's chain lands with the automatic keep
+ * before it and the deletion of that scaffolding after it - and well inside
+ * the half minute an idle event page is given before the browser puts it
+ * down, so the timer fires in the same life as the write it follows.
+ */
+export const BACKUP_DELAY_MS = 1500;
+
+/**
+ * The copy rebuilt off the write's own path (D295). A write schedules the
+ * rebuild and answers; the rebuild runs once the writes go quiet.
+ *
+ * Until D295 every save awaited it: the whole store read, every row with
+ * its sentence written into `storage.local` - half a megabyte per thousand
+ * phrases - and the storage event carrying the old and the new copy into
+ * every page that listens, before the bubble heard that its phrase was
+ * kept. On an e-ink reader with a few thousand phrases that was the
+ * seconds the bubble hung after Save (Michał's report, 2026-10-05). The
+ * copy exists for Safari's thirty-day eviction of the database, which a
+ * copy a second and a half behind the store serves exactly as well.
+ *
+ * One rebuild at a time, in order: each reads the whole store and writes
+ * the whole copy, and two racing could land an older read after a newer
+ * one. Nothing waits for it, so its failure is nobody's error - the next
+ * write schedules it again. A write the browser puts the page down under
+ * before the timer fires leaves the copy one write behind until the next;
+ * the eviction the copy answers is thirty days away.
+ *
+ * `flush` is for the caller that does have to wait: it runs a scheduled
+ * rebuild at once and waits for the one in flight.
+ *
+ * @param {object} deps
+ * @param {() => Promise<unknown>} deps.rebuild
+ * @param {number} [deps.delay]
+ * @param {(work: () => void, ms: number) => unknown} [deps.setTimer]
+ * @param {(timer: unknown) => void} [deps.clearTimer]
+ * @returns {{ schedule: () => void, flush: () => Promise<void>, pending: () => boolean }}
+ */
+export function backupScheduler({
+  rebuild,
+  delay = BACKUP_DELAY_MS,
+  setTimer = (work, ms) => setTimeout(work, ms),
+  clearTimer = (timer) => clearTimeout(/** @type {ReturnType<typeof setTimeout>} */ (timer)),
+}) {
+  /** @type {unknown} */
+  let timer = null;
+  /** @type {Promise<void>} */
+  let chain = Promise.resolve();
+
+  const run = () => {
+    timer = null;
+    chain = chain.then(() => rebuild()).then(
+      () => undefined,
+      () => undefined,
+    );
+    return chain;
+  };
+
+  return {
+    schedule() {
+      if (timer !== null) clearTimer(timer);
+      timer = setTimer(() => void run(), delay);
+    },
+    async flush() {
+      if (timer !== null) {
+        clearTimer(timer);
+        await run();
+      } else {
+        await chain;
+      }
+    },
+    pending: () => timer !== null,
+  };
+}
+
+/**
  * The store filled back from the copy, when - and only when - the store is
  * empty and the copy is not. The emptiness is asked first and the copy read
  * only then: on every ordinary start and before every ordinary write this

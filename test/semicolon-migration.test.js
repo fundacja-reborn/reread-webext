@@ -233,7 +233,9 @@ describe("where the migration runs", () => {
   it("is the background's start, after the store is settled and before any door opens", () => {
     const background = sourceOf("src/background/vocabulary.js");
     const started = background.slice(background.indexOf("const started = settled()"), background.indexOf("export async function refreshVocabulary("));
-    assert.match(started, /await ensureBackup\(\);\s*await migrateSemicolonsOnce\(\);\s*await sweepSemicolonBackup\(\);/);
+    // The copy looked for once per browser session since D295, in the same
+    // place of the chain.
+    assert.match(started, /await ensureBackupOnce\(\);\s*await migrateSemicolonsOnce\(\);\s*await sweepSemicolonBackup\(\);/);
     // Every door waits on it - the three one-phrase acts of the learned
     // shelf (D224) through the road they share, `markPhrase`.
     for (const door of ["savePhrase", "importPhrases", "listVocabulary", "deleteLearned"]) {
