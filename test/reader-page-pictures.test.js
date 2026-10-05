@@ -182,9 +182,9 @@ describe("the reader's page holds a picture to the band it measures", () => {
     assert.match(fit, /document\.documentElement\.style\.setProperty\("--page-band-h", `\$\{whole\}px`\);/);
   });
 
-  it("does it with the cut - never under a finger - and measures the document laid out with it", () => {
+  it("does it with the cut - never under a finger or a bubble - and measures the document laid out with it", () => {
     const cut = fn("pagesNow", "pageShown");
-    const held = cut.indexOf("if (same && pointerHeld) {");
+    const held = cut.indexOf("if (same && (pointerHeld || bubbleOpen())) {");
     const fitted = cut.indexOf("const laidOut = fitPictures(height) ? document.documentElement.scrollHeight : extent;");
     const measured = cut.indexOf("const blocks = flowBlocks();");
     assert.ok(held >= 0 && fitted > held, "the pictures are resized before the held pointer is asked about");

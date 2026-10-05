@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  BACKUP_DELAY_MS,
   asBackup,
   backupOf,
+  backupScheduler,
   ensureBackup,
   readBackupSummary,
   rebuildBackup,
@@ -202,5 +204,138 @@ describe("the copy of the vocabulary", () => {
     // space, and a second read of the same key to weigh it would be a read
     // for nothing.
     assert.ok((summary?.bytes ?? 0) > 0, "the copy weighs nothing");
+  });
+});
+
+describe("the copy rebuilt off the write's path (D295)", () => {
+  /** A clock the test turns by hand: the timers fire in order of their due time. */
+  function clock() {
+    let now = 0;
+    let next = 0;
+    /** @type {Map<number, { at: number, work: () => void }>} */
+    const timers = new Map();
+    return {
+      /** @param {() => void} work @param {number} ms */
+      setTimer: (work, ms) => {
+        next += 1;
+        timers.set(next, { at: now + ms, work });
+        return next;
+      },
+      /** @param {unknown} timer */
+      clearTimer: (timer) => {
+        timers.delete(/** @type {number} */ (timer));
+      },
+      /** @param {number} ms */
+      async tick(ms) {
+        now += ms;
+        for (const [id, { at, work }] of [...timers].sort((a, b) => a[1].at - b[1].at)) {
+          if (at > now) break;
+          timers.delete(id);
+          work();
+          // The rebuild's promises settle before the next timer fires.
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        }
+      },
+      armed: () => timers.size,
+    };
+  }
+
+  it("folds a burst of writes into one rebuild, after the writes go quiet", async () => {
+    const ticking = clock();
+    let rebuilt = 0;
+    const scheduler = backupScheduler({
+      rebuild: async () => {
+        rebuilt += 1;
+      },
+      delay: 100,
+      setTimer: ticking.setTimer,
+      clearTimer: ticking.clearTimer,
+    });
+    // The bubble's chain: the automatic keep, the save, the deletion of the
+    // scaffolding - three writes within the delay.
+    scheduler.schedule();
+    await ticking.tick(60);
+    scheduler.schedule();
+    await ticking.tick(60);
+    scheduler.schedule();
+    assert.equal(rebuilt, 0, "a rebuild ran before the writes went quiet");
+    assert.equal(scheduler.pending(), true);
+    await ticking.tick(100);
+    assert.equal(rebuilt, 1, "a burst is rebuilt once");
+    assert.equal(scheduler.pending(), false);
+    assert.equal(ticking.armed(), 0, "a timer was left behind");
+  });
+
+  it("runs one rebuild at a time, in order, and a failure is nobody's error", async () => {
+    /** @type {string[]} */
+    const log = [];
+    /** @type {(() => void)[]} */
+    const releases = [];
+    let calls = 0;
+    const ticking = clock();
+    const scheduler = backupScheduler({
+      rebuild: () => {
+        calls += 1;
+        const mine = calls;
+        log.push(`start ${mine}`);
+        // The first rebuild is still reading when the second is due.
+        if (mine === 1) {
+          return new Promise((resolve) => {
+            releases.push(() => {
+              log.push("end 1");
+              resolve(undefined);
+            });
+          });
+        }
+        if (mine === 2) {
+          log.push("fail 2");
+          return Promise.reject(new Error("the store would not open"));
+        }
+        log.push(`end ${mine}`);
+        return Promise.resolve();
+      },
+      delay: 10,
+      setTimer: ticking.setTimer,
+      clearTimer: ticking.clearTimer,
+    });
+    scheduler.schedule();
+    await ticking.tick(10);
+    scheduler.schedule();
+    await ticking.tick(10);
+    assert.deepEqual(log, ["start 1"], "the second rebuild started under the first");
+    releases[0]?.();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.deepEqual(log, ["start 1", "end 1", "start 2", "fail 2"], "the rebuilds did not run in order");
+    // The next write schedules again, and the failure before it is forgotten.
+    scheduler.schedule();
+    await ticking.tick(10);
+    assert.deepEqual(log, ["start 1", "end 1", "start 2", "fail 2", "start 3", "end 3"]);
+  });
+
+  it("flushes a scheduled rebuild at once, and waits for the one in flight", async () => {
+    const ticking = clock();
+    let rebuilt = 0;
+    const scheduler = backupScheduler({
+      rebuild: async () => {
+        rebuilt += 1;
+      },
+      delay: 100,
+      setTimer: ticking.setTimer,
+      clearTimer: ticking.clearTimer,
+    });
+    await scheduler.flush();
+    assert.equal(rebuilt, 0, "a flush with nothing scheduled rebuilt");
+    scheduler.schedule();
+    await scheduler.flush();
+    assert.equal(rebuilt, 1, "the flush did not run the scheduled rebuild");
+    assert.equal(ticking.armed(), 0, "the flushed timer was left to fire again");
+    await ticking.tick(200);
+    assert.equal(rebuilt, 1, "the flushed timer fired again");
+  });
+
+  it("waits long enough to fold a page's burst and short enough for an idle event page", () => {
+    // An event page is put down after thirty seconds of quiet; the timer
+    // has to fire well inside that, in the same life as the write.
+    assert.ok(BACKUP_DELAY_MS >= 1000 && BACKUP_DELAY_MS <= 5000, `${BACKUP_DELAY_MS} ms`);
   });
 });

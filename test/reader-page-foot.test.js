@@ -41,11 +41,14 @@ describe("the page's foot (D238)", () => {
     assert.match(bodyOf(reader, "pageBand"), /readableBand\(barFold\(\)\)/, "the pages measure the band under an open sheet, or without the bars");
   });
 
-  it("cuts the pages again from the page being read, and never under a finger", async () => {
+  it("cuts the pages again from the page being read, and never under a finger or a bubble", async () => {
     const reader = await source("reader/reader.js");
     const cut = bodyOf(reader, "pagesNow");
     assert.match(cut, /const anchor = same \? anchorY\(\) : undefined;/, "a re-cut of the same document does not begin from the page being read");
-    assert.match(cut, /if \(same && pointerHeld\) \{\s*settleWanted = true;\s*return kept;/, "the pages are cut again under a held pointer");
+    // Under a bubble as under a finger (D295): the bubble's keyboard shrinks
+    // the band for a few seconds, and a table cut for it was two cuts of
+    // the whole part under an edit box.
+    assert.match(cut, /if \(same && \(pointerHeld \|\| bubbleOpen\(\)\)\) \{\s*settleWanted = true;\s*return kept;/, "the pages are cut again under a held pointer or a bubble");
     // The anchor is a place in the text, kept at every turn and found
     // again after a re-wrap; a bar shortening the band leaves it where it
     // stood, so the window does not move.

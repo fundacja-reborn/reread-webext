@@ -51,9 +51,10 @@ describe("the sentence a recall bubble opened in", () => {
     assert.match(counting, /const sentences = config\.saveSentence \? mergeSentences\(request\) : null;/, "the sentence is written without the setting, or the setting is not read fresh");
     assert.match(counting, /await fillSentences\(pair, sentences\)/, "the sentences do not reach the store");
     // A sentence filled in is vocabulary, so the copy that outlives the
-    // database must carry it; the mirror carries no sentence, and a rewrite
+    // database must carry it - rebuilt once the writes go quiet, as after
+    // every write since D295; the mirror carries no sentence, and a rewrite
     // would repaint every open tab for nothing - the counts' own rule.
-    assert.match(counting, /if \(restored > 0\) await afterWrite\(config\);\s*else if \(filled > 0\) await rebuildBackup\(\);/, "a filled sentence rebuilds the mirror, or never reaches the copy");
+    assert.match(counting, /if \(restored > 0\) await afterWrite\(config\);\s*else if \(filled > 0\) backup\.schedule\(\);/, "a filled sentence rebuilds the mirror, or never reaches the copy");
   });
 
   it("keeps the store's promise: nothing but the sentence moves, and a row with one is not written", async () => {

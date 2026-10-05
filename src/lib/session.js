@@ -42,6 +42,18 @@ export const READER_SOURCE_KEY = "readerSource";
 /** @typedef {{ tabId: number, at: number } | { marks: true, at: number }} ReaderSource */
 
 /**
+ * Whether the copy of the vocabulary has been looked for in this browser
+ * session (D295). The background's start used to read the whole copy every
+ * time, to write one for an installation that had none - half a megabyte
+ * per thousand phrases, parsed and checked row by row, at every start of an
+ * event page the browser puts down after half a minute of quiet. The case
+ * it answers is one start per installation (`ensureBackup`), so once per
+ * browser session is already generous; the flag goes with the session, and
+ * the next browser start looks again.
+ */
+export const BACKUP_ENSURED_KEY = "vocabBackupEnsured";
+
+/**
  * The marker the reader leaves in a tab's own `sessionStorage` as it walks to
  * the settings in that same tab (D139/D140), and the settings page's licence
  * to wear its back arrow. Not `storage.session`: the question is "did THIS
@@ -179,4 +191,21 @@ export async function clearReaderSource(now = Date.now, session = webext().stora
  */
 export async function writeMarksSource(now = Date.now, session = webext().storage.session) {
   await session.set({ [READER_SOURCE_KEY]: { marks: true, at: now() } });
+}
+
+/**
+ * @param {WebExtBrowser["storage"]["session"]} [session]
+ * @returns {Promise<boolean>}
+ */
+export async function readBackupEnsured(session = webext().storage.session) {
+  const stored = await session.get(BACKUP_ENSURED_KEY);
+  return stored[BACKUP_ENSURED_KEY] === true;
+}
+
+/**
+ * @param {WebExtBrowser["storage"]["session"]} [session]
+ * @returns {Promise<void>}
+ */
+export async function writeBackupEnsured(session = webext().storage.session) {
+  await session.set({ [BACKUP_ENSURED_KEY]: true });
 }
