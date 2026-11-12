@@ -1186,6 +1186,44 @@
     }
   },
   "close": { "message": "Fermer" },
+  "action_importing": { "message": "Importation..." },
+  "reader_import_reading": {
+    "message": "Lecture de $NAME$...",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup-2026-11-09.zip" }
+    }
+  },
+  "reader_import_progress_label": { "message": "Progression de l'importation" },
+  "reader_import_progress_preparing": { "message": "Recherche de ce qui est nouveau..." },
+  "reader_import_progress_articles": {
+    "message": "Articles : $DONE$ sur $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "34" },
+      "total": { "content": "$2", "example": "110" }
+    }
+  },
+  "reader_import_progress_pictures": {
+    "message": "Images : $DONE$ sur $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "34" },
+      "total": { "content": "$2", "example": "110" }
+    }
+  },
+  "reader_import_progress_books": {
+    "message": "Livre $DONE$ sur $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "2" },
+      "total": { "content": "$2", "example": "8" }
+    }
+  },
+  "reader_import_progress_phrases": {
+    "message": "Phrases enregistrées : $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2,113" }
+    }
+  },
+  "reader_import_progress_highlights": { "message": "Surlignages" },
+  "reader_import_keep_open": { "message": "Gardez cette page ouverte jusqu'à la fin de l'importation." },
   "reader_book_importing": {
     "message": "Ajout du livre - partie $PART$",
     "placeholders": {

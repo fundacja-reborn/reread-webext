@@ -1685,6 +1685,44 @@
     }
   },
   "close": { "message": "Закрити" },
+  "action_importing": { "message": "Імпортування..." },
+  "reader_import_reading": {
+    "message": "Читання файлу $NAME$...",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup-2026-11-09.zip" }
+    }
+  },
+  "reader_import_progress_label": { "message": "Перебіг імпорту" },
+  "reader_import_progress_preparing": { "message": "Перевірка, що є новим..." },
+  "reader_import_progress_articles": {
+    "message": "Статті: $DONE$ з $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "34" },
+      "total": { "content": "$2", "example": "110" }
+    }
+  },
+  "reader_import_progress_pictures": {
+    "message": "Зображення: $DONE$ з $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "34" },
+      "total": { "content": "$2", "example": "110" }
+    }
+  },
+  "reader_import_progress_books": {
+    "message": "Книга $DONE$ з $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "2" },
+      "total": { "content": "$2", "example": "8" }
+    }
+  },
+  "reader_import_progress_phrases": {
+    "message": "Збережені фрази: $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2,113" }
+    }
+  },
+  "reader_import_progress_highlights": { "message": "Позначення" },
+  "reader_import_keep_open": { "message": "Не закривайте цю сторінку до кінця імпорту." },
   "reader_book_importing": {
     "message": "Додавання книжки - частина $PART$",
     "placeholders": {

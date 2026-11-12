@@ -1147,6 +1147,44 @@
     }
   },
   "close": { "message": "Schließen" },
+  "action_importing": { "message": "Wird importiert..." },
+  "reader_import_reading": {
+    "message": "$NAME$ wird gelesen...",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup-2026-11-09.zip" }
+    }
+  },
+  "reader_import_progress_label": { "message": "Fortschritt des Imports" },
+  "reader_import_progress_preparing": { "message": "Es wird geprüft, was neu ist..." },
+  "reader_import_progress_articles": {
+    "message": "Artikel: $DONE$ von $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "34" },
+      "total": { "content": "$2", "example": "110" }
+    }
+  },
+  "reader_import_progress_pictures": {
+    "message": "Bilder: $DONE$ von $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "34" },
+      "total": { "content": "$2", "example": "110" }
+    }
+  },
+  "reader_import_progress_books": {
+    "message": "Buch $DONE$ von $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "2" },
+      "total": { "content": "$2", "example": "8" }
+    }
+  },
+  "reader_import_progress_phrases": {
+    "message": "Gespeicherte Einträge: $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2,113" }
+    }
+  },
+  "reader_import_progress_highlights": { "message": "Markierungen" },
+  "reader_import_keep_open": { "message": "Lassen Sie diese Seite geöffnet, bis der Import beendet ist." },
   "reader_book_importing": {
     "message": "Buch wird hinzugefügt - Teil $PART$",
     "placeholders": {

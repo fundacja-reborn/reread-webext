@@ -75,8 +75,8 @@ describe("the import with books", () => {
   it("writes the books after the articles and before the highlights, each the way its own import does", async () => {
     const script = await source("reader/reader.js");
     const running = bodyOf(script, "runBackup");
-    const articles = running.indexOf("await importArticles(offered.articles)");
-    const books = running.indexOf("await importBooks(offered.books.plan.toAdd, offered.books.bytes)");
+    const articles = running.indexOf("await importArticles(offered.articles, onArticle)");
+    const books = running.indexOf("await importBooks(offered.books.plan.toAdd, offered.books.bytes, meter)");
     const phrases = running.indexOf("kind: Message.RESTORE_VOCABULARY");
     const marks = running.indexOf("marksImportPlan(laid.documents");
     assert.ok(articles !== -1 && books !== -1 && phrases !== -1 && marks !== -1, "a part is not written");
