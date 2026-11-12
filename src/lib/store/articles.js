@@ -396,10 +396,17 @@ export async function allArticles() {
  * other - an article already saved keeps its copy whole, pictures included
  * or not.
  *
+ * `onStep` is the page's progress line (`lib/reader/import-progress.js`):
+ * called twice for every article added - once written, once copied - and
+ * never for a skipped one. The copy has its own call because on a phone it
+ * is the slower half, and a bar that stood still through it would say the
+ * import had stopped.
+ *
  * @param {import("./articles-file.js").FileArticle[]} articles
+ * @param {() => void} [onStep]
  * @returns {Promise<{ added: number, skipped: number, urls: string[] }>}
  */
-export async function importArticles(articles) {
+export async function importArticles(articles, onStep) {
   await restoreMarks();
   await restoreLibrary();
   const { added, skipped, positions } = await withLibrary("readwrite", async (stores) => {
@@ -431,11 +438,15 @@ export async function importArticles(articles) {
         positions.push(position);
       }
       added.push({ ...meta, content, dir, lang });
+      onStep?.();
     }
     return { added, skipped: plan.skipped, positions };
   });
   if (added.length > 0) await rebuildMarksBackup();
-  for (const article of added) await copyArticle(article, false);
+  for (const article of added) {
+    await copyArticle(article, false);
+    onStep?.();
+  }
   // After the articles: the copy writes a position only for a document its
   // index holds.
   for (const position of positions) await copyPosition(position);

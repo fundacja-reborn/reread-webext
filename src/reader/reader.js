@@ -87,6 +87,7 @@ import { fileOrder } from "../lib/store/articles-file.js";
 import { asDocState, asMarksState, asRoomState, docState, marksState, roomState } from "../lib/reader/history-state.js";
 import { asRoomRequest } from "../lib/room-frame.js";
 import { importKind } from "../lib/reader/import-kind.js";
+import { bookUnits, importUnits, pictureCount, progressMeter } from "../lib/reader/import-progress.js";
 import { speechAction } from "../lib/reader/keys.js";
 import { readingTime, wordsIn } from "../lib/reader/length.js";
 import { wordless } from "../lib/matcher/words.js";
@@ -499,6 +500,13 @@ const importRun = /** @type {HTMLButtonElement | null} */ (
   document.getElementById("library-import-run")
 );
 const importCancel = document.getElementById("library-import-cancel");
+// The import at work: the bar over the whole of it and the line naming the
+// part being written (`lib/reader/import-progress.js`).
+const importProgress = document.getElementById("library-import-progress");
+const importBar = /** @type {HTMLProgressElement | null} */ (
+  document.getElementById("library-import-bar")
+);
+const importStage = document.getElementById("library-import-stage");
 // The backup of everything's offer (D213): one line per part the file
 // holds, and the box that decides about the settings.
 const importParts = document.getElementById("library-import-parts");
@@ -1238,6 +1246,76 @@ async function removeNoticeMark() {
     repaintMarks();
     showNotice(t("reader_list_write_failed"));
   }
+}
+
+/**
+ * Whether an import is writing right now. The one lock of the offer: a
+ * second press, or a second file, waits for the report of the first.
+ */
+let importBusy = false;
+
+/**
+ * The offer's frame while its import writes, and back: the press is
+ * answered on the button itself - its word changes and it stops taking
+ * presses - the bar and the line appear under it, and everything that
+ * could start a second import or change this one waits. Cancel leaves the
+ * row instead of greying: what is written stays written, so a Cancel that
+ * could only hide the frame over an import that goes on would lie (it did
+ * exactly that until 2026-11-12, and a second import was then started on
+ * top of the first).
+ *
+ * @param {boolean} busy
+ */
+function setImportBusy(busy) {
+  importBusy = busy;
+  if (importConfirm !== null) {
+    if (busy) importConfirm.setAttribute("aria-busy", "true");
+    else importConfirm.removeAttribute("aria-busy");
+  }
+  if (importRun !== null) {
+    importRun.disabled = busy;
+    importRun.textContent = busy ? t("action_importing") : t("action_import");
+  }
+  if (importCancel !== null) importCancel.hidden = busy;
+  if (importSettings !== null) importSettings.disabled = busy;
+  if (importButton instanceof HTMLButtonElement) importButton.disabled = busy;
+  if (importProgress !== null) importProgress.hidden = !busy;
+  // The first line, until a part begins: the file is laid against the
+  // library before anything is written, and that takes its own while.
+  if (busy) paintImportProgress(0, t("reader_import_progress_preparing"));
+}
+
+/**
+ * The meter's paint: the bar and the line together, so the two never say
+ * different things.
+ *
+ * @param {number} fraction
+ * @param {string} label
+ */
+function paintImportProgress(fraction, label) {
+  if (importBar !== null) importBar.value = fraction;
+  if (importStage !== null) importStage.textContent = label;
+}
+
+/**
+ * Resolves once the browser has had a frame to show what was just written
+ * to the page. The import's long stretches are synchronous - an archive
+ * entry inflated, a book's text parsed - and a line set right before one
+ * would otherwise appear only after it. The timer is for a tab that is not
+ * showing: it gets no frames, and the import must not wait for one.
+ *
+ * @returns {Promise<void>}
+ */
+function nextPaint() {
+  return new Promise((resolve) => {
+    const late = setTimeout(resolve, 100);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        clearTimeout(late);
+        resolve();
+      }, 0);
+    });
+  });
 }
 
 /**
@@ -7741,15 +7819,36 @@ function renderBackupOffer() {
  * when the box says so. One report, the parts' sentences in a row.
  */
 async function runBackup() {
-  if (pendingBackup === null || importRun === null) return;
+  if (pendingBackup === null || importRun === null || importBusy) return;
   const offered = pendingBackup;
-  importRun.disabled = true;
+  setImportBusy(true);
+  transferStatus("");
   try {
+    // The press is answered before the first write: the frame above is
+    // painted, then the work is counted for the bar.
+    await nextPaint();
+    const adding = importPlan((await listArticles()).map((meta) => meta.url), offered.articles).toAdd;
+    const shelved = offered.books === null ? [] : offered.books.plan.toAdd;
+    const units = importUnits({
+      articles: adding.length,
+      pictures:
+        offered.pictures === undefined
+          ? 0
+          : pictureCount(offered.pictures.refs, adding.map((article) => article.url)),
+      books: shelved.map((book) => ({ parts: book.meta.segmentCount, pictures: (book.pictures ?? []).length })),
+      phrases: offered.phrases.length,
+      highlights: offered.highlights.length,
+    });
+    const meter = progressMeter(units.total, paintImportProgress);
     /** @type {string[]} */
     const sentences = [];
     if (offered.articles.length > 0) {
-      const report = await importArticles(offered.articles);
-      const pictured = await writePictures(offered.pictures, report.urls);
+      // No stage for a file whose articles are all here already: "0 of 0"
+      // says nothing, and the first line stands until the next part.
+      const onArticle = adding.length > 0 ? articlesStage(meter, adding.length, units.articles) : undefined;
+      await nextPaint();
+      const report = await importArticles(offered.articles, onArticle);
+      const pictured = await writePictures(offered.pictures, report.urls, meter);
       sentences.push(plural(report.added, "reader_import_added"));
       if (report.skipped > 0) sentences.push(plural(report.skipped, "reader_import_skipped"));
       if (pictured.count > 0) {
@@ -7759,7 +7858,7 @@ async function runBackup() {
     if (offered.books !== null && offered.books.rows.length > 0) {
       const report =
         offered.books.plan.toAdd.length > 0
-          ? await importBooks(offered.books.plan.toAdd, offered.books.bytes)
+          ? await importBooks(offered.books.plan.toAdd, offered.books.bytes, meter)
           : { added: 0, unreadable: 0 };
       sentences.push(plural(report.added, "reader_import_books_added"));
       if (offered.books.plan.skipped > 0) {
@@ -7768,6 +7867,10 @@ async function runBackup() {
       if (report.unreadable > 0) sentences.push(plural(report.unreadable, "reader_import_unreadable"));
     }
     if (offered.phrases.length > 0) {
+      // One message, written by the background: the line says how many are
+      // on their way, and the bar takes their share when the answer comes.
+      meter.stage(() => t("reader_import_progress_phrases", [offered.phrases.length.toLocaleString()]), units.phrases);
+      await nextPaint();
       const answer = asResult(
         await webext().runtime.sendMessage({ kind: Message.RESTORE_VOCABULARY, rows: offered.phrases }),
       );
@@ -7782,6 +7885,8 @@ async function runBackup() {
       }
     }
     if (offered.highlights.length > 0) {
+      meter.stage(() => t("reader_import_progress_highlights"), units.highlights);
+      await nextPaint();
       await restoreMarks();
       const [articles, books, { marks, notes }] = await Promise.all([listArticles(), listBooks(), allMarksRows()]);
       // A book's marks laid against its text first (D223): a book that
@@ -7806,8 +7911,7 @@ async function runBackup() {
       await writeConfig(offered.settings);
       sentences.push(t("reader_backup_settings_done"));
     }
-    transferStatus(sentences.join(" "));
-    closeImportOffer();
+    reportImport(sentences.join(" "));
     await refreshLibrary();
     void refreshBackupLine();
   } catch {
@@ -7815,8 +7919,49 @@ async function runBackup() {
     // already picked and read.
     transferStatus(t("reader_list_write_failed"), "error");
   } finally {
-    importRun.disabled = false;
+    setImportBusy(false);
   }
+}
+
+/**
+ * The articles' stage on the meter, and the step `importArticles` calls:
+ * twice for an article - written, then copied - so the line counts an
+ * article once both are done.
+ *
+ * @param {import("../lib/reader/import-progress.js").ProgressMeter} meter
+ * @param {number} adding the articles the import will add
+ * @param {number} units the stage's share of the bar
+ * @returns {() => void}
+ */
+function articlesStage(meter, adding, units) {
+  let steps = 0;
+  meter.stage(
+    () =>
+      t("reader_import_progress_articles", [
+        Math.min(adding, Math.floor(steps / 2)).toLocaleString(),
+        adding.toLocaleString(),
+      ]),
+    units,
+  );
+  return () => {
+    steps += 1;
+    meter.step();
+  };
+}
+
+/**
+ * The import's report, in the place of its offer: the frame closes and the
+ * line under it speaks. The frame is tall - a list of parts and a sample of
+ * titles over the buttons - so when it closes, the line may end up above
+ * what the screen shows; it is brought back into view, or the import would
+ * end the way it used to run: with nothing said where the reader looks.
+ *
+ * @param {string} text
+ */
+function reportImport(text) {
+  transferStatus(text);
+  closeImportOffer();
+  transferLine?.scrollIntoView({ block: "nearest" });
 }
 
 /**
@@ -7832,28 +7977,58 @@ async function runBackup() {
  * counted; a write cut short leaves nothing behind (`deleteBook` takes
  * what a failure wrote, the orphan sweep covers the rest).
  *
+ *
+ * The meter's stage is the books': the line says which book is being
+ * written, the bar steps per part, per picture and once for the row. A
+ * book left out, or cut short, gives the bar the rest of its share, so
+ * the books after it start where they were planned to.
+ *
  * @param {import("../lib/store/books-file.js").FileBook[]} books the ones the plan adds
  * @param {Uint8Array} bytes the whole archive
+ * @param {import("../lib/reader/import-progress.js").ProgressMeter} meter
  * @returns {Promise<{ added: number, unreadable: number }>}
  */
-async function importBooks(books, bytes) {
+async function importBooks(books, bytes, meter) {
   const read = await entryReader(bytes);
   let added = 0;
   let unreadable = 0;
+  let at = 0;
+  /** @param {import("../lib/store/books-file.js").FileBook} book */
+  const unitsOf = (book) => bookUnits({ parts: book.meta.segmentCount, pictures: (book.pictures ?? []).length });
+  meter.stage(
+    () => t("reader_import_progress_books", [at.toLocaleString(), books.length.toLocaleString()]),
+    books.reduce((sum, book) => sum + unitsOf(book), 0),
+  );
   for (const book of books) {
+    // The line names the book before its text is read: the read and the
+    // parse are one long stretch without a frame.
+    at += 1;
+    meter.refresh();
+    await nextPaint();
+    const planned = unitsOf(book);
+    let spent = 0;
+    const step = () => {
+      spent += 1;
+      meter.step();
+    };
     const id = book.meta.id;
     const text = read(book.text, MAX_BOOK_TEXT_BYTES);
     const segments = text === null ? null : fromBookText(new TextDecoder().decode(text), id);
     if (segments === null || segments.length !== book.meta.segmentCount) {
       unreadable += 1;
+      meter.step(planned);
       continue;
     }
     try {
       for (const [index, segment] of segments.entries()) {
         await putBookSegment({ bookId: id, index, ...segment });
+        step();
       }
       const rows = bookPictureRows(id, book.pictures ?? [], (name) => read(name, MAX_DOWNLOAD_BYTES));
-      for (const row of rows) await putBookPicture(row);
+      for (const row of rows) {
+        await putBookPicture(row);
+        step();
+      }
       const summary = picturesSummary(rows);
       const { pictures: claimed, ...meta } = book.meta;
       void claimed;
@@ -7865,6 +8040,7 @@ async function importBooks(books, bytes) {
       await deleteBook(id).catch(() => undefined);
       unreadable += 1;
     }
+    meter.step(Math.max(0, planned - spent));
   }
   return { added, unreadable };
 }
@@ -7875,20 +8051,43 @@ async function importBooks(books, bytes) {
  * the archive one entry at a time and written one row at a time, the way a
  * save writes them.
  *
+ *
+ * The meter's stage is the pictures', counted from the articles actually
+ * added: a step per picture written, and a picture the archive names but
+ * does not give is stepped over, so the line still ends on its total.
+ *
  * @param {NonNullable<typeof pendingImport>["pictures"]} pictures
  * @param {string[]} urls the addresses actually added
+ * @param {import("../lib/reader/import-progress.js").ProgressMeter} meter
  * @returns {Promise<{ count: number, bytes: number }>}
  */
-async function writePictures(pictures, urls) {
+async function writePictures(pictures, urls, meter) {
   let pictured = { count: 0, bytes: 0 };
   if (pictures === undefined) return pictured;
+  const named = pictureCount(pictures.refs, urls);
+  if (named === 0) return pictured;
+  let seen = 0;
+  meter.stage(
+    () => t("reader_import_progress_pictures", [seen.toLocaleString(), named.toLocaleString()]),
+    named,
+  );
+  await nextPaint();
   const read = await entryReader(pictures.bytes);
   for (const url of urls) {
     const refs = pictures.refs.get(url);
     if (refs === undefined) continue;
     const rows = archivePictures(url, refs, (name) => read(name, MAX_DOWNLOAD_BYTES));
+    for (const row of rows) {
+      await putPicture(row);
+      seen += 1;
+      meter.step();
+    }
+    const missing = refs.length - rows.length;
+    if (missing > 0) {
+      seen += missing;
+      meter.step(missing);
+    }
     if (rows.length === 0) continue;
-    for (const row of rows) await putPicture(row);
     const summary = picturesSummary(rows);
     await setPictures(url, summary);
     pictured = { count: pictured.count + summary.count, bytes: pictured.bytes + summary.bytes };
@@ -7897,13 +8096,30 @@ async function writePictures(pictures, urls) {
 }
 
 async function runImport() {
-  if (pendingImport === null || importRun === null) return;
+  if (pendingImport === null || importRun === null || importBusy) return;
   const offered = pendingImport;
-  importRun.disabled = true;
+  setImportBusy(true);
+  transferStatus("");
   try {
-    const report = await importArticles(offered.articles);
+    // Answered and counted the way the backup's press is (`runBackup`).
+    await nextPaint();
+    const adding = importPlan((await listArticles()).map((meta) => meta.url), offered.articles).toAdd;
+    const units = importUnits({
+      articles: adding.length,
+      pictures:
+        offered.pictures === undefined
+          ? 0
+          : pictureCount(offered.pictures.refs, adding.map((article) => article.url)),
+      books: [],
+      phrases: 0,
+      highlights: 0,
+    });
+    const meter = progressMeter(units.total, paintImportProgress);
+    const onArticle = adding.length > 0 ? articlesStage(meter, adding.length, units.articles) : undefined;
+    await nextPaint();
+    const report = await importArticles(offered.articles, onArticle);
 
-    const pictured = await writePictures(offered.pictures, report.urls);
+    const pictured = await writePictures(offered.pictures, report.urls, meter);
 
     // "Added 12, skipped 3" is the whole reason to trust an import that
     // says nothing else - the same report the phrase import gives.
@@ -7913,9 +8129,7 @@ async function runImport() {
     if (pictured.count > 0) {
       sentences.push(plural(pictured.count, "reader_import_pictures_added", [megabytes(pictured.bytes)]));
     }
-    transferStatus(sentences.join(" "));
-
-    closeImportOffer();
+    reportImport(sentences.join(" "));
     await refreshLibrary();
     void refreshBackupLine();
   } catch {
@@ -7923,7 +8137,7 @@ async function runImport() {
     // already picked and read.
     transferStatus(t("reader_list_write_failed"), "error");
   } finally {
-    importRun.disabled = false;
+    setImportBusy(false);
   }
 }
 
@@ -9400,6 +9614,7 @@ importButton?.addEventListener("click", () => importInput?.click());
  * @param {File} file
  */
 async function dispatchImport(file) {
+  if (importBusy) return;
   const head = new Uint8Array(await file.slice(0, 2).arrayBuffer());
   const kind = importKind({ name: file.name, type: file.type, head });
   if (kind === "book" || kind === "markdown") {
@@ -9408,27 +9623,42 @@ async function dispatchImport(file) {
     await runBookImport(file, kind);
     return;
   }
-  if (kind === "archive") {
-    // A ZIP nobody has named: its directory says whether it is the list's
-    // backup with pictures (D145) or a book - `articles.json` is the word.
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const entries = await listEntries(bytes).catch(() => []);
-    if (entries.some((entry) => entry.name === BACKUP_ENTRIES.manifest)) {
-      // The backup of everything (D213): the manifest is the word.
-      bookImportStatus("");
-      await offerBackup(file, bytes, entries);
-    } else if (entries.some((entry) => entry.name === ARTICLES_ENTRY)) {
-      bookImportStatus("");
-      await offerArchive(file, bytes, entries);
-    } else {
-      closeImportOffer();
-      transferStatus("");
-      await runBookImport(file, "book");
-    }
-    return;
-  }
+  // A backup is read whole before its offer can say what it holds, and a
+  // large one takes seconds on a slow device: the line says so at once, in
+  // the place the offer will take, and the button waits - a picker closed
+  // over a page that shows nothing reads as a file that was not taken. The
+  // offer, or the reason there is none, replaces the line.
+  closeImportOffer();
   bookImportStatus("");
-  await offerImport(file);
+  transferStatus(t("reader_import_reading", [file.name]));
+  if (importButton instanceof HTMLButtonElement) importButton.disabled = true;
+  try {
+    await nextPaint();
+    if (kind === "archive") {
+      // A ZIP nobody has named: its directory says whether it is the list's
+      // backup with pictures (D145) or a book - `articles.json` is the word.
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const entries = await listEntries(bytes).catch(() => []);
+      if (entries.some((entry) => entry.name === BACKUP_ENTRIES.manifest)) {
+        // The backup of everything (D213): the manifest is the word.
+        await offerBackup(file, bytes, entries);
+      } else if (entries.some((entry) => entry.name === ARTICLES_ENTRY)) {
+        await offerArchive(file, bytes, entries);
+      } else {
+        transferStatus("");
+        await runBookImport(file, "book");
+      }
+      return;
+    }
+    await offerImport(file);
+  } catch {
+    // The file could not be read at all - taken away, or too large for the
+    // memory this device gives a page.
+    closeImportOffer();
+    transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  } finally {
+    if (importButton instanceof HTMLButtonElement) importButton.disabled = false;
+  }
 }
 
 importInput?.addEventListener("change", () => {

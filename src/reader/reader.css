@@ -1651,6 +1651,29 @@ body.reader:has(#library:not([hidden])) {
   overflow-wrap: anywhere;
 }
 
+/* The import at work: the bar across the frame and under it the line that
+   names the part being written. The bar is the settings page's download bar
+   (`.model-progress`) - the browser's own, in the page's accent - at the
+   frame's width, capped so that on a desk it stays a bar and not a rule
+   across the screen. The line in the text's full ink: it is the answer to
+   the press, not an aside. */
+.import-progress {
+  margin: 0.75rem 0 0;
+}
+
+.import-progress-bar {
+  display: block;
+  width: 100%;
+  max-width: 24rem;
+  height: 0.5rem;
+  accent-color: var(--page-accent);
+}
+
+.import-stage {
+  margin: 0.4rem 0 0;
+  overflow-wrap: anywhere;
+}
+
 /* The row wraps. It held two buttons when it was written; the highlights
    export made three (D106), and three of these labels do not fit a phone's
    line in any language - unwrapped they ran off the screen's edge and took

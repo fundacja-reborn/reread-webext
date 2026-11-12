@@ -1524,6 +1524,64 @@
     "message": "Close",
     "description": "Generic label of a button that puts a dialog away."
   },
+  "action_importing": {
+    "message": "Importing...",
+    "description": "The Import button of the reading list's offer while its import is writing: the press is answered on the button itself, which takes no presses until the report."
+  },
+  "reader_import_reading": {
+    "message": "Reading $NAME$...",
+    "description": "Under the Import button, from the moment a backup file is picked until the offer says what it holds - a large file takes seconds to read on a slow device.",
+    "placeholders": {
+      "name": { "content": "$1", "example": "reread-backup-2026-11-09.zip" }
+    }
+  },
+  "reader_import_progress_label": {
+    "message": "Import progress",
+    "description": "The accessible name of the progress bar under the Import button of the offer."
+  },
+  "reader_import_progress_preparing": {
+    "message": "Checking what is new...",
+    "description": "The first line under the import's progress bar: the file is being compared with what the reading list already holds, before anything is written."
+  },
+  "reader_import_progress_articles": {
+    "message": "Articles: $DONE$ of $TOTAL$",
+    "description": "The line under the import's progress bar while the articles are written: how many of the new ones are done.",
+    "placeholders": {
+      "done": { "content": "$1", "example": "34" },
+      "total": { "content": "$2", "example": "110" }
+    }
+  },
+  "reader_import_progress_pictures": {
+    "message": "Pictures: $DONE$ of $TOTAL$",
+    "description": "The line under the import's progress bar while the articles' pictures are written.",
+    "placeholders": {
+      "done": { "content": "$1", "example": "34" },
+      "total": { "content": "$2", "example": "110" }
+    }
+  },
+  "reader_import_progress_books": {
+    "message": "Book $DONE$ of $TOTAL$",
+    "description": "The line under the import's progress bar while the books are written: which of the new books is being written now, out of how many.",
+    "placeholders": {
+      "done": { "content": "$1", "example": "2" },
+      "total": { "content": "$2", "example": "8" }
+    }
+  },
+  "reader_import_progress_phrases": {
+    "message": "Saved phrases: $COUNT$",
+    "description": "The line under the import's progress bar while the saved phrases are written - all at once, so only their number is said.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "2,113" }
+    }
+  },
+  "reader_import_progress_highlights": {
+    "message": "Highlights",
+    "description": "The line under the import's progress bar while the highlights are written."
+  },
+  "reader_import_keep_open": {
+    "message": "Keep this page open until the import ends.",
+    "description": "Under the import's progress line: closing the page stops the import half way."
+  },
   "reader_book_importing": {
     "message": "Adding the book - part $PART$",
     "placeholders": {

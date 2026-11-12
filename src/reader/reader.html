@@ -1043,6 +1043,30 @@
               <button type="button" id="library-import-run" data-i18n="action_import">Import</button>
               <button type="button" id="library-import-cancel" data-i18n="action_cancel">Cancel</button>
             </p>
+            <!-- What the press is doing, said where the press was: a bar
+                 over the whole import and a line naming the part being
+                 written with its count. A large backup takes minutes on a
+                 slow device, and the page used to say nothing in that time -
+                 the press was repeated and cancelled (Michał, from a Boox
+                 Page, 2026-11-12). Shown by script from the press to the
+                 report; Cancel leaves the row for that time, because the
+                 writing cannot be taken back half way and a button that
+                 only hid the frame would lie. The bar is never without a
+                 value, so it never animates - on e-ink every animation is
+                 a flash. The line is not a live region: it changes up to a
+                 hundred times, and the report after it is the one. -->
+            <div id="library-import-progress" class="import-progress" hidden>
+              <progress
+                id="library-import-bar"
+                class="import-progress-bar"
+                max="1"
+                value="0"
+                aria-label="Import progress"
+                data-i18n-aria-label="reader_import_progress_label"
+              ></progress>
+              <p id="library-import-stage" class="import-stage"></p>
+              <p class="hint" data-i18n="reader_import_keep_open">Keep this page open until the import ends.</p>
+            </div>
           </div>
           <p id="library-transfer-status" class="status report" role="status"></p>
           <!-- The book import speaks its own line: its progress ticks per
