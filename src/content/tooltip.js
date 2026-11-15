@@ -515,6 +515,17 @@ export const STYLE = `
        the paper's colour writes; the outlined door is a line of ink. */
     --door-ink: #1f2430;
     --door-paper: #ffffff;
+    /* What a press looks like, named so that a paper changes it in one place
+       and no paper's rule has to outrank a state's (D301): the tint a framed
+       door wears at rest and under a cursor, and the press itself - a quarter
+       of the ink on anything drawn in ink, a quarter of the paper on anything
+       filled with it. The dark papers used to dress the doors with rules of
+       their own, more specific than the press, and a door on dark paper
+       answered a finger with nothing. */
+    --door-rest: rgba(0, 0, 0, 0.05);
+    --door-hover: rgba(0, 0, 0, 0.1);
+    --press: color-mix(in srgb, var(--door-ink) 25%, transparent);
+    --press-filled: color-mix(in srgb, var(--door-ink) 75%, var(--door-paper));
     /* One strength for every line the bubble draws, past 4.5:1 against its own
        paper. An e-ink panel quantizes the screen to 16 greys and rounds a
        near-white hairline back into it, so a tenth of a black is not a faint
@@ -649,6 +660,12 @@ export const STYLE = `
     outline: 1px solid currentColor;
     outline-offset: 0;
   }
+  /* The press, inside the frame the fold already wears (D301; the quiet
+     labels' rule further down says why and how). */
+  .context-toggle:active {
+    opacity: 1;
+    background: var(--press);
+  }
   .context-toggle svg {
     width: var(--icon);
     height: var(--icon);
@@ -738,6 +755,7 @@ export const STYLE = `
     color: inherit;
     background: none;
     border: 0;
+    border-radius: 2px;
     opacity: 0.8;
     text-decoration: underline;
     text-underline-offset: 0.15em;
@@ -748,6 +766,12 @@ export const STYLE = `
     opacity: 1;
     outline: 1px solid currentColor;
     outline-offset: 1px;
+  }
+  /* The press behind the word itself (D301): the link has no box to fill,
+     so the wash stands under its letters for as long as the finger is down. */
+  .hint-link:active {
+    opacity: 1;
+    background: var(--press);
   }
 
   /* The dictionaries' shelf (Michał's fifth brief): the same rows as the
@@ -1058,6 +1082,19 @@ export const STYLE = `
     outline-offset: 0;
   }
   .actions button:disabled { opacity: 0.35; cursor: default; }
+  /* The press on a quiet label or a picture (D301): the quarter of the ink
+     the framed doors wear under a finger, for as long as the finger or the
+     key is down. Until now a label only went from seven tenths to full
+     strength under a cursor - which a tap shows after the fact, and an e-ink
+     panel does not show at all. Only the press, never the hover a tap leaves
+     behind (the doors' second half, further down): two of these are
+     switches, and a wash that outlived the tap would read as a switch still
+     on. Save that is waiting for a line (aria-disabled) stays out, as it
+     does from its own press: its answer is the sentence. */
+  .actions button:active:not(:disabled):not([aria-disabled="true"]) {
+    opacity: 1;
+    background: var(--press);
+  }
 
   /* The clipboard row (D110): an extra row the copy icon opens, so Save never
      leaves the screen for it. It reads like the action row - quiet labels,
@@ -1091,6 +1128,12 @@ export const STYLE = `
     outline: 1px solid currentColor;
     outline-offset: 0;
   }
+  /* The press, as on the action row's labels (D301): the word "copied"
+     answers on the lift, this answers while the finger is down. */
+  .copy-row button:active {
+    opacity: 1;
+    background: var(--press);
+  }
 
   /* The speaker is the row's one picture (D83): universally readable where a
      "Read aloud" label would push the row past one line on a phone, and an
@@ -1122,6 +1165,22 @@ export const STYLE = `
     color: var(--door-paper);
     opacity: 1;
   }
+  /* The press that stops the voice (D301): the filled speaker gives up a
+     quarter of its ink, the way the launcher's filled door does. It has to
+     be said apart - the labels' quarter of ink under a picture drawn in the
+     paper's colour would be a picture nobody can see. */
+  .actions button[data-action="speak"]:is([aria-busy="true"], [aria-pressed="true"]):active {
+    background: var(--press-filled);
+  }
+  /* The clipboard's picture while its row stands open (D301): the row under
+     the actions is this button's doing, and the button says so for as long
+     as the row is out - with the press's own wash and nothing drawn around
+     it. Quieter than the speaker's fill on purpose: a voice is something
+     happening, a row is something standing there. */
+  .actions button[data-action="copy"][aria-expanded="true"] {
+    background: var(--press);
+    opacity: 1;
+  }
 
   /* The exception, and the only real call to action a bubble has: Save is the
      press that keeps a phrase which would otherwise be gone, the launcher's
@@ -1140,13 +1199,13 @@ export const STYLE = `
        there on paper too: the tint inside it is the first thing an e-ink panel
        rounds away, and a Save that has lost its frame is one more label in a
        row of labels. */
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--door-rest);
     border: 1px solid var(--edge);
     border-radius: 6px;
   }
   .actions button[data-action="save"]:hover:not(:disabled):not([aria-disabled="true"]),
   .actions button[data-action="reader"]:hover:not(:disabled),
-  .actions button[data-action="settings"]:hover:not(:disabled) { background: rgba(0, 0, 0, 0.1); }
+  .actions button[data-action="settings"]:hover:not(:disabled) { background: var(--door-hover); }
   /* The press itself, a quarter of the ink: the same strength the page's
      bar gives a tool in hand (page.css, D221/PR #387), and for the same
      reason - an e-ink panel keeps 16 greys, and the tenth above rounded
@@ -1157,14 +1216,17 @@ export const STYLE = `
      gesture granted (D84), so the panel's refresh finds the state
      whichever moment it catches. A mouse keeps its tenth on hover. The
      tier is named by its attribute alone: the sizes test finds the tier's
-     own rule by ".bubble[data-pointer" and must not find this one first. */
+     own rule by ".bubble[data-pointer" and must not find this one first.
+     The wash is the bubble's one press (D301), and every paper reaches the
+     doors through the variables: a rule of a paper's own that dressed them
+     would outrank this one, which is how the dark papers lost the press. */
   .actions button[data-action="save"]:active:not(:disabled):not([aria-disabled="true"]),
   .actions button[data-action="reader"]:active:not(:disabled),
   .actions button[data-action="settings"]:active:not(:disabled),
   [data-pointer="coarse"] .actions button[data-action="save"]:hover:not(:disabled):not([aria-disabled="true"]),
   [data-pointer="coarse"] .actions button[data-action="reader"]:hover:not(:disabled),
   [data-pointer="coarse"] .actions button[data-action="settings"]:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--door-ink) 25%, transparent);
+    background: var(--press);
   }
   /* Dimmed two ways that look the same: disabled, when there is nothing a
      press could do, and aria-disabled, when a press has one thing to say -
@@ -1228,14 +1290,11 @@ export const STYLE = `
     outline: 2px solid var(--door-ink);
     outline-offset: 2px;
   }
-  .bubble[data-variant="launcher"] .actions button:active {
-    background: color-mix(in srgb, var(--door-ink) 12%, transparent);
-  }
-  .bubble[data-variant="launcher"] .actions button[data-action="reader"]:active {
-    background: color-mix(in srgb, var(--door-ink) 82%, var(--door-paper));
-  }
   /* Hover only where a pointer can hover: a finger's tap must not leave a
-     door looking pressed until the next tap somewhere else. */
+     door looking pressed until the next tap somewhere else. Before the
+     press on purpose (D301): the two are equally specific, so the later
+     one wins - and with the hover standing last, a door under a cursor
+     answered the button going down with nothing at all. */
   @media (hover: hover) {
     .bubble[data-variant="launcher"] .actions button:hover {
       background: color-mix(in srgb, var(--door-ink) 8%, transparent);
@@ -1243,6 +1302,22 @@ export const STYLE = `
     .bubble[data-variant="launcher"] .actions button[data-action="reader"]:hover {
       background: color-mix(in srgb, var(--door-ink) 88%, var(--door-paper));
     }
+  }
+  /* The press, the bubble's own quarter both ways (D301): of the ink on an
+     outlined door, of the paper on the filled one. An eighth was the
+     strength an e-ink panel rounds back into the paper - the framed doors'
+     lesson from the Boox - and this is the bubble that panel's reader
+     meets first. */
+  .bubble[data-variant="launcher"] .actions button:active {
+    background: var(--press);
+  }
+  /* The filled door also holds its press through the hover a tap leaves
+     behind on the touch tier: the framed doors' rule for that hover reaches
+     this door too, and its quarter of ink under words written in the
+     paper's colour would be a door nobody can read. */
+  .bubble[data-variant="launcher"] .actions button[data-action="reader"]:active,
+  .bubble[data-variant="launcher"][data-pointer="coarse"] .actions button[data-action="reader"]:hover {
+    background: var(--press-filled);
   }
 
   /* A hand is not a cursor: where the primary pointer is a finger, the type
@@ -1282,14 +1357,15 @@ export const STYLE = `
       /* The doors swap ink and paper with the bubble (D182). */
       --door-ink: #f2f4f8;
       --door-paper: #262c3a;
+      /* The framed doors' tint on dark paper, as variables and never as
+         rules (D301, see .bubble): the press reads the ink above. */
+      --door-rest: rgba(255, 255, 255, 0.08);
+      --door-hover: rgba(255, 255, 255, 0.16);
     }
     .bubble:not([data-scheme]) :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
     .bubble:not([data-scheme]) .editor { background: rgba(255, 255, 255, 0.06); }
     /* The quiet labels need nothing here: they are the bubble's own colour at
        seven tenths, which lands right on either background. */
-    /* Not the launcher's: its doors carry their own ink and paper (D182). */
-    .bubble:not([data-scheme]):not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
-    .bubble:not([data-scheme]):not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled):not([aria-disabled="true"]) { background: rgba(255, 255, 255, 0.16); }
   }
 
   /* The reader's own paper, by name: the reader hands its theme down with
@@ -1310,11 +1386,11 @@ export const STYLE = `
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     --door-ink: #f2f4f8;
     --door-paper: #262c3a;
+    --door-rest: rgba(255, 255, 255, 0.08);
+    --door-hover: rgba(255, 255, 255, 0.16);
   }
   .bubble[data-scheme="dark"] :is(.body, .context)[data-tone="error"] { color: #f09a3e; }
   .bubble[data-scheme="dark"] .editor { background: rgba(255, 255, 255, 0.06); }
-  .bubble[data-scheme="dark"]:not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]) { background: rgba(255, 255, 255, 0.08); }
-  .bubble[data-scheme="dark"]:not([data-variant="launcher"]) .actions :is(button[data-action="save"], button[data-action="reader"], button[data-action="settings"]):hover:not(:disabled):not([aria-disabled="true"]) { background: rgba(255, 255, 255, 0.16); }
   /* Sepia is the one paper the system query never dresses. A step lighter
      than the page's #f4ecd8 - the light bubble's manner, it floats - with
      the sepia ink, and an edge holding the 4.5:1 the lines test asks of
@@ -1330,8 +1406,8 @@ export const STYLE = `
   }
   /* E-ink (D234): black on white, the edge black too - the one line a
      panel of sixteen greys is sure to draw - and no shadow to dither. The
-     doors are the same pair. The washes underneath (the press, the row's
-     tint) are quarters and tenths of black now, which the panel shows. */
+     doors are the same pair. The framed doors' tint underneath is a
+     twentieth and a tenth of black here; the press is named below. */
   .bubble[data-scheme="eink"] {
     color-scheme: light;
     background: #ffffff;
@@ -1341,6 +1417,12 @@ export const STYLE = `
     box-shadow: none;
     --door-ink: #000000;
     --door-paper: #ffffff;
+    /* The press as a grey the panel keeps (D237, D301): a quarter of black
+       comes off a Boox as a stain, two or three greys darker than the
+       arithmetic says, so the press is the pages' own lit grey here
+       (page.css) - under the labels, the pictures and the open clipboard
+       alike. The framed doors add their second line below. */
+    --press: #dddddd;
   }
   /* Nothing moves on e-ink paper: the row unfolds in one repaint, the way
      it does under reduced motion - and the fold reads as folded or not
@@ -1368,6 +1450,13 @@ export const STYLE = `
     background: #dddddd;
     outline: 1px solid var(--edge);
     outline-offset: -2px;
+  }
+  /* The open clipboard's picture already wears the press's grey on this
+     paper, so the press that closes the row goes one grey darker - the
+     pages' own step under a control that is on (page.css, D237). On the
+     other papers that press is a flip, and the row leaving is the answer. */
+  .bubble[data-scheme="eink"] .actions button[data-action="copy"][aria-expanded="true"]:active {
+    background: #cccccc;
   }
 `;
 
