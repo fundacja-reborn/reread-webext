@@ -1553,7 +1553,7 @@
   },
   "reader_import_progress_pictures": {
     "message": "Pictures: $DONE$ of $TOTAL$",
-    "description": "The line under the import's progress bar while the articles' pictures are written.",
+    "description": "The line under the import's progress bar while the articles' pictures are written - and under the export's, while they are read into the file.",
     "placeholders": {
       "done": { "content": "$1", "example": "34" },
       "total": { "content": "$2", "example": "110" }
@@ -1561,7 +1561,7 @@
   },
   "reader_import_progress_books": {
     "message": "Book $DONE$ of $TOTAL$",
-    "description": "The line under the import's progress bar while the books are written: which of the new books is being written now, out of how many.",
+    "description": "The line under the import's progress bar while the books are written: which of the new books is being written now, out of how many. The export's bar says the same of the books going into the file.",
     "placeholders": {
       "done": { "content": "$1", "example": "2" },
       "total": { "content": "$2", "example": "8" }
@@ -1569,7 +1569,7 @@
   },
   "reader_import_progress_phrases": {
     "message": "Saved phrases: $COUNT$",
-    "description": "The line under the import's progress bar while the saved phrases are written - all at once, so only their number is said.",
+    "description": "The line under the import's progress bar while the saved phrases are written - all at once, so only their number is said. The export's bar says the same while they go into the file.",
     "placeholders": {
       "count": { "content": "$1", "example": "2,113" }
     }
@@ -1581,6 +1581,44 @@
   "reader_import_keep_open": {
     "message": "Keep this page open until the import ends.",
     "description": "Under the import's progress line: closing the page stops the import half way."
+  },
+  "action_exporting": {
+    "message": "Exporting...",
+    "description": "An export button of the reading list - Export, or one of the selection's two - while its file is being written: the press is answered on the button itself, which takes no presses until the report."
+  },
+  "reader_export_progress_label": {
+    "message": "Export progress",
+    "description": "The accessible name of the progress bar under the reading list's export buttons."
+  },
+  "reader_export_progress_preparing": {
+    "message": "Preparing the file...",
+    "description": "The first line under the export's progress bar: what goes into the file is being read from the database, before anything is written."
+  },
+  "reader_export_progress_articles": {
+    "message": "Articles: $COUNT$",
+    "description": "The line under the export's progress bar while the articles are written - all at once, so only their number is said.",
+    "placeholders": {
+      "count": { "content": "$1", "example": "119" }
+    }
+  },
+  "reader_export_progress_documents": {
+    "message": "Document $DONE$ of $TOTAL$",
+    "description": "The line under the export's progress bar while the ticked documents are written one by one as EPUB or Markdown files: which one is being written now, out of how many.",
+    "placeholders": {
+      "done": { "content": "$1", "example": "2" },
+      "total": { "content": "$2", "example": "8" }
+    }
+  },
+  "reader_export_keep_open": {
+    "message": "Keep this page open until the export ends.",
+    "description": "Under the export's progress line: closing the page ends the export with no file."
+  },
+  "reader_export_doc_progress": {
+    "message": "Exporting... $PERCENT$%",
+    "description": "Under the pressed export row of the reader's menu while the document's file is being written: how far it is, in whole percent. Replaced by reader_export_doc_done or reader_export_doc_failed.",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "42" }
+    }
   },
   "reader_book_importing": {
     "message": "Adding the book - part $PART$",

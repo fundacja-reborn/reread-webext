@@ -19,10 +19,16 @@
  *
  * Nothing here touches the network, and the file goes nowhere but the
  * browser's download: a document leaves the way the backup leaves.
+ *
+ * A long book takes a while on a slow device, so the writing says how far
+ * it is (2026-11-15): the caller's `onProgress` hears a fraction when the
+ * work begins and then once per whole percent - a step per part rebuilt,
+ * and for a book file the packing after it (`documentProgress`).
  */
 
 import { t } from "../lib/i18n.js";
 import { NO_BASE, buildArticle } from "../lib/reader/article.js";
+import { documentProgress } from "../lib/reader/export-progress.js";
 import { getArticle, getPictures } from "../lib/store/articles.js";
 import { allBookPictures, allBookSegments, getBook } from "../lib/store/books.js";
 import { EPUB_MIME, documentFilename, documentIdentifier, epubDocument } from "../lib/store/epub-file.js";
@@ -49,10 +55,20 @@ import { packArchive } from "./zip.js";
  * by the file the book came from included. The plain-text page has no
  * contents to list and takes no rows.
  *
+ * `finish` takes the step the packing makes - called once per entry the
+ * archive has taken, with which entry of how many - where the file is an
+ * archive; the plain-text page has no packing and calls nothing.
+ *
  * @typedef {{
  *   part: (root: Element, rows?: import("../lib/store/epub-file.js").PartRow[]) => void,
- *   finish: () => Promise<ExportedDocument>,
+ *   finish: (packed: import("../lib/reader/export-progress.js").DocumentProgress["packed"]) => Promise<ExportedDocument>,
  * }} DocumentWriter
+ */
+
+/**
+ * How far the file is, for whoever asked: a fraction from 0 to 1.
+ *
+ * @typedef {(fraction: number) => void} OnProgress
  */
 
 /**
@@ -64,20 +80,23 @@ import { packArchive } from "./zip.js";
  * @param {"article" | "book"} kind
  * @param {string} key an article's address, a book's id
  * @param {ExportFormat} format
+ * @param {OnProgress} [onProgress]
  * @returns {Promise<ExportedDocument | null>}
  */
-export async function exportDocument(kind, key, format) {
-  return kind === "book" ? exportBook(key, format) : exportArticle(key, format);
+export async function exportDocument(kind, key, format, onProgress) {
+  return kind === "book" ? exportBook(key, format, onProgress) : exportArticle(key, format, onProgress);
 }
 
 /**
  * @param {string} url
  * @param {ExportFormat} format
+ * @param {OnProgress} [onProgress]
  * @returns {Promise<ExportedDocument | null>}
  */
-async function exportArticle(url, format) {
+async function exportArticle(url, format, onProgress) {
   const article = await getArticle(url);
   if (article === null) return null;
+  const progress = documentProgress(1, format, onProgress);
   const writer =
     format === "markdown"
       ? markdownWriter({ title: article.title, source: url, at: article.savedAt }, article.title)
@@ -95,19 +114,22 @@ async function exportArticle(url, format) {
           article.title,
         );
   writer.part(rebuilt(article.content, { baseUrl: url }));
-  return writer.finish();
+  progress.rebuilt();
+  return writer.finish(progress.packed);
 }
 
 /**
  * @param {string} id
  * @param {ExportFormat} format
+ * @param {OnProgress} [onProgress]
  * @returns {Promise<ExportedDocument | null>}
  */
-async function exportBook(id, format) {
+async function exportBook(id, format, onProgress) {
   const book = await getBook(id);
   if (book === null) return null;
   const segments = await allBookSegments(book);
   if (segments === null) return null;
+  const progress = documentProgress(segments.length, format, onProgress);
   const writer =
     format === "markdown"
       ? markdownWriter({ title: book.title, source: book.author, at: book.addedAt }, book.title)
@@ -138,8 +160,9 @@ async function exportBook(id, format) {
     const root = rebuilt(segment.blocks.join(""), { baseUrl: NO_BASE, archive: "" });
     if (toc === null) writer.part(root);
     else writer.part(root, toc.filter((entry) => entry.segmentIndex === at));
+    progress.rebuilt();
   }
-  return writer.finish();
+  return writer.finish(progress.packed);
 }
 
 /**
@@ -180,10 +203,10 @@ function epubWriter(meta, title) {
   const book = epubDocument(meta);
   return {
     part: (root, rows) => book.part(root, rows),
-    finish: async () => {
+    finish: async (packed) => {
       // The writer's own type on the archive: what the browser is handed
       // is a book file, whatever the ZIP library calls its output.
-      const archive = await packArchive(book.entries());
+      const archive = await packArchive(paced(book.entries(), packed));
       return {
         content: new Blob([archive], { type: EPUB_MIME }),
         filename: documentFilename(title, "epub"),
@@ -191,6 +214,24 @@ function epubWriter(meta, title) {
       };
     },
   };
+}
+
+/**
+ * The entries handed to the archive one at a time, each followed by the
+ * packing's step: the generator is resumed once the archive has taken the
+ * entry - deflated it, where it is text - so the step counts work done.
+ * The page gets a turn of the event loop when the step moved the bar, and
+ * only then.
+ *
+ * @param {import("../lib/store/articles-archive.js").ArchiveEntry[]} entries
+ * @param {import("../lib/reader/export-progress.js").DocumentProgress["packed"]} packed
+ * @returns {AsyncGenerator<import("../lib/store/articles-archive.js").ArchiveEntry>}
+ */
+async function* paced(entries, packed) {
+  for (const [at, entry] of entries.entries()) {
+    yield entry;
+    if (packed(at + 1, entries.length)) await yieldToUi();
+  }
 }
 
 /** A breath between two parts of a book, so the page stays responsive through a long one. */

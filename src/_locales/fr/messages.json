@@ -1224,6 +1224,29 @@
   },
   "reader_import_progress_highlights": { "message": "Surlignages" },
   "reader_import_keep_open": { "message": "Gardez cette page ouverte jusqu'à la fin de l'importation." },
+  "action_exporting": { "message": "Exportation..." },
+  "reader_export_progress_label": { "message": "Progression de l'exportation" },
+  "reader_export_progress_preparing": { "message": "Préparation du fichier..." },
+  "reader_export_progress_articles": {
+    "message": "Articles : $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "119" }
+    }
+  },
+  "reader_export_progress_documents": {
+    "message": "Document $DONE$ sur $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "2" },
+      "total": { "content": "$2", "example": "8" }
+    }
+  },
+  "reader_export_keep_open": { "message": "Gardez cette page ouverte jusqu'à la fin de l'exportation." },
+  "reader_export_doc_progress": {
+    "message": "Exportation... $PERCENT$ %",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "42" }
+    }
+  },
   "reader_book_importing": {
     "message": "Ajout du livre - partie $PART$",
     "placeholders": {

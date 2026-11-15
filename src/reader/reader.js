@@ -88,6 +88,7 @@ import { fileOrder } from "../lib/store/articles-file.js";
 import { asDocState, asMarksState, asRoomState, docState, marksState, roomState } from "../lib/reader/history-state.js";
 import { asRoomRequest } from "../lib/room-frame.js";
 import { importKind } from "../lib/reader/import-kind.js";
+import { exportUnits, promisedPictures } from "../lib/reader/export-progress.js";
 import { bookUnits, importUnits, pictureCount, progressMeter } from "../lib/reader/import-progress.js";
 import { speechAction } from "../lib/reader/keys.js";
 import { readingTime, wordsIn } from "../lib/reader/length.js";
@@ -527,6 +528,13 @@ const exportBooks = /** @type {HTMLInputElement | null} */ (
   document.getElementById("library-export-books")
 );
 const exportBooksLabel = document.getElementById("library-export-books-label");
+// The export at work: the bar and the line under the transfer section's
+// buttons, the import's own pair (`lib/reader/export-progress.js`).
+const exportProgress = document.getElementById("library-export-progress");
+const exportBar = /** @type {HTMLProgressElement | null} */ (
+  document.getElementById("library-export-bar")
+);
+const exportStage = document.getElementById("library-export-stage");
 // The highlights page (D108): the reading list's furniture repeated - a
 // filter, an empty state, the rows, a pager - plus the scoped page's title
 // line, its own export, and the template a row's copy button is cloned from.
@@ -701,6 +709,18 @@ let picturesNote = null;
  * written, and the rows and buttons grey until it is.
  */
 let documentExport = false;
+
+/**
+ * Which export of the transfer section is writing right now - the backup
+ * (or the selection's file, the same button), or the ticked documents as
+ * book files or as text pages - and nothing while none is. The one lock of
+ * the section's exports: a second press, on the same button or on another,
+ * waits for the report of the first. Until 2026-11-15 the backup had none,
+ * and a press repeated over a silent page started a second file.
+ *
+ * @type {"backup" | import("./export-doc.js").ExportFormat | null}
+ */
+let exportBusy = null;
 
 /**
  * What the last press of an export row came to - "Exported to X (1.2 MB)",
@@ -1299,11 +1319,48 @@ function paintImportProgress(fraction, label) {
 }
 
 /**
+ * The transfer section while one of its exports writes, and back - the
+ * import's manner (`setImportBusy`): the press is answered on the pressed
+ * button itself, whose word changes (`renderExportControls`), the three
+ * export buttons stop taking presses, the boxes that decide what goes into
+ * the file wait - the file is already being written by what they said at
+ * the press - and the bar and the line appear under the buttons. There is
+ * no stop: an export writes nothing to the databases, and closing the page
+ * ends it with no file.
+ *
+ * @param {typeof exportBusy} which
+ */
+function setExportBusy(which) {
+  exportBusy = which;
+  renderExportControls();
+  if (exportPictures !== null) exportPictures.disabled = which !== null;
+  if (exportBooks !== null) exportBooks.disabled = which !== null;
+  if (exportProgress !== null) exportProgress.hidden = which === null;
+  // The first line, until a part begins: everything is read from the
+  // databases before the first entry, and that takes its own while.
+  if (which !== null) paintExportProgress(0, t("reader_export_progress_preparing"));
+}
+
+/**
+ * The export meter's paint: the bar and the line together, so the two
+ * never say different things.
+ *
+ * @param {number} fraction
+ * @param {string} label
+ */
+function paintExportProgress(fraction, label) {
+  if (exportBar !== null) exportBar.value = fraction;
+  if (exportStage !== null) exportStage.textContent = label;
+}
+
+/**
  * Resolves once the browser has had a frame to show what was just written
  * to the page. The import's long stretches are synchronous - an archive
- * entry inflated, a book's text parsed - and a line set right before one
- * would otherwise appear only after it. The timer is for a tab that is not
- * showing: it gets no frames, and the import must not wait for one.
+ * entry inflated, a book's text parsed - and so are the export's - the
+ * articles' entry deflated, a book's text written - and a line set right
+ * before one would otherwise appear only after it. The timer is for a tab
+ * that is not showing: it gets no frames, and the work must not wait for
+ * one.
  *
  * @returns {Promise<void>}
  */
@@ -5991,6 +6048,10 @@ function renderPickLine() {
  * the press. A ticked book goes with its pictures whatever the box says:
  * they are the book's own, out of its .epub, and cannot be downloaded
  * again the way an article's can.
+ *
+ * While an export writes (`exportBusy`), all three buttons wait and the
+ * pressed one says so in its own word - the answer to the press, where the
+ * press was.
  */
 function renderExportControls() {
   const { metas } = libraryShown;
@@ -5998,10 +6059,13 @@ function renderExportControls() {
   if (exportButton !== null) {
     // Outside the selection the export is the backup of everything (D213),
     // which always has something to write - the settings at the least.
-    exportButton.disabled = picking && picked.size === 0;
-    exportButton.textContent = picking
-      ? t("reader_export_selected", picked.size.toLocaleString())
-      : t("action_export");
+    exportButton.disabled = exportBusy !== null || (picking && picked.size === 0);
+    exportButton.textContent =
+      exportBusy === "backup"
+        ? t("action_exporting")
+        : picking
+          ? t("reader_export_selected", picked.size.toLocaleString())
+          : t("action_export");
   }
   // The selection's own two buttons (D229): every ticked document as a
   // file of its own - the book file, or the text page - counted like the
@@ -6010,13 +6074,19 @@ function renderExportControls() {
   // files is nobody's ask, and the backup is one file.
   if (exportEpubButton !== null) {
     exportEpubButton.hidden = !picking;
-    exportEpubButton.disabled = picked.size === 0 || documentExport;
-    exportEpubButton.textContent = t("reader_export_epub_selected", picked.size.toLocaleString());
+    exportEpubButton.disabled = picked.size === 0 || documentExport || exportBusy !== null;
+    exportEpubButton.textContent =
+      exportBusy === "epub"
+        ? t("action_exporting")
+        : t("reader_export_epub_selected", picked.size.toLocaleString());
   }
   if (exportMarkdownButton !== null) {
     exportMarkdownButton.hidden = !picking;
-    exportMarkdownButton.disabled = picked.size === 0 || documentExport;
-    exportMarkdownButton.textContent = t("reader_export_markdown_selected", picked.size.toLocaleString());
+    exportMarkdownButton.disabled = picked.size === 0 || documentExport || exportBusy !== null;
+    exportMarkdownButton.textContent =
+      exportBusy === "markdown"
+        ? t("action_exporting")
+        : t("reader_export_markdown_selected", picked.size.toLocaleString());
   }
   const kept = going.reduce(
     (sum, meta) =>
@@ -6916,9 +6986,20 @@ async function removeRow(button, url, kind) {
  * everything. Packed as a stream, each article's pictures and each book
  * read when its turn comes. Downloading is a blob and an anchor; no
  * permission asks for less.
+ *
+ * The press is answered at once (`setExportBusy`): the button says it is
+ * exporting and takes no second press, and the bar under it moves as the
+ * stream writes (`backupStream`) - the file of a large library takes a
+ * minute or more on a slow device.
  */
 async function exportList() {
+  if (exportBusy !== null) return;
+  setExportBusy("backup");
+  transferStatus("");
   try {
+    // The press is answered before the first read: the button and the bar
+    // are painted, then the databases are read whole.
+    await nextPaint();
     if (picking) {
       await exportSelection();
       return;
@@ -6979,6 +7060,8 @@ async function exportList() {
     transferStatus(t("reader_backup_done", [BACKUP_FILENAME, fileSize(size), parts.join(", ")]));
   } catch {
     transferStatus(describeError(ErrorCode.INTERNAL), "error");
+  } finally {
+    setExportBusy(null);
   }
 }
 
@@ -6996,37 +7079,94 @@ async function exportList() {
  * left out - a row over parts that are not there would be a book nobody
  * could open.
  *
+ * The stream is also what moves the bar under the buttons: the work is
+ * counted off the input before the first entry (`exportUnits`), and each
+ * stage steps once the archive has taken its entries - the generator is
+ * resumed after an entry is packed, so a step counts work done. The
+ * vocabulary and the articles are one entry each, and their lines say a
+ * count; the pictures step per article as its rows are read, by the row's
+ * account, so the line ends on the total it began with; the books name
+ * the one being written. A stage's line is painted before its long
+ * stretch begins (`nextPaint`).
+ *
  * @param {import("../lib/store/backup-file.js").BackupInput & {
  *   books: import("../lib/store/book.js").BookMeta[],
  * }} input
  * @returns {AsyncGenerator<import("../lib/store/articles-archive.js").ArchiveEntry>}
  */
 async function* backupStream(input) {
+  const units = exportUnits({
+    phrases: input.selection === true ? 0 : input.phrases.length,
+    pictures: input.pictures ? promisedPictures(input.articles) : 0,
+    articles: input.articles.length,
+    books: input.books.map((book) => ({ parts: book.segmentCount, pictures: book.pictures?.count ?? 0 })),
+  });
+  const meter = progressMeter(units.total, paintExportProgress);
+  if (units.phrases > 0) {
+    meter.stage(() => t("reader_import_progress_phrases", [input.phrases.length.toLocaleString()]), units.phrases);
+    await nextPaint();
+  }
   yield* backupEntries(input);
+  if (units.phrases > 0) meter.step(units.phrases);
   const articles = fileOrder(input.articles);
   /** @type {Map<string, import("../lib/store/articles-archive.js").PictureRef[]>} */
   const refs = new Map();
   if (input.pictures) {
+    let seen = 0;
+    if (units.pictures > 0) {
+      meter.stage(
+        () => t("reader_import_progress_pictures", [seen.toLocaleString(), units.pictures.toLocaleString()]),
+        units.pictures,
+      );
+      await nextPaint();
+    }
     for (const [at, article] of articles.entries()) {
       // Only the articles whose row says there are any: the row is the
       // account, and the rows come back from the copy where the database
       // has lost them.
       if (article.pictures === undefined) continue;
       const kept = pictureEntries(at, await getPictures(article.url));
+      // Counted once read, which is the slow half - they are stored, not
+      // deflated - and by the row's account, so that a picture the
+      // database no longer gives is stepped over.
+      if (units.pictures > 0) {
+        seen += article.pictures.count;
+        meter.step(article.pictures.count);
+      }
       if (kept.refs.length === 0) continue;
       yield* kept.entries;
       refs.set(article.url, kept.refs);
     }
   }
+  if (units.articles > 0) {
+    meter.stage(() => t("reader_export_progress_articles", [articles.length.toLocaleString()]), units.articles);
+    await nextPaint();
+  }
   yield articlesEntry(articles, input.marks, input.positions, refs);
+  if (units.articles > 0) meter.step(units.articles);
   if (input.books.length === 0) return;
   /** @type {Parameters<typeof toBooksIndex>[0]} */
   const index = [];
+  let turn = 0;
+  meter.stage(
+    () => t("reader_import_progress_books", [turn.toLocaleString(), input.books.length.toLocaleString()]),
+    units.books,
+  );
   for (const book of input.books) {
+    // The line names the book before its text is read: the read and the
+    // entry's deflating are one long stretch without a frame.
+    turn += 1;
+    meter.refresh();
+    await nextPaint();
+    const promised = book.pictures?.count ?? 0;
     const segments = await allBookSegments(book);
-    if (segments === null) continue;
+    if (segments === null) {
+      meter.step(book.segmentCount + promised);
+      continue;
+    }
     const at = index.length;
     yield { name: bookTextEntryName(book.id), data: new TextEncoder().encode(toBookText(book.id, segments)), deflate: true };
+    meter.step(book.segmentCount);
     /** @type {import("../lib/store/articles-archive.js").PictureRef[]} */
     const refs = [];
     for (const picture of await allBookPictures(book)) {
@@ -7041,6 +7181,7 @@ async function* backupStream(input) {
         height: picture.height,
       });
     }
+    meter.step(promised);
     const position = input.positions.get(book.id);
     index.push({ meta: book, ...(position === undefined ? {} : { position }), pictures: refs });
   }
@@ -7100,34 +7241,62 @@ async function exportSelection() {
  * its file is written, the bargain every export here keeps. Which kind a
  * ticked key is - an article's address or a book's id - the shelf says.
  *
+ * The pressed button says it is exporting and the bar under the buttons
+ * moves (`setExportBusy`): the line says which of the ticked documents is
+ * being written, and the bar goes on inside a long one by the fraction its
+ * writing reports - a document that could not be written gives the bar its
+ * whole share, so the ones after it start where they were planned to. The
+ * bar's unit is a hundredth of a document, the whole percent a document's
+ * writing reports in: whole numbers add up to the whole, fractions do not.
+ *
  * @param {import("./export-doc.js").ExportFormat} format
  */
 async function exportPickedDocuments(format) {
-  if (documentExport || picked.size === 0) return;
+  if (documentExport || exportBusy !== null || picked.size === 0) return;
   documentExport = true;
-  renderExportControls();
+  setExportBusy(format);
+  transferStatus("");
   let exported = 0;
   let failed = 0;
   let bytes = 0;
   try {
+    // Answered before the first read, the backup's way (`exportList`).
+    await nextPaint();
     const shelf = await listBooks();
     const ids = new Set(shelf.map((book) => book.id));
-    for (const key of [...picked]) {
+    const keys = [...picked];
+    const meter = progressMeter(keys.length * 100, paintExportProgress);
+    let turn = 0;
+    meter.stage(
+      () => t("reader_export_progress_documents", [turn.toLocaleString(), keys.length.toLocaleString()]),
+      keys.length * 100,
+    );
+    for (const key of keys) {
+      // The line names the document before it is read.
+      turn += 1;
+      meter.refresh();
+      await nextPaint();
+      let within = 0;
       try {
-        const file = await exportDocument(ids.has(key) ? "book" : "article", key, format);
+        const file = await exportDocument(ids.has(key) ? "book" : "article", key, format, (fraction) => {
+          const percent = Math.round(fraction * 100);
+          meter.step(percent - within);
+          within = percent;
+        });
         if (file === null) {
           failed += 1;
-          continue;
+        } else {
+          bytes += downloadFile(file.content, file.filename, file.type);
+          exported += 1;
         }
-        bytes += downloadFile(file.content, file.filename, file.type);
-        exported += 1;
       } catch {
         failed += 1;
       }
+      meter.step(100 - within);
     }
   } finally {
     documentExport = false;
-    renderExportControls();
+    setExportBusy(null);
   }
   if (exported === 0) {
     transferStatus(t("reader_export_doc_failed"), "error");
@@ -8397,6 +8566,12 @@ function refreshExportRows(target, row) {
  * document is the one the press was made on, whatever is on screen when
  * the file is done; the line is redrawn only if it still is.
  *
+ * The press is answered in the row's own line before the document is read
+ * (2026-11-15): it says the file is being written and how far it is, in
+ * whole percent - a long book takes a while on a slow device, and the two
+ * greyed rows alone were no answer. The line is kept where the report will
+ * be (`exportNote`), so the menu closed and opened again shows it still.
+ *
  * @param {import("./export-doc.js").ExportFormat} format
  */
 async function onExportPress(format) {
@@ -8404,10 +8579,19 @@ async function onExportPress(format) {
   if (target === null || documentExport) return;
   documentExport = true;
   for (const button of [navExportEpub, navExportMarkdown]) if (button !== null) button.disabled = true;
+  const line = format === "epub" ? navExportEpubHint : navExportMarkdownHint;
+  /** @param {number} fraction */
+  const say = (fraction) => {
+    const percent = Math.round(fraction * 100).toLocaleString();
+    exportNote = { url: target.url, format, text: t("reader_export_doc_progress", [percent]) };
+    if (line !== null && shown?.url === target.url) line.textContent = exportNote.text;
+  };
+  say(0);
   /** @type {string} */
   let text;
   try {
-    const file = await exportDocument(target.origin === "book" ? "book" : "article", target.url, format);
+    await nextPaint();
+    const file = await exportDocument(target.origin === "book" ? "book" : "article", target.url, format, say);
     if (file === null) {
       text = t("reader_export_doc_failed");
     } else {
@@ -8421,8 +8605,7 @@ async function onExportPress(format) {
   exportNote = { url: target.url, format, text };
   for (const button of [navExportEpub, navExportMarkdown]) if (button !== null) button.disabled = false;
   if (shown?.url !== target.url) return;
-  const hint = format === "epub" ? navExportEpubHint : navExportMarkdownHint;
-  if (hint !== null) hint.textContent = text;
+  if (line !== null) line.textContent = text;
 }
 
 /**
