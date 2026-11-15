@@ -26,6 +26,7 @@
 
 import { applyReading } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
+import { onStorageChanged } from "../lib/storage-changes.js";
 import { clearableField } from "../lib/clear-field.js";
 import { CONFIG_KEY, SIZE, TTS_RATE, chosenPair, isFont, isTheme, readConfig, writeConfig } from "../lib/config.js";
 import { fileSize, localizePage, plural, speedFactor, t, uiLocale } from "../lib/i18n.js";
@@ -1833,7 +1834,7 @@ nextButton?.addEventListener("click", () => {
   renderList();
 });
 
-webext().storage.onChanged.addListener((changes, area) => {
+onStorageChanged((changes, area) => {
   if (area !== "local") return;
   // The mirror is how a vocabulary write anywhere - a bubble on some tab,
   // this page itself - announces itself: the list is stale, reload it.

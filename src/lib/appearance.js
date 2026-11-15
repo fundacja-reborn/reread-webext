@@ -17,7 +17,7 @@
  * the rules run under `node --test` without a browser.
  */
 
-import { webext } from "./browser.js";
+import { onStorageChanged } from "./storage-changes.js";
 import { CONFIG_KEY, readConfig } from "./config.js";
 
 /**
@@ -102,7 +102,7 @@ export function paperFor(theme, without) {
 export function followTheme({ without } = {}) {
   const root = document.documentElement;
   const apply = () => void readConfig().then((config) => applyTheme(root, paperFor(config.reader.theme, without)));
-  webext().storage.onChanged.addListener((changes, area) => {
+  onStorageChanged((changes, area) => {
     if (area !== "local" || changes[CONFIG_KEY] === undefined) return;
     apply();
   });

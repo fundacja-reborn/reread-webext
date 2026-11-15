@@ -1,11 +1,16 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 import {
+  BACKUP_BUCKETS,
   BACKUP_DELAY_MS,
-  asBackup,
-  backupOf,
+  BACKUP_KEY,
+  asHead,
+  asWholeBackup,
   backupScheduler,
+  bucketKey,
+  bucketOf,
   ensureBackup,
   readBackupSummary,
   rebuildBackup,
@@ -16,11 +21,11 @@ import {
 /** @typedef {import("../src/lib/store/backup.js").BackupDeps} BackupDeps */
 
 /**
- * The copy of the vocabulary that outlives the database, held to its three
- * rules: written whole and only from a store that could be read, restored
- * only into an empty store, never touching a row that exists. No browser
- * runs in CI - the store and the storage are stand-ins that remember what was
- * asked of them and in what order.
+ * The copy of the vocabulary that outlives the database, held to its rules:
+ * written from a store that could be read and only where it changed (D297),
+ * restored only into an empty store, never touching a row that exists. No
+ * browser runs in CI - the store and the storage are stand-ins that
+ * remember what was asked of them and in what order.
  */
 
 /**
@@ -42,54 +47,112 @@ function phrase(id, over = {}) {
 }
 
 /**
- * @param {{ phrases?: Phrase[], listFails?: boolean, stored?: unknown, putMissing?: (rows: Phrase[]) => { added: number, skipped: number } }} [script]
+ * The copy as the versions before D297 wrote it: one value, every phrase.
+ *
+ * @param {Phrase[]} phrases
+ * @param {number} writtenAt
+ */
+function whole(phrases, writtenAt) {
+  return { version: 1, writtenAt, phrases };
+}
+
+/** @param {Phrase[]} rows */
+function byId(rows) {
+  return [...rows].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+}
+
+/**
+ * @param {{ phrases?: Phrase[], listFails?: boolean, area?: Record<string, unknown>, putMissing?: (rows: Phrase[]) => { added: number, skipped: number } }} [script]
  */
 function standIn(script = {}) {
-  const phrases = script.phrases ?? [];
+  /** The store's rows; a test changes them between rebuilds. */
+  const store = { phrases: script.phrases ?? [] };
+  /** @type {Record<string, unknown>} */
+  const area = { ...script.area };
   /** @type {string[]} */
   const asked = [];
-  /** @type {import("../src/lib/store/backup.js").VocabBackup | undefined} */
-  let written;
+  /** Every write, as the keys it carried. */
+  /** @type {string[][]} */
+  const writes = [];
+  let now = 42;
   /** @type {BackupDeps} */
   const deps = {
     empty: async () => {
       asked.push("empty");
-      return phrases.length === 0;
+      return store.phrases.length === 0;
     },
     list: async () => {
       asked.push("list");
       if (script.listFails === true) throw new Error("the store would not open");
-      return phrases;
+      return [...store.phrases];
     },
     putMissing: async (rows) => {
       asked.push(`putMissing ${rows.length}`);
       return script.putMissing === undefined ? { added: rows.length, skipped: 0 } : script.putMissing(rows);
     },
-    read: async () => {
-      asked.push("read");
-      return script.stored;
+    read: async (keys) => {
+      asked.push(keys.length === 1 && keys[0] === BACKUP_KEY ? "read head" : `read ${keys.length} buckets`);
+      /** @type {Record<string, unknown>} */
+      const found = {};
+      // Through JSON, as the storage area hands values back: its own copies.
+      for (const key of keys) if (area[key] !== undefined) found[key] = JSON.parse(JSON.stringify(area[key]));
+      return found;
     },
-    write: async (backup) => {
+    write: async (items) => {
       asked.push("write");
-      written = backup;
+      writes.push(Object.keys(items));
+      for (const [key, value] of Object.entries(items)) area[key] = JSON.parse(JSON.stringify(value));
     },
-    now: () => 42,
+    now: () => now,
   };
-  return { deps, asked, written: () => written };
+  return {
+    deps,
+    store,
+    area,
+    asked,
+    writes,
+    /** The bucket keys written since the last call, without the head. */
+    takeBuckets: () => writes.splice(0).flat().filter((key) => key !== BACKUP_KEY),
+    /** @param {number} at */
+    setNow: (at) => {
+      now = at;
+    },
+  };
+}
+
+/** A few dozen rows with ids shaped like the store's own. */
+function manyPhrases(count = 200) {
+  /** @type {Phrase[]} */
+  const rows = [];
+  for (let at = 0; at < count; at += 1) {
+    const id = `${String(at * 2654435761).padStart(8, "0").slice(-8)}-0000-4000-8000-${String(at).padStart(12, "0")}`;
+    rows.push(phrase(String(at), { id }));
+  }
+  return rows;
 }
 
 describe("the copy of the vocabulary", () => {
-  it("survives a trip through JSON with every field, the optional ones included", () => {
-    const rows = [phrase("1"), phrase("2", { langFrom: "de", context: "ein Satz", sourceUrl: "https://example.org/" })];
-    const stored = JSON.parse(JSON.stringify(backupOf(rows, 42)));
-    assert.deepEqual(asBackup(stored), { version: 1, writtenAt: 42, phrases: rows });
+  it("comes back from its buckets with every field, the optional ones included", async () => {
+    const rows = [
+      phrase("1"),
+      phrase("2", { langFrom: "de", context: "ein Satz", sourceUrl: "https://example.org/" }),
+      phrase("3", { recallCount: 3, lastRecallAt: 50, readCount: 12, lastReadAt: 60, learnedAt: 5000 }),
+    ];
+    const world = standIn({ phrases: rows });
+    assert.equal(await rebuildBackup(world.deps), 3);
+
+    /** @type {Phrase[]} */
+    let restored = [];
+    const wiped = standIn({ area: world.area, putMissing: (back) => ((restored = back), { added: back.length, skipped: 0 }) });
+    assert.equal(await restoreVocabulary(wiped.deps), 3);
+    assert.deepEqual(byId(restored), byId(rows));
   });
 
   it("carries the counts (D209) as counts, and restores a phrase without a count that is not one", () => {
     const counted = phrase("1", { recallCount: 3, lastRecallAt: 50, readCount: 12, lastReadAt: 60 });
-    assert.deepEqual(asBackup(JSON.parse(JSON.stringify(backupOf([counted], 42))))?.phrases, [counted]);
+    assert.deepEqual(asWholeBackup(JSON.parse(JSON.stringify(whole([counted], 42))))?.phrases, [counted]);
 
-    const narrowed = asBackup({
+    const narrowed = asWholeBackup({
       version: 1,
       writtenAt: 1,
       phrases: [
@@ -111,8 +174,8 @@ describe("the copy of the vocabulary", () => {
 
   it("carries the learned mark (D224) as a moment, and restores a phrase without a mark that is not one", () => {
     const marked = phrase("1", { learnedAt: 5000 });
-    assert.deepEqual(asBackup(JSON.parse(JSON.stringify(backupOf([marked], 42))))?.phrases, [marked]);
-    const narrowed = asBackup({
+    assert.deepEqual(asWholeBackup(JSON.parse(JSON.stringify(whole([marked], 42))))?.phrases, [marked]);
+    const narrowed = asWholeBackup({
       version: 1,
       writtenAt: 1,
       phrases: [
@@ -125,85 +188,229 @@ describe("the copy of the vocabulary", () => {
     assert.deepEqual(narrowed?.phrases, [phrase("2"), phrase("3"), phrase("4"), { ...phrase("5"), recallCount: 2, learnedAt: 7000 }]);
   });
 
-  it("is no copy at all in another shape, and drops the rows that make no sense", () => {
-    assert.equal(asBackup(undefined), null);
-    assert.equal(asBackup(null), null);
-    assert.equal(asBackup({ version: 2, writtenAt: 1, phrases: [] }), null);
-    assert.equal(asBackup({ version: 1, writtenAt: "yesterday", phrases: [] }), null);
-    assert.equal(asBackup({ version: 1, writtenAt: 1 }), null);
+  it("is no copy at all in another shape, and drops the rows that make no sense", async () => {
+    assert.equal(asWholeBackup(undefined), null);
+    assert.equal(asWholeBackup(null), null);
+    assert.equal(asWholeBackup({ version: 2, writtenAt: 1, phrases: [] }), null);
+    assert.equal(asWholeBackup({ version: 1, writtenAt: "yesterday", phrases: [] }), null);
+    assert.equal(asWholeBackup({ version: 1, writtenAt: 1 }), null);
 
+    const digests = Array.from({ length: BACKUP_BUCKETS }, () => "0-0");
+    const head = { version: 2, writtenAt: 1, count: 0, bytes: 0, digests, cursor: 3 };
+    assert.deepEqual(asHead(head), head);
+    assert.equal(asHead(undefined), null);
+    assert.equal(asHead(whole([], 1)), null, "the whole copy of the versions before is not a head");
+    assert.equal(asHead({ ...head, version: 3 }), null);
+    assert.equal(asHead({ ...head, writtenAt: "yesterday" }), null);
+    assert.equal(asHead({ ...head, count: -1 }), null);
+    assert.equal(asHead({ ...head, digests: digests.slice(1) }), null, "a head for another number of buckets");
+    assert.equal(asHead({ ...head, digests: digests.map(() => 7) }), null);
+    assert.equal(asHead({ ...head, cursor: BACKUP_BUCKETS })?.cursor, 0, "a cursor past the buckets starts the round again");
+    assert.equal(asHead({ ...head, cursor: "next" })?.cursor, 0);
+
+    // A bucket's rows are narrowed one by one on the way back.
     const kept = phrase("1");
-    const narrowed = asBackup({
-      version: 1,
-      writtenAt: 1,
-      phrases: [
-        kept,
-        { ...phrase("2"), translations: [] },
-        { ...phrase("3"), id: "" },
-        { ...phrase("4"), createdAt: "then" },
-        { ...phrase("5"), extra: "field" },
-        "not a row",
-      ],
-    });
-    assert.deepEqual(narrowed?.phrases, [kept, phrase("5")], "the good rows, without the unknown field");
+    const world = standIn({ phrases: [kept, phrase("5")] });
+    await rebuildBackup(world.deps);
+    const key = bucketKey(bucketOf("5"));
+    world.area[key] = [
+      .../** @type {unknown[]} */ (world.area[key]).map((row) => ({ .../** @type {object} */ (row), extra: "field" })),
+      { ...phrase("2"), translations: [] },
+      { ...phrase("3"), id: "" },
+      { ...phrase("4"), createdAt: "then" },
+      "not a row",
+    ];
+    /** @type {Phrase[]} */
+    let restored = [];
+    const wiped = standIn({ area: world.area, putMissing: (back) => ((restored = back), { added: back.length, skipped: 0 }) });
+    await restoreVocabulary(wiped.deps);
+    assert.deepEqual(byId(restored), [kept, phrase("5")], "the good rows, without the unknown field");
   });
 
   it("restores only into an empty store, and asks the store before it reads the copy", async () => {
-    const wiped = standIn({ phrases: [], stored: backupOf([phrase("1"), phrase("2"), phrase("3")], 1) });
-    assert.equal(await restoreVocabulary(wiped.deps), 3);
-    assert.deepEqual(wiped.asked, ["empty", "read", "putMissing 3"]);
+    const full = standIn({ phrases: [phrase("1"), phrase("2"), phrase("3")] });
+    await rebuildBackup(full.deps);
 
-    const full = standIn({ phrases: [phrase("9")], stored: backupOf([phrase("1")], 1) });
-    assert.equal(await restoreVocabulary(full.deps), 0);
-    assert.deepEqual(full.asked, ["empty"], "a store with phrases must not even cost the copy's read");
+    const wiped = standIn({ area: full.area });
+    assert.equal(await restoreVocabulary(wiped.deps), 3);
+    assert.deepEqual(wiped.asked, ["empty", "read head", `read ${BACKUP_BUCKETS} buckets`, "putMissing 3"]);
+
+    const standing = standIn({ phrases: [phrase("9")], area: full.area });
+    assert.equal(await restoreVocabulary(standing.deps), 0);
+    assert.deepEqual(standing.asked, ["empty"], "a store with phrases must not even cost the copy's read");
   });
 
   it("brings nothing back from no copy, an empty copy, or a copy of rows that already exist", async () => {
-    assert.equal(await restoreVocabulary(standIn({ stored: undefined }).deps), 0);
-    assert.equal(await restoreVocabulary(standIn({ stored: backupOf([], 1) }).deps), 0);
-    const skipped = standIn({
-      stored: backupOf([phrase("1"), phrase("2")], 1),
-      putMissing: () => ({ added: 1, skipped: 1 }),
-    });
+    const none = standIn();
+    assert.equal(await restoreVocabulary(none.deps), 0);
+    assert.deepEqual(none.asked, ["empty", "read head"], "no head, and the buckets were read anyway");
+
+    // A deliberate emptying leaves an empty copy: the rebuild after it
+    // writes every bucket that held a phrase as an empty one.
+    const emptied = standIn({ phrases: [phrase("1"), phrase("2")] });
+    await rebuildBackup(emptied.deps);
+    emptied.store.phrases = [];
+    await rebuildBackup(emptied.deps);
+    assert.equal(asHead(emptied.area[BACKUP_KEY])?.count, 0);
+    assert.equal(await restoreVocabulary(standIn({ area: emptied.area }).deps), 0);
+
+    const copied = standIn({ phrases: [phrase("1"), phrase("2")] });
+    await rebuildBackup(copied.deps);
+    const skipped = standIn({ area: copied.area, putMissing: () => ({ added: 1, skipped: 1 }) });
     assert.equal(await restoreVocabulary(skipped.deps), 1, "only what was actually added counts as restored");
   });
 
-  it("is rebuilt whole from the store, and not at all from a store that would not answer", async () => {
-    const rows = [phrase("1"), phrase("2")];
+  it("is first written whole from the store, the buckets before the head, and not at all from a store that would not answer", async () => {
+    const rows = manyPhrases();
     const fine = standIn({ phrases: rows });
-    assert.equal(await rebuildBackup(fine.deps), 2);
-    assert.deepEqual(fine.written(), backupOf(rows, 42));
+    assert.equal(await rebuildBackup(fine.deps), rows.length);
+    assert.deepEqual(fine.asked, ["list", "read head", "write", "write"]);
+    assert.equal(fine.writes[0]?.length, BACKUP_BUCKETS, "the first rebuild leaves a bucket unwritten");
+    assert.deepEqual(fine.writes[1], [BACKUP_KEY], "the head is not the last write");
+    const head = asHead(fine.area[BACKUP_KEY]);
+    assert.equal(head?.count, rows.length);
+    assert.equal(head?.writtenAt, 42);
+    assert.equal(head?.cursor, 0);
 
     const broken = standIn({ phrases: rows, listFails: true });
     await assert.rejects(() => rebuildBackup(broken.deps));
-    assert.equal(broken.written(), undefined, "a copy replaced by a guess");
+    assert.deepEqual(broken.writes, [], "a copy replaced by a guess");
     assert.deepEqual(broken.asked, ["list"]);
   });
 
-  it("is written once for a vocabulary that has none, and left alone otherwise", async () => {
-    const before = standIn({ phrases: [phrase("1")], stored: undefined });
-    assert.equal(await ensureBackup(before.deps), true);
-    assert.deepEqual(before.written(), backupOf([phrase("1")], 42));
+  it("writes one bucket for one phrase saved, changed, learned or deleted - and the bucket whose turn it is (D297)", async () => {
+    const rows = manyPhrases();
+    const world = standIn({ phrases: rows });
+    await rebuildBackup(world.deps);
+    world.takeBuckets();
 
-    const already = standIn({ phrases: [phrase("1")], stored: backupOf([phrase("1")], 7) });
-    assert.equal(await ensureBackup(already.deps), false);
-    assert.equal(already.written(), undefined);
+    // Bucket 0's turn comes first; a phrase outside it shows both writes.
+    const fresh = phrase("900", { id: "ffffffff-0000-4000-8000-000000000900" });
+    assert.notEqual(bucketOf(fresh.id), 0);
+    world.store.phrases = [...rows, fresh];
+    await rebuildBackup(world.deps);
+    assert.deepEqual(world.takeBuckets().sort(), [bucketKey(0), bucketKey(bucketOf(fresh.id))].sort(), "a save");
 
-    const nothing = standIn({ phrases: [], stored: undefined });
-    assert.equal(await ensureBackup(nothing.deps), false, "an empty store has nothing to copy");
-    assert.equal(nothing.written(), undefined);
+    // The turn moves on by one with every rebuild.
+    world.store.phrases = [...rows, { ...fresh, translations: ["inne"] }];
+    await rebuildBackup(world.deps);
+    assert.deepEqual(world.takeBuckets().sort(), [bucketKey(1), bucketKey(bucketOf(fresh.id))].sort(), "other meanings");
+
+    world.store.phrases = [...rows, { ...fresh, translations: ["inne"], learnedAt: 77 }];
+    await rebuildBackup(world.deps);
+    assert.deepEqual(world.takeBuckets().sort(), [bucketKey(2), bucketKey(bucketOf(fresh.id))].sort(), "learned");
+
+    world.store.phrases = rows;
+    await rebuildBackup(world.deps);
+    assert.deepEqual(world.takeBuckets().sort(), [bucketKey(3), bucketKey(bucketOf(fresh.id))].sort(), "deleted");
+
+    // And the copy is the store, whatever road it took there.
+    /** @type {Phrase[]} */
+    let restored = [];
+    const wiped = standIn({ area: world.area, putMissing: (back) => ((restored = back), { added: back.length, skipped: 0 }) });
+    await restoreVocabulary(wiped.deps);
+    assert.deepEqual(byId(restored), byId(rows));
   });
 
-  it("tells the settings page how many phrases the copy holds, since when and what it weighs", async () => {
-    assert.equal(await readBackupSummary(standIn({ stored: undefined }).deps), null);
-    const summary = await readBackupSummary(standIn({ stored: backupOf([phrase("1"), phrase("2")], 9) }).deps);
+  it("does not rewrite the copy for counts, and catches them up a bucket per rebuild", async () => {
+    const rows = manyPhrases();
+    const world = standIn({ phrases: rows });
+    await rebuildBackup(world.deps);
+    world.takeBuckets();
+
+    // A finished part of a book: a read added to every row at once.
+    const counted = rows.map((row) => ({ ...row, readCount: 4, lastReadAt: 900 }));
+    world.store.phrases = counted;
+    await rebuildBackup(world.deps);
+    assert.deepEqual(world.takeBuckets(), [bucketKey(0)], "counts alone rewrote more than the bucket whose turn it was");
+
+    // One full round later every bucket has had its turn.
+    for (let turn = 1; turn < BACKUP_BUCKETS; turn += 1) await rebuildBackup(world.deps);
+    assert.equal(new Set(world.takeBuckets()).size, BACKUP_BUCKETS - 1);
+    /** @type {Phrase[]} */
+    let restored = [];
+    const wiped = standIn({ area: world.area, putMissing: (back) => ((restored = back), { added: back.length, skipped: 0 }) });
+    await restoreVocabulary(wiped.deps);
+    assert.deepEqual(byId(restored), byId(counted), "a count stayed behind after a full round");
+  });
+
+  it("takes its digest over every field of a phrase but the counts", async () => {
+    const source = await readFile(new URL("../src/lib/store/backup.js", import.meta.url), "utf8");
+    const narrowed = /function asPhrase\(row\) \{[\s\S]*?const \{([\s\S]*?)\} =/.exec(source)?.[1] ?? "";
+    const fields = narrowed.split(",").map((one) => one.trim()).filter((one) => one.length > 0);
+    const digested = /const DIGESTED = \[([\s\S]*?)\];/.exec(source)?.[1] ?? "";
+    const listed = [...digested.matchAll(/"([^"]+)"/g)].map((found) => found[1]);
+    const counts = ["recallCount", "lastRecallAt", "readCount", "lastReadAt"];
+    assert.ok(fields.length > 0 && listed.length > 0, "the lists were not found in the source");
+    assert.deepEqual([...listed, ...counts].sort(), [...fields].sort(), "a field of a phrase is neither digested nor a count");
+  });
+
+  it("deals ids into every bucket, evenly enough", () => {
+    const rows = manyPhrases(BACKUP_BUCKETS * 80);
+    const sizes = Array.from({ length: BACKUP_BUCKETS }, () => 0);
+    for (const row of rows) {
+      const bucket = bucketOf(row.id);
+      assert.ok(Number.isInteger(bucket) && bucket >= 0 && bucket < BACKUP_BUCKETS);
+      sizes[bucket] = (sizes[bucket] ?? 0) + 1;
+    }
+    assert.ok(Math.min(...sizes) > 0, "a bucket nothing lands in");
+    assert.ok(Math.max(...sizes) < 80 * 2, `a bucket twice the size of the average: ${Math.max(...sizes)}`);
+  });
+
+  it("reads the whole copy of the versions before, restores from it, and replaces it at the first rebuild", async () => {
+    const rows = [phrase("1"), phrase("2"), phrase("3")];
+    const wiped = standIn({ area: { [BACKUP_KEY]: whole(rows, 7) } });
+    assert.equal(await restoreVocabulary(wiped.deps), 3);
+    assert.deepEqual(wiped.asked, ["empty", "read head", "putMissing 3"], "the old copy is one read");
+
+    // The first start after the update: the store has its phrases, the copy
+    // is the old one, and the look writes it again in buckets.
+    const updated = standIn({ phrases: rows, area: { [BACKUP_KEY]: whole(rows, 7) } });
+    assert.equal(await ensureBackup(updated.deps), true);
+    assert.equal(asHead(updated.area[BACKUP_KEY])?.count, 3);
+    assert.equal(asWholeBackup(updated.area[BACKUP_KEY]), null, "the old copy still stands under the head's key");
+    assert.equal(updated.writes[0]?.length, BACKUP_BUCKETS);
+
+    // The old copy beside an empty store is what a restore reads - never
+    // written over from nothing.
+    const evicted = standIn({ area: { [BACKUP_KEY]: whole(rows, 7) } });
+    assert.equal(await ensureBackup(evicted.deps), false);
+    assert.deepEqual(evicted.writes, []);
+  });
+
+  it("is written once for a vocabulary that has none, and left alone otherwise", async () => {
+    const before = standIn({ phrases: [phrase("1")] });
+    assert.equal(await ensureBackup(before.deps), true);
+    assert.equal(asHead(before.area[BACKUP_KEY])?.count, 1);
+
+    const already = standIn({ phrases: [phrase("1")], area: before.area });
+    assert.equal(await ensureBackup(already.deps), false);
+    assert.deepEqual(already.asked, ["read head"], "a copy that stands cost more than its head");
+    assert.deepEqual(already.writes, []);
+
+    const nothing = standIn();
+    assert.equal(await ensureBackup(nothing.deps), false, "an empty store has nothing to copy");
+    assert.deepEqual(nothing.writes, []);
+  });
+
+  it("tells the settings page how many phrases the copy holds, since when and what it weighs - off the head", async () => {
+    assert.equal(await readBackupSummary(standIn().deps), null);
+
+    const world = standIn({ phrases: [phrase("1"), phrase("2")] });
+    world.setNow(9);
+    await rebuildBackup(world.deps);
+    const reading = standIn({ area: world.area });
+    const summary = await readBackupSummary(reading.deps);
     assert.equal(summary?.count, 2);
     assert.equal(summary?.writtenAt, 9);
-    // The size is the copy's own JSON, measured while it is already parsed:
-    // the settings page counts the vocabulary into its breakdown of the
-    // space, and a second read of the same key to weigh it would be a read
-    // for nothing.
     assert.ok((summary?.bytes ?? 0) > 0, "the copy weighs nothing");
+    assert.deepEqual(reading.asked, ["read head"], "the line on the settings page read a bucket");
+
+    // The old whole copy is weighed as it was.
+    const old = await readBackupSummary(standIn({ area: { [BACKUP_KEY]: whole([phrase("1")], 5) } }).deps);
+    assert.equal(old?.count, 1);
+    assert.equal(old?.writtenAt, 5);
+    assert.ok((old?.bytes ?? 0) > 0);
   });
 });
 
