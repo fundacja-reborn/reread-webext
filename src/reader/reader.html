@@ -983,6 +983,30 @@
                  quotes are (Michał's call), and the format fold below points
                  there. -->
           </p>
+          <!-- What a press on an export button is doing, said where the
+               press was: a bar over the whole file and a line naming the
+               part being written with its count. The backup of a large
+               library takes a minute or more on a slow device, and until
+               2026-11-15 the page said nothing in that time - the button
+               stayed as it was and took a second press (Michał, from a
+               Boox Page). Shown by script from the press to the report,
+               for the backup, the selection's file and the ticked
+               documents written one by one. The import's bar in the
+               export's own names: never without a value, so it never
+               animates, and the line is not a live region - the report
+               after it is the one. -->
+          <div id="library-export-progress" class="export-progress" hidden>
+            <progress
+              id="library-export-bar"
+              class="export-progress-bar"
+              max="1"
+              value="0"
+              aria-label="Export progress"
+              data-i18n-aria-label="reader_export_progress_label"
+            ></progress>
+            <p id="library-export-stage" class="export-stage"></p>
+            <p class="hint" data-i18n="reader_export_keep_open">Keep this page open until the export ends.</p>
+          </div>
           <!-- When the backup was last written and how much more is here
                since (D288, `lib/store/export-stamp.js`): a hint under the
                button it is about, filled by script whenever the list

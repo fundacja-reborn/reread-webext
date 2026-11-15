@@ -28,7 +28,7 @@ describe("the backup of everything on the reading list page", () => {
     assert.match(exporting, /backupStream\(\{[\s\S]*highlights: docs\.map\(copyDocOf\),\s*settings: config,/, "the highlights or the settings do not reach the archive");
     assert.match(exporting, /downloadFile\(archive, BACKUP_FILENAME, "application\/zip"\)/, "the backup is not written under its own name");
     // The button is never greyed for the backup: the settings are always there.
-    assert.match(bodyOf(script, "renderExportControls"), /exportButton\.disabled = picking && picked\.size === 0;/, "Export is greyed outside the selection");
+    assert.match(bodyOf(script, "renderExportControls"), /exportButton\.disabled = exportBusy !== null \|\| \(picking && picked\.size === 0\);/, "Export is greyed outside the selection");
   });
 
   it("streams the articles' pictures one article at a time, in the file's order, and writes articles.json after them (D222)", async () => {

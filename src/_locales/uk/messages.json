@@ -1723,6 +1723,29 @@
   },
   "reader_import_progress_highlights": { "message": "Позначення" },
   "reader_import_keep_open": { "message": "Не закривайте цю сторінку до кінця імпорту." },
+  "action_exporting": { "message": "Експортування..." },
+  "reader_export_progress_label": { "message": "Перебіг експорту" },
+  "reader_export_progress_preparing": { "message": "Підготовка файлу..." },
+  "reader_export_progress_articles": {
+    "message": "Статті: $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "119" }
+    }
+  },
+  "reader_export_progress_documents": {
+    "message": "Документ $DONE$ з $TOTAL$",
+    "placeholders": {
+      "done": { "content": "$1", "example": "2" },
+      "total": { "content": "$2", "example": "8" }
+    }
+  },
+  "reader_export_keep_open": { "message": "Не закривайте цю сторінку до кінця експорту." },
+  "reader_export_doc_progress": {
+    "message": "Експортування... $PERCENT$%",
+    "placeholders": {
+      "percent": { "content": "$1", "example": "42" }
+    }
+  },
   "reader_book_importing": {
     "message": "Додавання книжки - частина $PART$",
     "placeholders": {

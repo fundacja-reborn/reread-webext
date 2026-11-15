@@ -1656,12 +1656,15 @@ body.reader:has(#library:not([hidden])) {
    (`.model-progress`) - the browser's own, in the page's accent - at the
    frame's width, capped so that on a desk it stays a bar and not a rule
    across the screen. The line in the text's full ink: it is the answer to
-   the press, not an aside. */
-.import-progress {
+   the press, not an aside. The export at work wears the same under its own
+   names, under the transfer section's buttons. */
+.import-progress,
+.export-progress {
   margin: 0.75rem 0 0;
 }
 
-.import-progress-bar {
+.import-progress-bar,
+.export-progress-bar {
   display: block;
   width: 100%;
   max-width: 24rem;
@@ -1669,7 +1672,8 @@ body.reader:has(#library:not([hidden])) {
   accent-color: var(--page-accent);
 }
 
-.import-stage {
+.import-stage,
+.export-stage {
   margin: 0.4rem 0 0;
   overflow-wrap: anywhere;
 }

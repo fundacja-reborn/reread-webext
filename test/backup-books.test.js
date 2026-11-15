@@ -55,7 +55,7 @@ describe("the export with books", () => {
     const pictures = stream.indexOf("allBookPictures(book)");
     const index = stream.indexOf("name: BOOKS_ENTRY");
     assert.ok(light !== -1 && light < list && list < text && text < pictures && pictures < index, "the stream is not light parts, the reading list, then each book's text and pictures, then the index");
-    assert.match(stream, /if \(segments === null\) continue;/, "a book whose text is not all there is written anyway");
+    assert.match(stream, /if \(segments === null\) \{\s*meter\.step\(book\.segmentCount \+ promised\);\s*continue;\s*\}/, "a book whose text is not all there is written anyway");
     assert.match(stream, /bookPictureEntryName\(at, picture\)/, "a book's pictures are not named under its place in the index");
   });
 });
@@ -108,7 +108,7 @@ describe("the selection's export (D218)", () => {
     assert.match(exporting, /plural\(articles\.length \+ books\.length, "reader_export_done", \[SELECTION_FILENAME, fileSize\(size\)\]\)/, "the report does not count both kinds");
     assert.doesNotMatch(script, /ARTICLES_FILENAME|ARCHIVE_FILENAME|toArticlesFile\(|articlesToExport/, "the list's own files are still written from the page");
     const controls = bodyOf(script, "renderExportControls");
-    assert.match(controls, /exportButton\.disabled = picking && picked\.size === 0;/, "the button does not count every ticked document");
+    assert.match(controls, /exportButton\.disabled = exportBusy !== null \|\| \(picking && picked\.size === 0\);/, "the button does not count every ticked document");
     assert.match(controls, /t\("reader_export_selected", picked\.size\.toLocaleString\(\)\)/, "the button's count leaves the books out");
   });
 });
