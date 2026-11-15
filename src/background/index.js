@@ -16,6 +16,7 @@ import { ErrorCode, Message, asRequest, fail, ok } from "../lib/protocol.js";
 import { ensurePersistent } from "../lib/storage-report.js";
 import { toolbarIconFor } from "../lib/theme-icon.js";
 import { setProvider, translate } from "../lib/translator/index.js";
+import { keptWarm, warmKeeper } from "../lib/translator/warm.js";
 import { asSchemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
 import { bergamotViaHost, raiseEngineHost } from "../lib/translator/providers/bergamot/remote.js";
@@ -44,7 +45,22 @@ import {
 // event page runs the engine's worker itself, a service worker cannot spawn
 // workers and delegates to the offscreen document instead - and "is there an
 // offscreen API" is the whole test.
-setProvider(offscreenApi() === null ? bergamot : bergamotViaHost);
+//
+// The event page's engine dies with the page, and the browser puts an idle
+// event page down after thirty seconds - so it is kept awake for a while
+// after each translation, as long as the offscreen document keeps its own
+// engine (D298, `translator/warm.js`): a reader's next new word is rarely
+// thirty seconds away, and loading the engine again is the longest wait a
+// bubble has. The touch is any extension API that reaches the browser's
+// parent process; this one answers from memory.
+const awake = warmKeeper({
+  touch: () => {
+    void webext()
+      .runtime.getPlatformInfo()
+      .catch(() => {});
+  },
+});
+setProvider(offscreenApi() === null ? keptWarm(bergamot, awake) : bergamotViaHost);
 
 /**
  * @typedef {null

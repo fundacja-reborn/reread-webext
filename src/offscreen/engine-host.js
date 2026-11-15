@@ -16,14 +16,16 @@ import { webext } from "../lib/browser.js";
 import { ErrorCode, fail } from "../lib/protocol.js";
 import { asEngineCall, schemeReport } from "../lib/translator/providers/bergamot/host-protocol.js";
 import { bergamot } from "../lib/translator/providers/bergamot/index.js";
+import { ENGINE_IDLE_MS } from "../lib/translator/warm.js";
 
 /**
  * How long a warm engine may sit unasked before this document closes itself
- * and takes the engine's memory with it. The same economics as Firefox's
- * event page dying - a translation after the nap pays the reload, every hour
- * of reading that never happened pays nothing.
+ * and takes the engine's memory with it: a translation after the nap pays
+ * the reload, every hour of reading that never happened pays nothing. The
+ * number is shared with Firefox, whose event page is kept awake for as long
+ * after a translation (D298, `translator/warm.js`).
  */
-const IDLE_LIMIT_MS = 5 * 60_000;
+const IDLE_LIMIT_MS = ENGINE_IDLE_MS;
 
 let inFlight = 0;
 
