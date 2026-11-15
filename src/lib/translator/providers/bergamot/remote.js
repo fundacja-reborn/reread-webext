@@ -13,19 +13,20 @@
 
 import { offscreenApi, webext } from "../../../browser.js";
 import { ErrorCode, asResult, fail } from "../../../protocol.js";
+import { HEARTBEAT_MS } from "../../warm.js";
 import { engineCall } from "./host-protocol.js";
 
 const HOST_PAGE = "offscreen/engine-host.html";
 
-/**
- * How often to touch an extension API while a translation is in flight.
- * Chromium stops an idle service worker after 30 seconds, and a background
- * awaiting the host's answer is exactly that idle: the first translation of a
- * session loads a model and can take longer than the limit. A cheap API call
- * resets the clock - the pattern Chrome's own documentation recommends - and
- * it runs only while an answer is owed, so an idle background still sleeps.
+/*
+ * An extension API is touched every `HEARTBEAT_MS` while a translation is
+ * in flight. Chromium stops an idle service worker after 30 seconds, and a
+ * background awaiting the host's answer is exactly that idle: the first
+ * translation of a session loads a model and can take longer than the limit.
+ * A cheap API call resets the clock - the pattern Chrome's own documentation
+ * recommends - and it runs only while an answer is owed, so an idle
+ * background still sleeps.
  */
-const HEARTBEAT_MS = 20_000;
 
 /** @type {Promise<void> | null} */
 let creating = null;
