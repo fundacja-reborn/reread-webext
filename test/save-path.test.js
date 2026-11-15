@@ -27,13 +27,22 @@ describe("the copy of the vocabulary off the save's path (D295)", () => {
     const background = await source("background/vocabulary.js");
     assert.match(background, /const backup = backupScheduler\(\{ rebuild: rebuildBackup \}\);/, "the copy has no scheduler");
     const after = bodyOf(background, "afterWrite");
-    assert.match(after, /await rebuildMirror\(config\);\s*backup\.schedule\(\);/, "the write answers before the mirror stands, or waits for the copy");
+    assert.match(after, /await rebuildMirror\(config, how\);\s*backup\.schedule\(\);/, "the write answers before the mirror stands, or waits for the copy");
     assert.doesNotMatch(after, /await rebuildBackup|await backup/, "the write waits for the copy");
     // No door rebuilds the copy inside its answer: the sentence a count
     // report fills in (D216) schedules it like every other write.
     const doors = background.slice(background.indexOf("export async function refreshVocabulary("));
     assert.doesNotMatch(doors, /await rebuildBackup\(\)/, "a door rebuilds the copy inside its answer");
     assert.match(bodyOf(background, "countPhrases"), /else if \(filled > 0\) backup\.schedule\(\);/, "a filled sentence waits for the copy, or never reaches it");
+  });
+
+  it("stores the mirror where it changed on a write, and whole on an install or an update (D299)", async () => {
+    const background = await source("background/vocabulary.js");
+    assert.match(bodyOf(background, "refreshVocabulary"), /await afterWrite\(await readConfig\(\), \{ whole: true \}\);/, "an update trusts the buckets the last version left");
+    // Every other door writes what changed: no caller but the refresh asks for the whole.
+    assert.equal((background.match(/whole: true/g) ?? []).length, 1, "a write other than the refresh stores every bucket");
+    const mirror = background.slice(background.indexOf("async function rebuildMirror("), background.indexOf("const backup = backupScheduler"));
+    assert.match(mirror, /await writeMirror\(mirror, how\);/, "the rebuild does not pass on how to store the mirror");
   });
 
   it("looks for a missing copy once per browser session, and at every start when the session store will not say", async () => {

@@ -64,6 +64,7 @@
  */
 
 import { webext } from "../browser.js";
+import { bucketFor, digestOf } from "./digest.js";
 import { isCount, withLearnedAt } from "./phrase.js";
 import { allPhrases, hasPhrases, putMissingPhrases } from "./vocab.js";
 
@@ -167,24 +168,6 @@ function defaults() {
 }
 
 /**
- * FNV-1a over a string's code units: thirty-two bits, enough to deal ids
- * into buckets evenly and - with the length beside it - to tell whether a
- * bucket's text changed. Not a secret and not a signature: a digest that
- * collides costs one bucket one late write, which the cursor makes anyway.
- *
- * @param {string} text
- * @returns {number}
- */
-function hash(text) {
-  let value = 0x811c9dc5;
-  for (let at = 0; at < text.length; at += 1) {
-    value ^= text.charCodeAt(at);
-    value = Math.imul(value, 0x01000193);
-  }
-  return value >>> 0;
-}
-
-/**
  * Which bucket a phrase lives in: by its id, which never changes, so a
  * phrase edited, learned or counted stays where it is and only its own
  * bucket is written again.
@@ -193,7 +176,7 @@ function hash(text) {
  * @returns {number}
  */
 export function bucketOf(id) {
-  return hash(id) % BACKUP_BUCKETS;
+  return bucketFor(id, BACKUP_BUCKETS);
 }
 
 /**
@@ -355,7 +338,7 @@ export async function rebuildBackup(deps = defaults()) {
     // One pass over the bucket's text for both numbers: what it weighs, and
     // what tells it from the bucket the head remembers.
     const text = JSON.stringify(bucket, DIGESTED);
-    const digest = `${text.length.toString(36)}-${hash(text).toString(36)}`;
+    const digest = digestOf(text);
     digests.push(digest);
     bytes += text.length;
     if (head === null || head.digests[index] !== digest || head.cursor === index) changed[bucketKey(index)] = bucket;

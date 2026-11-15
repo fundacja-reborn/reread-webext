@@ -37,7 +37,7 @@ import { CONFIG_KEY, PLATFORM_KEY, osFrom, pageMode, withDefaults } from "../lib
 import { MODELS_KEY, asInventory, needsModelHint } from "../lib/models/inventory.js";
 import { ErrorCode, MAX_PAGE_HTML, Message, asPageRequest, fail, ok } from "../lib/protocol.js";
 import { pageHtml } from "../lib/reader/page-html.js";
-import { MIRROR_KEY } from "../lib/store/mirror.js";
+import { MIRROR_KEYS } from "../lib/store/mirror.js";
 import { setLauncherHint, setLauncherScale, startLauncher, stopLauncher } from "./launcher.js";
 import { start, stop } from "./reading.js";
 
@@ -95,8 +95,10 @@ function apply(wanted, stored) {
 
 // One read of `storage.local` at startup, the same one `reading.js` would have
 // made - it decides what to start, and when that is the reading side, feeds it.
+// The mirror stands under several keys (D299), all of them named in this one
+// call.
 void webext()
-  .storage.local.get([CONFIG_KEY, MIRROR_KEY, PLATFORM_KEY, MODELS_KEY])
+  .storage.local.get([CONFIG_KEY, ...MIRROR_KEYS, PLATFORM_KEY, MODELS_KEY])
   .then((stored) => {
     if (decided) return;
     config = withDefaults(stored[CONFIG_KEY]);

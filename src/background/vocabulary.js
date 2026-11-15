@@ -72,14 +72,19 @@ function pairOf(config) {
  * page and its "saved" off the popup - the row itself stays in the store,
  * on the phrases page's learned shelf.
  *
+ * In storage the mirror stands in buckets (D299, `mirror.js`), and a
+ * rebuild stores the ones that changed - every one of them when `whole` is
+ * asked for.
+ *
  * @param {import("../lib/config.js").Config} config
+ * @param {{ whole?: boolean }} [how]
  * @returns {Promise<import("../lib/protocol.js").VocabEntry[]>}
  */
-async function rebuildMirror(config) {
+async function rebuildMirror(config, how) {
   const pair = pairOf(config);
   const phrases = pair === null ? [] : learningOf(await listPhrases(pair));
   const mirror = await mirrorWithForms(config, phrases);
-  await writeMirror(mirror);
+  await writeMirror(mirror, how);
   return mirror.entries;
 }
 
@@ -100,10 +105,12 @@ const backup = backupScheduler({ rebuild: rebuildBackup });
  * underline what was just kept, the copy after the writes go quiet.
  *
  * @param {import("../lib/config.js").Config} config
+ * @param {{ whole?: boolean }} [how] the mirror stored whole rather than
+ *   where it changed - an install or an update (`refreshVocabulary`)
  * @returns {Promise<void>}
  */
-async function afterWrite(config) {
-  await rebuildMirror(config);
+async function afterWrite(config, how) {
+  await rebuildMirror(config, how);
   backup.schedule();
 }
 
@@ -170,12 +177,15 @@ const started = settled()
  * mirror can be missing while the database is not - a new version with a
  * different shape, or storage cleared under a database that survived. The
  * copy too: an update is what hands it to installations that predate it.
+ * The mirror is stored whole here (D299), every bucket whatever the head
+ * standing in storage says of it: this is the one write that does not trust
+ * what the last version, or the last session, left there.
  *
  * @returns {Promise<void>}
  */
 export async function refreshVocabulary() {
   await started;
-  await afterWrite(await readConfig());
+  await afterWrite(await readConfig(), { whole: true });
 }
 
 /**
