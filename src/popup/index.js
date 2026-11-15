@@ -37,7 +37,7 @@ import { dresser } from "../lib/user-css.js";
 import { listDictionaries } from "../lib/dict/store.js";
 import { listModels } from "../lib/models/store.js";
 import { ErrorCode, Message, asPageInfo, asResult, fail } from "../lib/protocol.js";
-import { MIRROR_KEY, asMirror, mirrorMatches } from "../lib/store/mirror.js";
+import { mirrorFrom, mirrorKeysFor, mirrorMatches } from "../lib/store/mirror.js";
 import { watchToolbarScheme } from "../lib/theme-icon.js";
 import { primaryLanguage, setSpeechOff } from "../lib/tts.js";
 import { pairChoices } from "./choices.js";
@@ -127,16 +127,16 @@ async function ask(request) {
 /**
  * What a phrase means now, from the copy of the vocabulary the pages read
  * (`mirror.js`): one storage read, no background woken - the same copy every
- * page consults before it underlines anything. A copy of another pair, or
- * none, answers "not saved", which is the truth about this pair.
+ * page consults before it underlines anything, and of it only the bucket
+ * the phrase would be in (D299). A copy of another pair, or none, answers
+ * "not saved", which is the truth about this pair.
  *
  * @param {string} normalized
  * @returns {Promise<string[]>}
  */
 async function savedMeanings(normalized) {
   if (settings === null) return [];
-  const stored = await webext().storage.local.get(MIRROR_KEY);
-  const mirror = asMirror(stored[MIRROR_KEY]);
+  const mirror = mirrorFrom(await webext().storage.local.get(mirrorKeysFor(normalized)));
   if (mirror === null || !mirrorMatches(mirror, settings)) return [];
   return mirror.entries.find(([key]) => key === normalized)?.[1] ?? [];
 }

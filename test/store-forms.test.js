@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
+import { bodyOf } from "./openings.js";
 
 import { withDefaults } from "../src/lib/config.js";
 import { mirrorWithForms } from "../src/lib/store/forms.js";
@@ -75,6 +77,7 @@ describe("mirrorWithForms", () => {
       from: "en",
       to: "pl",
       entries: [["read", ["x"]]],
+      order: [0],
       forms: { read: ["reads", "reading"], gone: ["goes"] },
       formsStamp: "1|en|dict:10:5",
     };
@@ -113,6 +116,7 @@ describe("mirrorWithForms", () => {
       from: "en",
       to: "pl",
       entries: [["read", ["x"]]],
+      order: [0],
       forms: { read: ["reads"] },
       formsStamp: "1|en|dict:10:5",
     };
@@ -131,5 +135,34 @@ describe("mirrorWithForms", () => {
     ]);
     assert.deepEqual(mirror.forms, { read: ["reads"] });
     assert.equal(mirror.formsStamp, "1|en|dict:10:5");
+  });
+
+  it("tells the caller what the rebuild ended with, for the next one to start from (D299)", async () => {
+    /** @type {Array<{ forms: Record<string, string[]>, stamp: string }>} */
+    const told = [];
+    const fake = { ...deps(null, { read: ["reads"] }), remember: (/** @type {{ forms: Record<string, string[]>, stamp: string }} */ known) => void told.push(known) };
+    await mirrorWithForms(CONFIG, [phrase("read"), phrase("bank")], fake);
+    assert.deepEqual(told, [{ forms: { read: ["reads"], bank: [] }, stamp: "1|en|dict:10:5" }]);
+
+    // Nothing is remembered when nothing was computed: the switch off, or a
+    // dictionary database that would not open.
+    told.length = 0;
+    await mirrorWithForms(withDefaults({ sourceLang: "en", targetLang: "pl", underlineForms: false }), [phrase("read")], fake);
+    const broken = {
+      ...fake,
+      /** @type {import("../src/lib/store/forms.js").FormsDeps["readForms"]} */
+      readForms: async () => {
+        throw new Error("The dictionary database is in use by another page");
+      },
+    };
+    await mirrorWithForms(CONFIG, [phrase("read")], broken);
+    assert.deepEqual(told, []);
+  });
+
+  it("starts from memory where there is one, and reads the mirror only on a page that has not rebuilt yet", async () => {
+    const source = await readFile(new URL("../src/lib/store/forms.js", import.meta.url), "utf8");
+    const defaults = bodyOf(source, "defaults");
+    assert.match(defaults, /standing: async \(\) => remembered \?\? \(await readMirror\(\)\),/, "every rebuild reads the standing mirror out of storage");
+    assert.match(defaults, /remember: \(known\) => \{\s*remembered = \{ forms: known\.forms, formsStamp: known\.stamp \};/, "a rebuild is not remembered");
   });
 });

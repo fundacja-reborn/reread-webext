@@ -46,7 +46,7 @@ import { ErrorCode, Message, asLookUp, asResult, asTranslation, fail } from "../
 import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
 import { offStorageChanged, onStorageChanged as listenToStorage } from "../lib/storage-changes.js";
-import { MIRROR_KEY, asMirror, formAliases, mirrorMatches, sameAliases, sameEntries } from "../lib/store/mirror.js";
+import { MIRROR_KEYS, formAliases, isMirrorKey, mirrorFrom, mirrorMatches, sameAliases, sameEntries } from "../lib/store/mirror.js";
 import {
   canSpeakLang,
   primaryLanguage,
@@ -327,6 +327,29 @@ let underline = DEFAULTS.underline;
  * @type {{ value: unknown } | null}
  */
 let storedConfig = null;
+
+/**
+ * The mirror as the last read of storage found it, raw, key by key - the
+ * head and every bucket (D299). A save changes one bucket, the event
+ * carries that bucket alone, and the vocabulary is all of them: the changed
+ * one is put in its place here and the mirror put together again
+ * (`onStorageChanged`). Null until the first read, and again once the side
+ * stops.
+ *
+ * @type {Record<string, unknown> | null}
+ */
+let storedMirror = null;
+
+/**
+ * @param {Record<string, unknown>} stored whatever a read of storage answered
+ * @returns {Record<string, unknown>} the values under the mirror's keys, and nothing else
+ */
+function mirrorPart(stored) {
+  /** @type {Record<string, unknown>} */
+  const part = {};
+  for (const key of MIRROR_KEYS) if (stored[key] !== undefined) part[key] = stored[key];
+  return part;
+}
 
 /**
  * The translation-off setting (D120), mirrored the same way. On ordinary
@@ -974,8 +997,8 @@ export function reportRead() {
  *   - a mirror for another pair: it was left behind by a settings change, so
  *     ask the background, whose answer rebuilds it for every page after this.
  *
- * @param {Record<string, unknown>} [preloaded] the same two keys, already
- *   read. The content script reads storage once per page and that read decides
+ * @param {Record<string, unknown>} [preloaded] the same keys - the settings'
+ *   and the mirror's, head and buckets (D299) - already read. The content script reads storage once per page and that read decides
  *   whether this starts at all - handing it in here is what keeps "one read at
  *   startup" true now that somebody reads before starting.
  */
@@ -984,10 +1007,11 @@ async function loadVocabulary(preloaded) {
   // being read, and an extension that logs stack traces into it looks exactly
   // like an extension that broke it.
   try {
-    const stored = preloaded ?? (await webext().storage.local.get([CONFIG_KEY, MIRROR_KEY]));
+    const stored = preloaded ?? (await webext().storage.local.get([CONFIG_KEY, ...MIRROR_KEYS]));
     storedConfig = { value: stored[CONFIG_KEY] };
+    storedMirror = mirrorPart(stored);
     const config = withDefaults(stored[CONFIG_KEY]);
-    const mirror = asMirror(stored[MIRROR_KEY]);
+    const mirror = mirrorFrom(stored);
     // Rides the same read and the same storage listener as the vocabulary:
     // flipping the switch in the popup reaches every open page on the spot.
     hideActions = config.hideBubbleActions;
@@ -1046,7 +1070,9 @@ async function loadVocabulary(preloaded) {
     // written before the answer came, and the forms (D208) travel only in
     // the mirror - so it is read once more, and the answer's own list stands
     // in only if the mirror still describes another pair.
-    const rebuilt = asMirror((await webext().storage.local.get(MIRROR_KEY))[MIRROR_KEY]);
+    const again = await webext().storage.local.get([...MIRROR_KEYS]);
+    storedMirror = mirrorPart(again);
+    const rebuilt = mirrorFrom(again);
     if (rebuilt !== null && mirrorMatches(rebuilt, config)) adopt(rebuilt.entries, rebuilt.forms);
     else adopt(result.value);
   } catch {
@@ -2090,19 +2116,28 @@ function onScroll(event) {
  */
 function onStorageChanged(changes, area) {
   if (area !== "local") return;
-  const mirror = changes[MIRROR_KEY];
+  const moved = Object.keys(changes).filter(isMirrorKey);
   const config = changes[CONFIG_KEY];
-  if (mirror === undefined && config === undefined) return;
-  // The mirror that changed is in the event, already read into this page
+  if (moved.length === 0 && config === undefined) return;
+  // What changed of the mirror is in the event, already read into this page
   // (D297): asking storage for it again would read every phrase a second
-  // time, for the value in hand. The settings beside it are the ones the
-  // last read found, or the event's own when they moved in the same write.
-  // A change to the settings alone still reads both - the mirror was not in
-  // the event - and so does a mirror that was removed, or a change that
-  // lands before the first read has.
-  if (mirror !== undefined && mirror.newValue !== undefined && storedConfig !== null) {
+  // time, for the values in hand. Since D299 that is the head and the
+  // buckets a write touched - one bucket for one phrase saved - put in
+  // their places among the ones the last read found; a key the event
+  // carries no value for was removed. The settings beside them are the ones
+  // the last read found, or the event's own when they moved in the same
+  // write. A change to the settings alone still reads everything - the
+  // mirror was not in the event - and so does a change that lands before
+  // the first read has.
+  if (moved.length > 0 && storedMirror !== null && storedConfig !== null) {
+    const mirror = { ...storedMirror };
+    for (const key of moved) {
+      const value = changes[key]?.newValue;
+      if (value === undefined) delete mirror[key];
+      else mirror[key] = value;
+    }
     const settings = config === undefined ? storedConfig.value : config.newValue;
-    void loadVocabulary({ [CONFIG_KEY]: settings, [MIRROR_KEY]: mirror.newValue });
+    void loadVocabulary({ [CONFIG_KEY]: settings, ...mirror });
     return;
   }
   void loadVocabulary();
@@ -2271,6 +2306,7 @@ export function stop() {
   aliases = new Map();
   shown = null;
   storedConfig = null;
+  storedMirror = null;
   clear();
 }
 

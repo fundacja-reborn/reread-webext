@@ -150,17 +150,29 @@ describe("one storage listener per page (D297)", () => {
 });
 
 describe("a page meets its own save in the mirror (D297)", () => {
-  it("takes the mirror from the event, and reads storage only when the event has none", async () => {
+  it("takes what changed of the mirror from the event, and reads storage only when the event has none of it", async () => {
     const reading = await source("content/reading.js");
     const listener = bodyOf(reading, "onStorageChanged");
+    // Since D299 the mirror is a head and buckets: the event carries the
+    // ones a write touched, and they are put among the ones last read.
+    assert.match(listener, /const moved = Object\.keys\(changes\)\.filter\(isMirrorKey\);/, "a changed bucket is not heard");
     assert.match(
       listener,
-      /if \(mirror !== undefined && mirror\.newValue !== undefined && storedConfig !== null\) \{[\s\S]*?void loadVocabulary\(\{ \[CONFIG_KEY\]: settings, \[MIRROR_KEY\]: mirror\.newValue \}\);\s*return;/,
+      /if \(moved\.length > 0 && storedMirror !== null && storedConfig !== null\) \{[\s\S]*?const mirror = \{ \.\.\.storedMirror \};[\s\S]*?if \(value === undefined\) delete mirror\[key\];\s*else mirror\[key\] = value;[\s\S]*?void loadVocabulary\(\{ \[CONFIG_KEY\]: settings, \.\.\.mirror \}\);\s*return;/,
       "the mirror in the event is read out of storage again",
     );
     assert.match(listener, /const settings = config === undefined \? storedConfig\.value : config\.newValue;/, "settings that moved in the same write are not the ones used");
-    assert.match(listener, /\}\s*void loadVocabulary\(\);\s*\}$/, "a change to the settings alone no longer reads both");
-    assert.match(bodyOf(reading, "loadVocabulary"), /storedConfig = \{ value: stored\[CONFIG_KEY\] \};/, "the settings a read found are not kept for the next mirror");
+    assert.match(listener, /\}\s*void loadVocabulary\(\);\s*\}$/, "a change to the settings alone no longer reads everything");
+    const load = bodyOf(reading, "loadVocabulary");
+    assert.match(load, /storedConfig = \{ value: stored\[CONFIG_KEY\] \};\s*storedMirror = mirrorPart\(stored\);/, "what a read found is not kept for the next change");
+    assert.match(load, /storage\.local\.get\(\[CONFIG_KEY, \.\.\.MIRROR_KEYS\]\)/, "the mirror is read without its buckets");
+    assert.match(bodyOf(reading, "stop"), /storedMirror = null;/, "a stopped side keeps the mirror");
+  });
+
+  it("reads the whole mirror in the content script's one read at startup", async () => {
+    const content = await source("content/index.js");
+    assert.match(content, /storage\.local\.get\(\[CONFIG_KEY, \.\.\.MIRROR_KEYS, PLATFORM_KEY, MODELS_KEY\]\)/, "the startup read leaves the buckets to a second read");
+    assert.equal((content.match(/storage\.local\.get\(/g) ?? []).length, 1, "the content script reads storage more than once at startup");
   });
 
   it("paints again only when the mirror says something the page does not show", async () => {
