@@ -32,6 +32,7 @@
  */
 
 import { webext } from "../lib/browser.js";
+import { onStorageChanged } from "../lib/storage-changes.js";
 import { CONFIG_KEY, PLATFORM_KEY, osFrom, pageMode, withDefaults } from "../lib/config.js";
 import { MODELS_KEY, asInventory, needsModelHint } from "../lib/models/inventory.js";
 import { ErrorCode, MAX_PAGE_HTML, Message, asPageRequest, fail, ok } from "../lib/protocol.js";
@@ -112,7 +113,7 @@ void webext()
     apply("reading");
   });
 
-webext().storage.onChanged.addListener((changes, area) => {
+onStorageChanged((changes, area) => {
   if (area !== "local") return;
   const configChange = changes[CONFIG_KEY];
   const platformChange = changes[PLATFORM_KEY];

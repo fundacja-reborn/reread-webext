@@ -5,9 +5,10 @@
  * Every write here is three steps - the row, then the mirror, then the copy
  * that outlives the database (`backup.js`) - and they are in this module
  * rather than in the router so that no future caller can do the first without
- * the others. Both copies are rebuilt in full from what the database just
- * said; a cache that patched itself would be a second version of the truth,
- * and neither is allowed to have opinions. The mirror is rebuilt before the
+ * the others. Both copies are rebuilt from the whole of what the database
+ * just said - the mirror written in full, the copy where it differs (D297,
+ * `backup.js`); a cache that patched itself would be a second version of
+ * the truth, and neither is allowed to have opinions. The mirror is rebuilt before the
  * write answers - the pages read it to underline - and the copy after the
  * writes go quiet (D295, `backupScheduler`): nothing reads it until the
  * database is gone, and rebuilding it inside every save cost the bubble
@@ -85,10 +86,10 @@ async function rebuildMirror(config) {
 /**
  * The copy that outlives the database, rebuilt once the writes go quiet
  * (D295): a write schedules it and answers without it. The rebuild reads
- * the whole store and writes every row into `storage.local`, and the
- * storage event carries the old and the new copy into every listening page
- * - the one part of a save that grows with the vocabulary and that nobody
- * waits for.
+ * the whole store to find what changed - work that grows with the
+ * vocabulary and that nobody waits for - and writes the buckets that did
+ * (D297): until then it wrote every row, and the storage event carried the
+ * old and the new copy into every listener of every page.
  */
 const backup = backupScheduler({ rebuild: rebuildBackup });
 
@@ -109,8 +110,8 @@ async function afterWrite(config) {
 /**
  * The copy written for a vocabulary that has none (`ensureBackup`), looked
  * for once per browser session (D295): the case is one start per
- * installation - the first after the update that brought the copy - and
- * the look costs the whole copy read and checked, at every start of an
+ * installation - the first after the update that brought the copy, or its
+ * buckets (D297) - and the look is a read of storage at every start of an
  * event page that the browser puts down after half a minute of quiet. The
  * flag lives in `storage.session`, which outlives the event page and not
  * the browser; a session store that will not answer is read as no flag,

@@ -181,6 +181,41 @@ export function formAliases(entries, forms) {
 }
 
 /**
+ * Whether two vocabularies, as a page holds them, name the same phrases
+ * with the same meanings (D297) - what lets a page leave its underlines
+ * alone when the mirror comes back saying what the page already painted
+ * after its own save. Meanings are compared in order: the bubble shows
+ * them in it.
+ *
+ * @param {ReadonlyMap<string, readonly string[]>} held
+ * @param {ReadonlyMap<string, readonly string[]>} next
+ * @returns {boolean}
+ */
+export function sameEntries(held, next) {
+  if (held.size !== next.size) return false;
+  for (const [key, meanings] of next) {
+    const before = held.get(key);
+    if (before === undefined || before.length !== meanings.length) return false;
+    if (before.some((one, at) => one !== meanings[at])) return false;
+  }
+  return true;
+}
+
+/**
+ * Whether two sets of aliases (`formAliases`) send the same forms to the
+ * same words - the other half of the same question.
+ *
+ * @param {ReadonlyMap<string, string>} held
+ * @param {ReadonlyMap<string, string>} next
+ * @returns {boolean}
+ */
+export function sameAliases(held, next) {
+  if (held.size !== next.size) return false;
+  for (const [form, key] of next) if (held.get(form) !== key) return false;
+  return true;
+}
+
+/**
  * @param {VocabMirror} mirror
  * @returns {Promise<void>}
  */

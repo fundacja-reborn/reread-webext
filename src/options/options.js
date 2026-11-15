@@ -16,6 +16,7 @@
 
 import { followTheme } from "../lib/appearance.js";
 import { webext } from "../lib/browser.js";
+import { onStorageChanged } from "../lib/storage-changes.js";
 import {
   BUBBLE_SCALE,
   CONFIG_KEY,
@@ -3726,7 +3727,7 @@ async function refresh() {
   }
 }
 
-webext().storage.onChanged.addListener((changes, area) => {
+onStorageChanged((changes, area) => {
   if (area !== "local" || changes[CONFIG_KEY] === undefined) return;
   void refresh();
 });

@@ -45,7 +45,8 @@ import { dictionarySourcesLink } from "../lib/sources.js";
 import { ErrorCode, Message, asLookUp, asResult, asTranslation, fail } from "../lib/protocol.js";
 import { copyCombo, keeping, madeSelection, touchPointer } from "../lib/selection.js";
 import { sentenceAround } from "../lib/sentence.js";
-import { MIRROR_KEY, asMirror, formAliases, mirrorMatches } from "../lib/store/mirror.js";
+import { offStorageChanged, onStorageChanged as listenToStorage } from "../lib/storage-changes.js";
+import { MIRROR_KEY, asMirror, formAliases, mirrorMatches, sameAliases, sameEntries } from "../lib/store/mirror.js";
 import {
   canSpeakLang,
   primaryLanguage,
@@ -310,12 +311,22 @@ let showMore = DEFAULTS.showBubbleMore;
 /**
  * How heavily saved phrases are underlined (D130), mirrored the same way. It
  * decides which highlight registration the paint goes on, so a change here is
- * a repaint - which is what the storage listener does with every change
- * anyway.
+ * a repaint - `adopt` compares it with the weight the last paint drew at.
  *
  * @type {import("../lib/underline.js").UnderlineWeight}
  */
 let underline = DEFAULTS.underline;
+
+/**
+ * The settings as the last read of storage found them, raw - what a change
+ * to the mirror alone is read beside (D297, `onStorageChanged`): the event
+ * carries the mirror and nothing else, and the settings are a few hundred
+ * bytes to keep. Wrapped, because "never set" is a value storage can hold;
+ * null until the first read, and again once the side stops.
+ *
+ * @type {{ value: unknown } | null}
+ */
+let storedConfig = null;
 
 /**
  * The translation-off setting (D120), mirrored the same way. On ordinary
@@ -825,13 +836,36 @@ function adopt(entries, forms = {}) {
   // a page loading and its vocabulary arriving. Painting now would put
   // underlines, and an observer, on a page that was just switched off.
   if (!started) return;
-  vocabulary = new Map(entries);
+  const next = new Map(entries);
   // Only while the switch says so: the mirror may still carry forms written
   // before it was turned off, and a stored value the switch has disowned
   // must never act.
-  aliases = underlineForms ? formAliases(entries, forms) : new Map();
-  repaint();
+  const nextAliases = underlineForms ? formAliases(entries, forms) : new Map();
+  // The mirror saying what this page already shows (D297): its own save,
+  // coming back through storage a moment after `change` painted it. Painting
+  // again would find the same ranges - after building the index of every
+  // key and form again and walking the text again, and on an e-ink screen
+  // after one more flash of every underline. Only when the same things were
+  // painted on the same ground at the same weight; anything else repaints.
+  const same =
+    shown !== null &&
+    shown.ground === (root ?? document.body) &&
+    shown.weight === underline &&
+    sameEntries(vocabulary, next) &&
+    sameAliases(aliases, nextAliases);
+  vocabulary = next;
+  aliases = nextAliases;
+  if (!same) repaint();
 }
+
+/**
+ * What the last paint was made of besides the vocabulary: the element it
+ * walked and the weight it drew at. Null until something is painted, and
+ * again once the side stops - `adopt` skips a paint only against this.
+ *
+ * @type {{ ground: Element | null, weight: import("../lib/underline.js").UnderlineWeight } | null}
+ */
+let shown = null;
 
 /**
  * What the page is scanned for: every saved key, and every form that stands
@@ -854,6 +888,7 @@ function paintedKeys() {
 function repaint() {
   if (vocabulary.size === 0) clear();
   else paint(paintedKeys(), { root: root ?? document.body, observe: follow, weight: underline });
+  shown = { ground: root ?? document.body, weight: underline };
   onPainted?.(foundPhrases());
 }
 
@@ -950,6 +985,7 @@ async function loadVocabulary(preloaded) {
   // like an extension that broke it.
   try {
     const stored = preloaded ?? (await webext().storage.local.get([CONFIG_KEY, MIRROR_KEY]));
+    storedConfig = { value: stored[CONFIG_KEY] };
     const config = withDefaults(stored[CONFIG_KEY]);
     const mirror = asMirror(stored[MIRROR_KEY]);
     // Rides the same read and the same storage listener as the vocabulary:
@@ -2054,7 +2090,21 @@ function onScroll(event) {
  */
 function onStorageChanged(changes, area) {
   if (area !== "local") return;
-  if (changes[MIRROR_KEY] === undefined && changes[CONFIG_KEY] === undefined) return;
+  const mirror = changes[MIRROR_KEY];
+  const config = changes[CONFIG_KEY];
+  if (mirror === undefined && config === undefined) return;
+  // The mirror that changed is in the event, already read into this page
+  // (D297): asking storage for it again would read every phrase a second
+  // time, for the value in hand. The settings beside it are the ones the
+  // last read found, or the event's own when they moved in the same write.
+  // A change to the settings alone still reads both - the mirror was not in
+  // the event - and so does a mirror that was removed, or a change that
+  // lands before the first read has.
+  if (mirror !== undefined && mirror.newValue !== undefined && storedConfig !== null) {
+    const settings = config === undefined ? storedConfig.value : config.newValue;
+    void loadVocabulary({ [CONFIG_KEY]: settings, [MIRROR_KEY]: mirror.newValue });
+    return;
+  }
   void loadVocabulary();
 }
 
@@ -2163,9 +2213,12 @@ export function start(where = {}) {
         ...(where.stretchPoint === undefined ? {} : { stretchPoint: where.stretchPoint }),
       });
     }
-    webext().storage.onChanged.addListener(onStorageChanged);
+    listenToStorage(onStorageChanged);
   }
 
+  // A start always paints: called again over a ground whose text changed,
+  // the same vocabulary is not the same picture (`adopt`).
+  shown = null;
   void loadVocabulary(where.stored);
 }
 
@@ -2189,7 +2242,7 @@ export function stop() {
   document.removeEventListener("pointerdown", onPointerDown, { capture: true });
   document.removeEventListener("selectionchange", onSelectionChange);
   stopSelect();
-  webext().storage.onChanged.removeListener(onStorageChanged);
+  offStorageChanged(onStorageChanged);
 
   if (settleTimer !== null) {
     window.clearTimeout(settleTimer);
@@ -2215,6 +2268,9 @@ export function stop() {
   // page, and a count is not worth losing to that.
   if (reportScheduled) sendReport();
   vocabulary = new Map();
+  aliases = new Map();
+  shown = null;
+  storedConfig = null;
   clear();
 }
 

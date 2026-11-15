@@ -41,6 +41,7 @@ import { applyReading } from "../lib/appearance.js";
 import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
 import { inPrivateContext, webext } from "../lib/browser.js";
+import { onStorageChanged } from "../lib/storage-changes.js";
 import { fileSize, localizePage, megabytes, plural, speedFactor, t, uiLocale } from "../lib/i18n.js";
 import { whenIdle } from "../lib/idle.js";
 import { privateNote } from "../lib/private-note.js";
@@ -10591,7 +10592,7 @@ if (speechSupported()) speechSynthesis.addEventListener("voiceschanged", renderV
 // The settings can change in another reader tab, and the language pair on the
 // settings page. Reading the whole thing back is cheaper than working out which
 // half moved.
-webext().storage.onChanged.addListener((changes, area) => {
+onStorageChanged((changes, area) => {
   if (area !== "local" || changes[CONFIG_KEY] === undefined) return;
   void readConfig().then(adoptConfig);
 });
@@ -10601,7 +10602,7 @@ void readConfig().then(adoptConfig);
 // Two ways in, and they are the same question. On load, because the reader was
 // probably just opened by the button; on a change to the session key, because
 // the button was pressed again while this tab was already standing here.
-webext().storage.onChanged.addListener((changes, area) => {
+onStorageChanged((changes, area) => {
   if (area !== "session") return;
   if (changes[READER_SOURCE_KEY] === undefined) return;
   void showPage();
