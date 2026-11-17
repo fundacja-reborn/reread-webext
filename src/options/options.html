@@ -28,10 +28,11 @@
     <div class="page-chrome">
       <!-- The bar the other pages wear (`.page-bar`, assets/page.css), so the
            walk between them never changes rooms' dress: the mark on the
-           leading edge, the drawn menu at the far one. The mark alone is not
-           a button here - everywhere else it is the door to the settings, and
-           this is the settings. The menu holds the extension's other pages;
-           its own room, by the menus' shared rule, is not on the list. -->
+           leading edge, the drawn menu at the far one. The mark is the way to
+           the reading list here as on every page (D304) - until then it was a
+           plain line on this one, because everywhere else it opened this very
+           page. The menu holds the extension's other pages; its own room, by
+           the menus' shared rule, is not on the list. -->
       <!-- The box around the bar and its menu (`.page-chrome`, page.css) is
            stuck to the top of the window (D219), as on every page of this
            extension: this page is long, and the menu scrolled away with its
@@ -71,7 +72,15 @@
             />
           </svg>
         </button>
-        <p class="page-mark">
+        <button
+          type="button"
+          id="brand"
+          class="page-mark"
+          title="Offline reading list"
+          data-i18n-title="reading_list"
+          aria-label="Offline reading list"
+          data-i18n-aria-label="reading_list"
+        >
           <!-- The name as it is drawn everywhere else (reapps.eu/read), in
                outlines rather than in the page's own face: the wordmark is
                the name's form, and a face the browser happens to have is
@@ -89,7 +98,7 @@
           <path d="M515.021,24.634l-91.141,261.989l-40.308,0l91.141,-261.798l40.308,-0.191Z" style="fill-rule:nonzero;"/>
           </g>
           </svg>
-        </p>
+        </button>
         </span>
         <!-- The narrow screen's own heading (F4): under 60rem the wordmark
              goes and the section being read stands in its place, as a title

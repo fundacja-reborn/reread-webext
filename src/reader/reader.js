@@ -10606,9 +10606,18 @@ window.addEventListener("pagehide", () => {
   void writeReaderTab(null).catch(() => undefined);
 });
 
-// The mark in the bar is the door to the settings - the one line standing over
-// every view of this page. The same walk as the menu row's (D139).
-brandButton?.addEventListener("click", () => goToSettings());
+// The mark in the bar is the way to the reading list from every view of this
+// page (D304): the menu's list row without the menu, so it takes the same
+// steps back through this page's own entries. On the list itself the press
+// only brings the list's top into view, which is what a press on a name in
+// the corner means everywhere: the rows are not read again, so a selection
+// or a filter standing over them stays. The panels go away first - the mark
+// stands inside the bar, where a press is not an outside press.
+brandButton?.addEventListener("click", () => {
+  closePanels();
+  if (library !== null && !library.hidden) scrollTo(0, 0);
+  else leaveToList();
+});
 
 // The menu's rows, each putting the menu away when pressed: a hallway is for
 // passing through, and every one of them leaves this tab standing - coming
@@ -10617,7 +10626,6 @@ brandButton?.addEventListener("click", () => goToSettings());
 // goes through the background exactly as the popup's does (`vocab-tab.js`):
 // the saved phrases are one tab, and a message is what raises it rather than
 // opening a copy - while the article here stays where it was scrolled to.
-// The settings row is the mark's press with a word on it.
 // The contents row (D117): the same dialog the book pagers open, reached
 // from the bar that is always on screen - the pagers scroll away with the
 // text, the bar does not.

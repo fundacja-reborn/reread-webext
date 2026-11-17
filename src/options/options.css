@@ -373,8 +373,8 @@ body:not(.no-translation) .no-translation-only {
 
    The bar and its menu (`.page-bar`, `.page-mark`, `.nav-menu`) live in
    assets/page.css - the dress every header of this extension wears. The
-   mark here is a plain line, not a button: the door it opens elsewhere is
-   this very room.
+   mark here is the button it is on every page since D304: the way to the
+   reading list.
 
    What this page adds is what a browser's own settings look like: the bar and
    the table of contents on the page's own paper, and the settings themselves
@@ -397,6 +397,13 @@ body:not(.no-translation) .no-translation-only {
   height: 1.15em;
   width: auto;
   color: var(--page-fg);
+}
+
+/* The mark is a button (D304), and a drawn name has no text to underline:
+   under the pointer it takes the accent the written marks of the other
+   pages take (`button.page-mark:hover`, page.css). */
+.page-mark:hover .page-wordmark {
+  color: var(--page-accent);
 }
 
 /* The menu panel hangs under the bar and keeps the same gutter. */
