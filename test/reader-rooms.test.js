@@ -154,6 +154,30 @@ describe("the room over the reading (D243)", () => {
     assert.match(reader, /if \(!paged\(\) \|\| roomShown !== null\) return;/, "the wheel turns pages under the room");
   });
 
+  it("puts the reading's own scrollbar away while the room stands, and keeps the column's width under it (D305)", async () => {
+    // Two scrollbars stood side by side - the room's and, beside it, the
+    // window's, which moved a reading nobody could see (Michał's
+    // screenshot, 2026-11-17).
+    const styles = await source("reader/reader.css");
+    const at = styles.indexOf("\n:root:has(.room:not([hidden])) {");
+    assert.notEqual(at, -1, "the window keeps its scrollbar beside the room's");
+    const rule = styles.slice(at, styles.indexOf("}", at));
+    assert.match(rule, /overflow: hidden;/, "the reading still scrolls under the room");
+    assert.match(rule, /padding-inline-end: var\(--room-gutter, 0px\);/, "the column under the room grows by the scrollbar's width");
+    // The width is measured around the showing, and only for a room opened
+    // over the reading: one room leading to the other finds the scrollbar
+    // gone, and measuring then would hand the column's width away.
+    const reader = await source("reader/reader.js");
+    assert.match(
+      bodyOf(reader, "openRoom"),
+      /const columnBefore = standing \? null : rootWidth\(\);\s*roomBox\.replaceChildren\(frame\);\s*roomBox\.hidden = false;\s*if \(columnBefore !== null\) holdColumn\(columnBefore\);/,
+      "the column's width is not read before the room shows and held after",
+    );
+    assert.match(bodyOf(reader, "holdColumn"), /Math\.max\(0, rootWidth\(\) - before\)/, "the held width is not what the scrollbar took");
+    assert.match(bodyOf(reader, "holdColumn"), /style\.setProperty\("--room-gutter", `\$\{gutter\}px`\)/, "the stylesheet is not told the scrollbar's width");
+    assert.match(bodyOf(reader, "closeRoom"), /roomBox\.hidden = true;\s*\}\s*(?:\/\/[^\n]*\n\s*)*document\.documentElement\.style\.removeProperty\("--room-gutter"\);/, "the padding outlives the room, beside the scrollbar that came back");
+  });
+
   it("opens both doors of the reader into the room, and leaves the rooms their own screen", async () => {
     const reader = await source("reader/reader.js");
     assert.match(bodyOf(reader, "goToSettings"), /openRoom\("settings", section\);/, "the settings door still walks away from the reading");
