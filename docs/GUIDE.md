@@ -119,7 +119,7 @@ Read by pages, the text moves only by whole pages, each beginning and ending wit
 
 ### Reading position
 
-Every saved document reopens where you stopped.
+Every saved document reopens where you stopped, with the same line at the top of the text. In the Pages layout the page opens with that line again, also after the window or the text size has changed.
 
 ### Search
 

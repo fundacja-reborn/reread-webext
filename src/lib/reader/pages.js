@@ -300,6 +300,28 @@ export function reopenedPage(tops, block, before, percent) {
 }
 
 /**
+ * The page of a table that opens on a remembered line (D303), or null when
+ * none does and the pages have to be cut from that line (`pageTops` with an
+ * anchor) for the document to reopen on it.
+ *
+ * A page opens on the line when its top stands between `from` and the
+ * line's own top: for a line inside a block the two are one coordinate, and
+ * for a block's first line `from` is the block's top - a page that opens
+ * with a block opens on its edge or on its first line as the cut fell, and
+ * either is the same page to its reader.
+ *
+ * @param {number[]} tops
+ * @param {number} from how far up the page may open, document coordinates
+ * @param {number} top the line's top
+ * @returns {number | null}
+ */
+export function pageOpeningOn(tops, from, top) {
+  const page = pageAt(tops, top);
+  const opens = tops[page];
+  return opens !== undefined && opens >= from - EPS && opens <= top + EPS ? page : null;
+}
+
+/**
  * The page a turn lands on, or null when there is no page that way - which
  * is the caller's cue to turn the part of a book instead. `first` and `last`
  * are the ends of the table, and always land.

@@ -270,6 +270,19 @@ describe("where the reader stopped, in the file (D213)", () => {
     assert.equal("position" in (read.articles[1] ?? {}), false);
   });
 
+  it("carries the first line's offset with the position, and no field without one (D303)", () => {
+    const one = article("one");
+    const place = { docId: one.url, segmentIndex: 0, blockIndex: 12, updatedAt: 500, percent: 40, offset: 318 };
+    const text = toArticlesFile([one], new Map(), new Map([[one.url, place]]));
+    assert.deepEqual(JSON.parse(text).articles[0].position, { segmentIndex: 0, blockIndex: 12, updatedAt: 500, percent: 40, offset: 318 });
+    assert.deepEqual(fromArticlesFile(text).articles[0]?.position, place);
+    // A broken offset drops alone: the place it rode on still comes in.
+    const torn = text.replace('"offset": 318', '"offset": -4');
+    assert.notEqual(torn, text);
+    const { offset: _, ...bare } = place;
+    assert.deepEqual(fromArticlesFile(torn).articles[0]?.position, bare);
+  });
+
   it("drops a position that is no place and keeps the article, and reads a file from before positions as it did", () => {
     const one = article("one");
     const rows = JSON.parse(toArticlesFile([one])).articles;

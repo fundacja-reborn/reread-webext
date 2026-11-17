@@ -126,6 +126,7 @@ import {
   meantPress,
   onPage,
   pageAt,
+  pageOpeningOn,
   pageFootCount,
   pagePercent,
   pageTops,
@@ -1922,12 +1923,13 @@ function textFold() {
  * margin between two paragraphs, the bubble standing over the text); then
  * the blocks' own rects answer instead.
  *
+ * @param {number} [line] the line the place is measured at, window
+ *   coordinates (`placeLine`)
  * @returns {number | null}
  */
-function topBlockIndex() {
+function topBlockIndex(line = textFold() + FOLD_REACH) {
   const root = contentRoot();
   if (root === null || root.children.length === 0) return null;
-  const line = textFold() + FOLD_REACH;
 
   const hit = document.elementFromPoint(window.innerWidth / 2, line);
   for (let node = hit; node !== null && node !== root; node = node.parentElement) {
@@ -1937,6 +1939,89 @@ function topBlockIndex() {
     Array.from(root.children, (block) => block.getBoundingClientRect()),
     line,
   );
+}
+
+/**
+ * The line the reading position is measured at, window coordinates: just
+ * under the top of the visible text. Read by pages that is the top of the
+ * page being read, wherever the window happens to stand: the bubble scrolls
+ * the window to make room for itself (D97, D138), and a position taken off
+ * the window then would name a line from the middle of the page - which the
+ * next opening would cut the pages from (D303).
+ *
+ * @param {PageTable | null} pages the table as it stands (`pagesNow`)
+ * @returns {number}
+ */
+function placeLine(pages) {
+  const top = pages === null ? undefined : pages.tops[pageShown(pages)];
+  return top === undefined ? textFold() + FOLD_REACH : top - window.scrollY + FOLD_REACH;
+}
+
+/**
+ * The first character of the line the visible text begins with, as an
+ * offset into its block's prose - the language a highlight's ends are
+ * written in (`anchorOf`), so the two read one walk. The line is the first
+ * of the block's whose box ends under the measuring line: the page's first
+ * line read by pages, the line the bar's edge runs through read by
+ * scrolling. Found by its characters' own boxes - the first text node with
+ * a box under the line, and in it, by halves, the first character that has
+ * one (`lineStartIn`'s way: a node's characters never climb back up).
+ *
+ * Null wherever the place is not a line of this block's text, and the
+ * position is then its block alone, as it was before D303:
+ *   - the block begins under the line - the head of an article above its
+ *     first paragraph, the gap between two blocks. Naming the block's first
+ *     line there would cut the pages from it at the next opening, and leave
+ *     the head on a page of its own;
+ *   - a picture stands between the line and the first character under it
+ *     (a figure over its caption): the picture is what the text begins with.
+ *
+ * @param {Element} root the content root, whose children are the blocks
+ * @param {number} at the block's index
+ * @param {number} line window coordinates
+ * @returns {number | null}
+ */
+function topLineOffset(root, at, line) {
+  const block = root.children[at];
+  if (block === undefined || block.getBoundingClientRect().top > line) return null;
+  const range = document.createRange();
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+    if (!(node instanceof Text) || node.length === 0) continue;
+    range.selectNodeContents(node);
+    let reaches = false;
+    for (const rect of range.getClientRects()) {
+      if (rect.height > 0 && rect.bottom > line) {
+        reaches = true;
+        break;
+      }
+    }
+    if (!reaches) continue;
+    let low = 0;
+    let high = node.length - 1;
+    while (low < high) {
+      const mid = (low + high) >> 1;
+      range.setStart(node, mid);
+      range.setEnd(node, mid + 1);
+      const rect = range.getClientRects()[0];
+      // A character with no box - a collapsed space at a line's end - is
+      // the line before's.
+      if (rect !== undefined && rect.bottom > line) high = mid;
+      else low = mid + 1;
+    }
+    range.setStart(node, low);
+    range.setEnd(node, low + 1);
+    const first = range.getClientRects()[0];
+    if (first === undefined) return null;
+    for (const picture of block.querySelectorAll("img, svg, video, canvas")) {
+      const rect = picture.getBoundingClientRect();
+      if (rect.height > 0 && rect.bottom > line && rect.bottom <= first.top + 1) return null;
+    }
+    // The segment is not part of the answer; the block and the offset are.
+    const span = anchorOf(range, root, 0);
+    return span === null || span.start.block !== at ? null : span.start.offset;
+  }
+  return null;
 }
 
 /**
@@ -1953,18 +2038,20 @@ function savePositionNow() {
   // Only documents the database holds: a live page has no row for the
   // position to belong to. A book's place is its segment and the block in it.
   if (target === null || target.origin === "live") return;
-  const at = topBlockIndex();
-  if (at === null) return;
+  const root = contentRoot();
+  const pages = pagesNow();
+  const line = placeLine(pages);
+  const at = topBlockIndex(line);
+  if (root === null || at === null) return;
   const segment = target.origin === "book" ? target.segmentIndex : 0;
   // Read by pages, "read" is the page on screen out of the part's pages
   // (D233): the window's edge would count the screen of padding the
   // layout keeps under the last line.
-  const pages = pagesNow();
   const percent =
     pages === null
       ? measuredPercent(window.scrollY, window.innerHeight, document.documentElement.scrollHeight)
       : pagePercent(pageShown(pages), pages.tops.length);
-  const record = positionRecord(target.url, segment, at, Date.now(), percent);
+  const record = positionRecord(target.url, segment, at, Date.now(), percent, topLineOffset(root, at, line));
   if (record !== null) void putPosition(record).catch(() => undefined);
 }
 
@@ -2011,6 +2098,44 @@ document.addEventListener("visibilitychange", () => {
 });
 
 /**
+ * The line a position remembers (D303), found again in the document on
+ * screen: where its first character stands now, and the place in the text
+ * the pages can be cut from (`pageAnchor`'s shape). `from` is how far up a
+ * page may open and still open on this line - the line's own top, or for a
+ * block's first line the block's top, since a page that opens with a block
+ * opens on its edge or on its first line as the cut fell.
+ *
+ * Null for a row without the offset, and for one whose offset is not a
+ * character of this block any more - a sanitizer tightened since, the
+ * mark's own bargain (`rangeOfMark`) - and the position is then its block.
+ *
+ * @param {Element} root
+ * @param {number} at the block's index
+ * @param {number | undefined} offset
+ * @returns {{ anchor: { block: Element, node: Text, offset: number }, top: number, from: number } | null}
+ */
+function keptLine(root, at, offset) {
+  const block = root.children[at];
+  if (block === undefined || offset === undefined) return null;
+  const range = rangeWithin(root, at, offset, offset + 1);
+  if (range === null || !(range.startContainer instanceof Text)) return null;
+  const rect = range.getClientRects()[0];
+  if (rect === undefined) return null;
+  const anchor = { block, node: range.startContainer, offset: range.startOffset };
+  const scrolled = window.scrollY;
+  const own = rect.top + scrolled;
+  // The line's top as the cutter measures lines - unless the lines of this
+  // block cannot be told apart (boxes that overlap from line to line are
+  // one box to it), and the "line" found is most of the block: then the
+  // character's own top is the place.
+  const snapped = anchorY(anchor);
+  const top = snapped === undefined || own - snapped > rect.height ? own : snapped;
+  const first = lineBoxes(block)[0];
+  const opens = first !== undefined && top <= first.top + 1;
+  return { anchor, top, from: opens ? Math.min(top, block.getBoundingClientRect().top + scrolled) : top };
+}
+
+/**
  * Puts a just-rendered document back where its reader stopped. Nothing to
  * restore - no row, another segment, an index past the end of a document
  * since overwritten - means the top, where `renderArticle` already left it.
@@ -2031,13 +2156,35 @@ function restorePosition(position, segmentIndex = 0) {
   }
   const block = root.children[at];
   if (block === undefined) return;
-  // Read by pages, the place is the page that opens in the block - not the
-  // page its first line stands on, which for a paragraph running over a
-  // page's edge is the page before the one that was read (`reopenedPage`).
-  // The table first, the block's box second: the first cut of a document
-  // holds its pictures to the band, and the box is measured in that layout.
+  // The table first, the boxes second: the first cut of a document holds
+  // its pictures to the band, and everything below is measured in that
+  // layout.
   const pages = pagesNow();
+  const line = keptLine(root, at, position?.offset);
+  if (pages !== null && line !== null) {
+    // Read by pages, the page opens on the remembered line (D303). The
+    // pages as they were just cut from the head do, wherever nothing has
+    // changed since the save; cut for another window or another type size,
+    // or saved over a table that was cut from the page being read (D238),
+    // they do not - and are cut again from the line, the cut D238 makes
+    // when a bar stands up: the page keeps its first line, and the pages
+    // before it end on it.
+    let table = pages;
+    let page = pageOpeningOn(table.tops, line.from, line.top);
+    if (page === null) {
+      pageAnchor = line.anchor;
+      pagesStale = true;
+      table = pagesNow() ?? pages;
+      page = pageAt(table.tops, line.top);
+    }
+    showPageOf(table, page);
+    return;
+  }
   if (pages !== null) {
+    // No line to open on: the place is the page that opens in the block -
+    // not the page its first line stands on, which for a paragraph running
+    // over a page's edge is the page before the one that was read
+    // (`reopenedPage`, D302).
     const scrolled = window.scrollY;
     const box = block.getBoundingClientRect();
     const above = block.previousElementSibling?.getBoundingClientRect().bottom;
@@ -2050,6 +2197,12 @@ function restorePosition(position, segmentIndex = 0) {
         position?.percent,
       ),
     );
+    return;
+  }
+  if (line !== null) {
+    // Scrolled, the remembered line stands under the bar (D303) - a block's
+    // first line with the block's own edge there, as every block did.
+    scrollTo(0, Math.max(0, line.from - chromeFold()));
     return;
   }
   block.scrollIntoView({ behavior: "instant", block: "start" });
@@ -2790,10 +2943,11 @@ function lineStartIn(block, top) {
  * own box can stand a hair under a taller neighbour's on the same line) -
  * or undefined when nothing is kept, or what was kept is gone.
  *
+ * @param {typeof pageAnchor} [kept] the place to measure - the page's own
+ *   by default, a position's remembered line at an opening (D303)
  * @returns {number | undefined}
  */
-function anchorY() {
-  const kept = pageAnchor;
+function anchorY(kept = pageAnchor) {
   if (kept === null || !kept.block.isConnected) return undefined;
   const scrolled = window.scrollY;
   if (kept.node === null) return kept.block.getBoundingClientRect().top + scrolled;

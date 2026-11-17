@@ -42,12 +42,23 @@ export const FOLD_REACH = 2;
  * A row without it is still a whole position - rows written before the
  * field existed keep working, they just have nothing to garnish.
  *
+ * `offset` is the first character of the first line of the visible text,
+ * counted in the anchored block's prose - the language a highlight's ends
+ * are written in (`marks.js`, the `prosePieces` walk) - so the restore can
+ * put that very line back at the top instead of the block's first one
+ * (D303). A page read by pages mostly opens in the middle of a paragraph,
+ * and the block alone cannot say on which of its lines; cut for another
+ * window or another type size, the pages are cut again from this line.
+ * Garnish like `percent`: a row without it, or with a broken one, is still
+ * a whole position and restores by its block (`reopenedPage` in `pages.js`).
+ *
  * @typedef {{
  *   docId: string,
  *   segmentIndex: number,
  *   blockIndex: number,
  *   updatedAt: number,
  *   percent?: number,
+ *   offset?: number,
  * }} ReadingPosition
  */
 
@@ -71,35 +82,44 @@ function isPercent(value) {
  * Builds the record a save writes, or nothing when there is nothing worth
  * writing - no document to belong to, or an index that is not a place.
  * A percent that is not one is left off rather than refused whole: the
- * anchor is the record's reason to exist, the percent only rides along.
+ * anchor is the record's reason to exist, the percent only rides along -
+ * and so does the first line's offset, on the same terms.
  *
  * @param {string} docId
  * @param {number} segmentIndex
  * @param {number} blockIndex
  * @param {number} now
  * @param {number | null} [percent]
+ * @param {number | null} [offset] the first visible line's first character,
+ *   in the block's prose
  * @returns {ReadingPosition | null}
  */
-export function positionRecord(docId, segmentIndex, blockIndex, now, percent) {
+export function positionRecord(docId, segmentIndex, blockIndex, now, percent, offset) {
   if (typeof docId !== "string" || docId.length === 0) return null;
   if (!isIndex(segmentIndex) || !isIndex(blockIndex)) return null;
   if (typeof now !== "number" || !Number.isFinite(now)) return null;
-  const record = { docId, segmentIndex, blockIndex, updatedAt: now };
-  return isPercent(percent) ? { ...record, percent } : record;
+  return {
+    docId,
+    segmentIndex,
+    blockIndex,
+    updatedAt: now,
+    ...(isPercent(percent) ? { percent } : {}),
+    ...(isIndex(offset) ? { offset } : {}),
+  };
 }
 
 /**
  * A row as it came back from the database, narrowed field by field. Anything
  * short of a whole position reads as no position at all - half an anchor
  * points nowhere. A broken percent drops alone, because the anchor it rode
- * on is still a place.
+ * on is still a place; so does a broken offset.
  *
  * @param {unknown} value
  * @returns {ReadingPosition | null}
  */
 export function asPosition(value) {
   if (typeof value !== "object" || value === null) return null;
-  const { docId, segmentIndex, blockIndex, updatedAt, percent } =
+  const { docId, segmentIndex, blockIndex, updatedAt, percent, offset } =
     /** @type {Record<string, unknown>} */ (value);
   if (typeof docId !== "string" || docId.length === 0) return null;
   if (!isIndex(segmentIndex) || !isIndex(blockIndex)) return null;
@@ -109,7 +129,11 @@ export function asPosition(value) {
     blockIndex,
     updatedAt: typeof updatedAt === "number" && Number.isFinite(updatedAt) ? updatedAt : 0,
   };
-  return isPercent(percent) ? { ...row, percent } : row;
+  return {
+    ...row,
+    ...(isPercent(percent) ? { percent } : {}),
+    ...(isIndex(offset) ? { offset } : {}),
+  };
 }
 
 /**

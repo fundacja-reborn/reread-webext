@@ -310,7 +310,8 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(reader, /function textFold\(\) \{\s*return paged\(\) \? pageBand\(\)\.top : chromeFold\(\);/, "the text's fold is not the page's top when read by pages");
     assert.match(reader, /fold: textFold,/, "the voice measures the first visible sentence from the bar's edge");
     assert.match(reader, /covered: textFold,/, "the bubble parks its line under the bar's edge, behind the page's curtain");
-    assert.match(reader, /function topBlockIndex\(\) \{[\s\S]*?const line = textFold\(\) \+ 2;/, "the position is read under the bar's edge, behind the page's curtain");
+    assert.match(reader, /function topBlockIndex\(line = textFold\(\) \+ FOLD_REACH\) \{/, "the position is read under the bar's edge, behind the page's curtain");
+    assert.match(reader, /function placeLine\(pages\) \{[\s\S]*?top === undefined \? textFold\(\) \+ FOLD_REACH : top - window\.scrollY \+ FOLD_REACH;/, "the position's line is not the page's own top when read by pages");
     // The e-ink sheet says its edge with a line where the others cast a shadow.
     const styles = await source("reader/reader.css");
     assert.match(styles, /:root\[data-reader-theme="eink"\] \.reader-chrome > :is\(\.reader-panel, \.nav-menu\) \{\s*box-shadow: none;\s*border-bottom: 1px solid var\(--page-border\);/, "the e-ink sheet has neither a shadow nor a line under its edge");

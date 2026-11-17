@@ -46,7 +46,7 @@ import { savedArticle } from "./saved-article.js";
  * A reading position as the file writes it: the row without its `docId`,
  * which is the article's own address - said once, on the article.
  *
- * @typedef {{ segmentIndex: number, blockIndex: number, updatedAt: number, percent?: number }} FilePosition
+ * @typedef {{ segmentIndex: number, blockIndex: number, updatedAt: number, percent?: number, offset?: number }} FilePosition
  */
 
 /**
@@ -150,8 +150,14 @@ export function fileOrder(articles) {
  * @param {ReadingPosition} position
  * @returns {FilePosition}
  */
-function filePosition({ segmentIndex, blockIndex, updatedAt, percent }) {
-  return { segmentIndex, blockIndex, updatedAt, ...(percent === undefined ? {} : { percent }) };
+function filePosition({ segmentIndex, blockIndex, updatedAt, percent, offset }) {
+  return {
+    segmentIndex,
+    blockIndex,
+    updatedAt,
+    ...(percent === undefined ? {} : { percent }),
+    ...(offset === undefined ? {} : { offset }),
+  };
 }
 
 /**

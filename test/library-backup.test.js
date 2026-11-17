@@ -302,6 +302,9 @@ describe("the copy of the reading list", () => {
   it("copies where the reader stopped, and refuses half a place", () => {
     const place = position("https://a.example/p");
     assert.deepEqual(asCopiedPosition(throughJson(positionRow(place))), place);
+    // The first line's offset (D303) is copied with the place it belongs to.
+    const lined = { ...place, offset: 318 };
+    assert.deepEqual(asCopiedPosition(throughJson(positionRow(lined))), lined);
     assert.equal(asCopiedPosition({ version: 1, position: { docId: "x" } }), null);
     assert.equal(asCopiedPosition({ version: 3, position: place }), null);
   });

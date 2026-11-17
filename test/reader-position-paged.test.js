@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
-import { pageAt, pagePercent, pageTops, reopenedPage } from "../src/lib/reader/pages.js";
+import { pageAt, pageOpeningOn, pagePercent, pageTops, reopenedPage } from "../src/lib/reader/pages.js";
 import { FOLD_REACH, blockAtLine } from "../src/lib/reader/position.js";
 
 /**
@@ -17,6 +17,15 @@ import { FOLD_REACH, blockAtLine } from "../src/lib/reader/position.js";
  * the place). The rule is pure and held here case by case; so is the one
  * promise no single case can make - that a page saved and reopened is the
  * same page, on every page of a document.
+ *
+ * And on the line that was read (D303). The block and the percent cannot
+ * say which line of the block opened the page, so pages cut for another
+ * window put the block's lines on two pages either of which may be the one
+ * meant. The row now carries the first line's first character, and the
+ * restore opens a page on it: the page of the table cut from the head when
+ * there is one, the pages cut again from the line when there is not. The
+ * rule that tells the two apart is held here; so is what the reader does
+ * with it, as far as a file can say.
  */
 
 const LINE = 30;
@@ -27,9 +36,10 @@ const LINE = 30;
  * reader cuts them: the text is one block of the flow, every line its own.
  *
  * @param {number[]} counts lines in each paragraph
- * @param {{ band: number, head?: number, first?: number, gap?: number }} how
+ * @param {{ band: number, head?: number, first?: number, gap?: number, anchor?: number }} how
+ *   `anchor` cuts the pages from a line instead of from the head (D238)
  */
-function prose(counts, { band, head = 0, first = 60, gap = 20 }) {
+function prose(counts, { band, head = 0, first = 60, gap = 20, anchor }) {
   /** @type {{ top: number, bottom: number }[]} */
   const blocks = [];
   /** @type {{ top: number, bottom: number }[]} */
@@ -44,8 +54,8 @@ function prose(counts, { band, head = 0, first = 60, gap = 20 }) {
   }
   const text = { top: blocks[0]?.top ?? first, bottom: top - gap };
   const flow = head > 0 ? [{ top: first, bottom: first + head }, text] : [text];
-  const tops = pageTops(flow, (index) => (flow[index] === text ? lines : []), band, first);
-  return { blocks, tops };
+  const tops = pageTops(flow, (index) => (flow[index] === text ? lines : []), band, first, anchor);
+  return { blocks, lines, tops };
 }
 
 /**
@@ -170,6 +180,98 @@ describe("reopenedPage", () => {
   });
 });
 
+describe("pageOpeningOn (D303)", () => {
+  const tops = [60, 360, 660, 960];
+
+  it("names the page that opens on the line, within a pixel", () => {
+    assert.equal(pageOpeningOn(tops, 660, 660), 2);
+    assert.equal(pageOpeningOn(tops, 660.4, 660.4), 2);
+    assert.equal(pageOpeningOn(tops, 60, 60), 0);
+  });
+
+  it("answers nothing for a line standing inside a page", () => {
+    assert.equal(pageOpeningOn(tops, 690, 690), null);
+    assert.equal(pageOpeningOn(tops, 950, 950), null);
+  });
+
+  it("takes a block's first line for the block's edge", () => {
+    // The page opens on the block's top, its first line a leading lower.
+    assert.equal(pageOpeningOn(tops, 360, 365), 1);
+    // Or on the first line itself, the block's top a leading higher.
+    assert.equal(pageOpeningOn(tops, 355, 360), 1);
+    // But not on whatever stands above the block on the same page.
+    assert.equal(pageOpeningOn(tops, 420, 425), null);
+  });
+
+  it("answers nothing for the first paragraph under an article's head", () => {
+    // The first page opens with the head; the paragraph's first line is
+    // not what it opens on, however near the top it stands.
+    assert.equal(pageOpeningOn(tops, 200, 205), null);
+  });
+});
+
+describe("a remembered line reopens as the first line of its page (D303)", () => {
+  /**
+   * The first line of every page of a table, as the save would name it.
+   *
+   * @param {ReturnType<typeof prose>} doc
+   */
+  function pageLines(doc) {
+    return doc.tops.map((top) => {
+      const line = doc.lines.find((one) => one.bottom > top + FOLD_REACH);
+      assert.ok(line !== undefined);
+      return line.top;
+    });
+  }
+
+  let seed = 303;
+  const next = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return seed / 2147483648;
+  };
+  const counts = Array.from({ length: 220 }, () => 1 + Math.floor(next() * 14));
+
+  it("on the table cut from the head, while nothing has changed", () => {
+    const doc = prose(counts, { band: 19 * LINE + 5, head: 6 * LINE });
+    for (const [page, top] of pageLines(doc).entries()) {
+      // The first page opens with the head, and has no line to be named by.
+      if (page === 0) continue;
+      assert.equal(pageOpeningOn(doc.tops, top, top), page, `page ${page} is not found by its own first line`);
+    }
+  });
+
+  it("on a table cut from the line, when the pages are cut for another band", () => {
+    const saved = prose(counts, { band: 19 * LINE + 5, head: 6 * LINE });
+    // Another window: three lines shorter, the bar a little taller.
+    const how = { band: 16 * LINE + 9, head: 6 * LINE, first: 72 };
+    const shift = 72 - 60;
+    const reopened = prose(counts, how);
+    let recut = 0;
+    for (const [page, savedTop] of pageLines(saved).entries()) {
+      if (page === 0) continue;
+      const top = savedTop + shift;
+      if (pageOpeningOn(reopened.tops, top, top) !== null) continue;
+      recut += 1;
+      // What the reader does then: the pages cut again from the line.
+      const tops = prose(counts, { ...how, anchor: top }).tops;
+      const landed = pageOpeningOn(tops, top, top);
+      assert.notEqual(landed, null, `no page opens on the line of page ${page}`);
+      assert.equal(tops[/** @type {number} */ (landed)], top);
+    }
+    // Nearly every page of the old table opens somewhere else in the new
+    // one - which is the case the block and the percent could not answer.
+    assert.ok(recut > saved.tops.length / 2, `only ${recut} of ${saved.tops.length} pages had to be cut again`);
+  });
+});
+
+describe("the reading position in the user guide (D303)", () => {
+  it("is promised in the user guide: the same line, and the same page's first line", async () => {
+    const guide = await readFile(new URL("../docs/GUIDE.md", import.meta.url), "utf8");
+    assert.match(guide, /Every saved document reopens where you stopped, with the same line at the top of the text\./, "the guide does not say which line a document reopens on");
+    assert.match(guide, /In the Pages layout the page opens with that line again, also after the window or the text size has changed\./, "the guide does not say what a changed window does to the page");
+  });
+});
+
 describe("the reader's wiring of the reopened page", () => {
   /**
    * The body of one top-level function.
@@ -192,6 +294,31 @@ describe("the reader's wiring of the reopened page", () => {
     assert.doesNotMatch(restore, /landOnPageOf\(/, "the restore lands on the page of the block's first line again");
     // The rule reads the save's measurement backwards: one constant, or the
     // two part on the first edit.
-    assert.match(bodyOf(reader, "topBlockIndex"), /const line = textFold\(\) \+ FOLD_REACH;/, "the save measures by a reach of its own");
+    assert.match(reader, /function topBlockIndex\(line = textFold\(\) \+ FOLD_REACH\) \{/, "the save measures by a reach of its own");
+    assert.match(bodyOf(reader, "placeLine"), /top === undefined \? textFold\(\) \+ FOLD_REACH : top - window\.scrollY \+ FOLD_REACH/, "the page's top is measured by another reach");
+  });
+
+  it("writes the first line with the place, measured on the page being read (D303)", async () => {
+    const reader = await readFile(new URL("../src/reader/reader.js", import.meta.url), "utf8");
+    const save = bodyOf(reader, "savePositionNow");
+    assert.match(save, /const line = placeLine\(pages\);\n  const at = topBlockIndex\(line\);/, "the block and the line are measured at two places");
+    assert.match(save, /positionRecord\(target\.url, segment, at, Date\.now\(\), percent, topLineOffset\(root, at, line\)\)/, "the row is written without its first line");
+    // Off its page under a bubble, the window is not the place: the page is.
+    assert.match(bodyOf(reader, "placeLine"), /pages\.tops\[pageShown\(pages\)\]/, "the line is read off the window, not off the page shown");
+    const measure = bodyOf(reader, "topLineOffset");
+    assert.match(measure, /block\.getBoundingClientRect\(\)\.top > line\) return null;/, "a block beginning under the line is named by its first line");
+    assert.match(measure, /anchorOf\(range, root, 0\)/, "the offset is not counted in the marks' prose");
+  });
+
+  it("opens on the remembered line: the head's table if it has the page, the pages cut from the line if not (D303)", async () => {
+    const reader = await readFile(new URL("../src/reader/reader.js", import.meta.url), "utf8");
+    const restore = bodyOf(reader, "restorePosition");
+    assert.match(restore, /const pages = pagesNow\(\);\n  const line = keptLine\(root, at, position\?\.offset\);/, "the line is measured before the first cut has laid the pictures out");
+    assert.match(restore, /let page = pageOpeningOn\(table\.tops, line\.from, line\.top\);\n    if \(page === null\) \{\n      pageAnchor = line\.anchor;\n      pagesStale = true;\n      table = pagesNow\(\) \?\? pages;/, "the pages are not cut from the line when no page opens on it");
+    assert.match(restore, /scrollTo\(0, Math\.max\(0, line\.from - chromeFold\(\)\)\);/, "scrolled, the line is not put under the bar");
+    // A row without the line still reopens by its block (D302, D100).
+    assert.match(restore, /if \(pages !== null\) \{[\s\S]*?reopenedPage\(/, "a row without a line has lost the page of its block");
+    assert.match(restore, /fineScrollTop\(/, "a row without a line has lost its place inside a tall block");
+    assert.match(bodyOf(reader, "keptLine"), /rangeWithin\(root, at, offset, offset \+ 1\)/, "the offset is not read back through the marks' prose");
   });
 });
