@@ -25,6 +25,15 @@
 export const POSITION_SAVE_DELAY = 1500;
 
 /**
+ * How far under the top of the visible text the save looks for the block
+ * being read, in CSS pixels: far enough to stand on the first line rather
+ * than on the edge above it, where a fractional rect answers either way.
+ * Shared with the restore read by pages (`reopenedPage` in `pages.js`),
+ * which reads the save's rule backwards and has to mean the same line.
+ */
+export const FOLD_REACH = 2;
+
+/**
  * `percent` is how far down the segment the view had reached when the save
  * was taken, 0-100 - the bottom edge of the window over the whole scroll
  * height. It is garnish on the anchor, not part of it: the list turns it

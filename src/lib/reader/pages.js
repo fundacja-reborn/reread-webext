@@ -21,6 +21,8 @@
  * two blocks.
  */
 
+import { FOLD_REACH } from "./position.js";
+
 /** @typedef {{ top: number, bottom: number }} Box */
 
 /**
@@ -231,6 +233,68 @@ export function pageAt(tops, y) {
   for (const [index, top] of tops.entries()) {
     if (top <= y + EPS) page = index;
     else break;
+  }
+  return page;
+}
+
+/**
+ * The page a remembered block reopens on.
+ *
+ * The reading position names a block: the one under the first line of the
+ * page being read, which is the block that line stands in or, with the line
+ * in no block (the head of an article, a gap), the first block under it
+ * (`blockAtLine`, `FOLD_REACH` in `position.js`). Most pages of prose open
+ * in the middle of a paragraph that began at the foot of the page before,
+ * so the page the block's first line stands on is the page BEFORE the one
+ * that was read. Landing there reopened three pages of ordinary prose in
+ * four a page early - and a page earlier again at every reopening that
+ * turned nothing, since the save taken on the page landed on names the
+ * block that page opens in (Michał's report, 2026-11-17).
+ *
+ * So the answer is the save's own rule read backwards: the page under
+ * whose first line the save would have named this block. A block inside a
+ * page, with another block above it there, is named on no page of this
+ * table - the position was saved over other pages, or by scrolling - and
+ * reopens on the page it stands on. A block named on several pages - one
+ * taller than a page, or the first under a page's head that runs on over
+ * the next - is told apart by the stored percent, which read by pages is
+ * the page out of the pages (`pagePercent`); with nothing to tell them
+ * apart, the earliest, which may repeat text and never skips any.
+ *
+ * Exact while the pages are cut as they were when the position was saved.
+ * Cut otherwise - another window, another type size, a table that was cut
+ * from the page being read (D238) - the block's lines may fall on two
+ * pages either of which could be the one meant; the block alone cannot say
+ * which, and the answer is then within a page of the place.
+ *
+ * @param {number[]} tops
+ * @param {Box} block the remembered block, document coordinates
+ * @param {number} before where the block before it ends, document
+ *   coordinates; `-Infinity` for the first block
+ * @param {number} [percent] the position's stored percent, if it has one
+ * @returns {number}
+ */
+export function reopenedPage(tops, block, before, percent) {
+  /** @type {number[]} */
+  const named = [];
+  for (const [index, top] of tops.entries()) {
+    const line = top + FOLD_REACH;
+    if (line >= block.bottom) break;
+    if (line >= before) named.push(index);
+  }
+  const first = named[0];
+  if (first === undefined) return pageAt(tops, block.top);
+  if (named.length === 1 || typeof percent !== "number" || !Number.isFinite(percent)) return first;
+  let page = first;
+  let gap = Infinity;
+  for (const one of named) {
+    const away = Math.abs(pagePercent(one, tops.length) - percent);
+    // Strictly nearer, so that pages the percent cannot tell apart - more
+    // than a hundred of them share its whole numbers - answer the earliest.
+    if (away < gap) {
+      gap = away;
+      page = one;
+    }
   }
   return page;
 }

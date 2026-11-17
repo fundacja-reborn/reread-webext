@@ -129,6 +129,7 @@ import {
   pageFootCount,
   pagePercent,
   pageTops,
+  reopenedPage,
   revealTarget,
   swipeIntent,
   tapIntent,
@@ -140,6 +141,7 @@ import {
 } from "../lib/reader/pages.js";
 import { edgeKeyTurn, foldSnap, pageStep, pageTurn } from "../lib/reader/paging.js";
 import {
+  FOLD_REACH,
   POSITION_SAVE_DELAY,
   blockAtLine,
   fineScrollTop,
@@ -1925,7 +1927,7 @@ function textFold() {
 function topBlockIndex() {
   const root = contentRoot();
   if (root === null || root.children.length === 0) return null;
-  const line = textFold() + 2;
+  const line = textFold() + FOLD_REACH;
 
   const hit = document.elementFromPoint(window.innerWidth / 2, line);
   for (let node = hit; node !== null && node !== root; node = node.parentElement) {
@@ -2029,6 +2031,27 @@ function restorePosition(position, segmentIndex = 0) {
   }
   const block = root.children[at];
   if (block === undefined) return;
+  // Read by pages, the place is the page that opens in the block - not the
+  // page its first line stands on, which for a paragraph running over a
+  // page's edge is the page before the one that was read (`reopenedPage`).
+  // The table first, the block's box second: the first cut of a document
+  // holds its pictures to the band, and the box is measured in that layout.
+  const pages = pagesNow();
+  if (pages !== null) {
+    const scrolled = window.scrollY;
+    const box = block.getBoundingClientRect();
+    const above = block.previousElementSibling?.getBoundingClientRect().bottom;
+    showPageOf(
+      pages,
+      reopenedPage(
+        pages.tops,
+        { top: box.top + scrolled, bottom: box.bottom + scrolled },
+        above === undefined ? -Infinity : above + scrolled,
+        position?.percent,
+      ),
+    );
+    return;
+  }
   block.scrollIntoView({ behavior: "instant", block: "start" });
   // `scrollIntoView` puts the block at the window's very top, which the
   // sticky chrome covers; step back so its first line lands under the bar.
@@ -2046,9 +2069,6 @@ function restorePosition(position, segmentIndex = 0) {
     document.documentElement.scrollHeight,
   );
   if (fine !== null) scrollTo(0, fine);
-  // Read by pages, the place is the page the block's first line stands on -
-  // or, inside a block taller than a page, the page the fine scroll reached.
-  landOnPageOf(fine !== null ? fine + textFold() : blockTop);
 }
 
 /**
