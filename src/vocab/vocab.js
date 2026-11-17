@@ -1409,8 +1409,8 @@ async function runImport() {
   }
 }
 
-// The mark at the top is the door to the settings, the same one the reader's
-// bar carries, and since D147 it goes the way the reader's does: through
+// The way to the settings - the menu's row and the look-up field's word -
+// goes the way the reader's does since D147: through
 // the background, which raises the settings tab if one stands and turns
 // this tab to the settings otherwise - a walk in place, with this page one
 // Back away. The marker in this tab's own `sessionStorage` is what tells
@@ -1549,7 +1549,12 @@ function arriveWithPhrase() {
 
 window.addEventListener("hashchange", arriveWithPhrase);
 
-brandButton?.addEventListener("click", () => goToSettings());
+// The mark in the bar is the way to the reading list on every page (D304):
+// the menu's list row without the menu.
+brandButton?.addEventListener("click", () => {
+  closePanels();
+  goToLibrary();
+});
 
 // The way back to the reading (D141/D142): walked here from the reader, the
 // arrow pops the same history entry as the system's back gesture; raised
@@ -1665,9 +1670,8 @@ if (speechSupported()) speechSynthesis.addEventListener("voiceschanged", renderV
 // tab into one (D147), the list one Back away from these phrases. A
 // rejection means the background was mid-restart - the press can be
 // repeated; the popup's rows make the same bargain.
-navLibrary?.addEventListener("click", () => {
-  closePanels();
-  // Inside the reader (D243): the row asks it for its own view rather than
+function goToLibrary() {
+  // Inside the reader (D243): the press asks it for its own view rather than
   // navigating this frame, which would take the reading's document with it.
   if (inReader) {
     askReader({ act: "view", view: "library" });
@@ -1676,6 +1680,11 @@ navLibrary?.addEventListener("click", () => {
   void webext()
     .runtime.sendMessage({ kind: Message.OPEN_LIBRARY })
     .catch(() => undefined);
+}
+
+navLibrary?.addEventListener("click", () => {
+  closePanels();
+  goToLibrary();
 });
 
 // The highlights row goes the reading list's way: the same one reader tab,
@@ -1692,7 +1701,6 @@ navMarks?.addEventListener("click", () => {
     .catch(() => undefined);
 });
 
-// The settings row is the mark's press with a word on it.
 navSettings?.addEventListener("click", () => {
   closePanels();
   goToSettings();

@@ -4193,13 +4193,22 @@ menuButton?.addEventListener("click", () => {
 // sending the background anywhere: a frame that navigated would take the
 // reading's own document with it, which is the whole thing this page is
 // framed to avoid. On its own screen the rows are what they always were.
-document.getElementById("nav-library")?.addEventListener("click", () => {
-  setMenu(false);
+function goToLibrary() {
   if (inReader) {
     askReader({ act: "view", view: "library" });
     return;
   }
   void webext().runtime.sendMessage({ kind: Message.OPEN_LIBRARY }).catch(() => {});
+}
+document.getElementById("nav-library")?.addEventListener("click", () => {
+  setMenu(false);
+  goToLibrary();
+});
+// The mark in the bar is the way to the reading list on every page (D304):
+// the list row's press without the menu.
+document.getElementById("brand")?.addEventListener("click", () => {
+  setMenu(false);
+  goToLibrary();
 });
 document.getElementById("nav-marks")?.addEventListener("click", () => {
   setMenu(false);

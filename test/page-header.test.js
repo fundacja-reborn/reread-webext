@@ -83,6 +83,52 @@ describe("the bar stuck to the top of every page", () => {
     assert.match(css.slice(css.indexOf("\n.page-wordmark {")), /height: 1\.15em/, "the drawn name does not grow with the text");
   });
 
+  it("opens the reading list from the name in the bar, on every page that wears it (D304)", async () => {
+    // The name in the corner opened the settings until D304, and nobody
+    // looked for them there (Michał, 2026-11-17). One meaning on all three
+    // pages: the mark's accessible name is the list, never the settings.
+    for (const page of ["reader/reader.html", "vocab/vocab.html", "options/options.html"]) {
+      const markup = await source(page);
+      const at = markup.indexOf('id="brand"');
+      assert.ok(at > 0, `${page}: the bar has no mark to press`);
+      assert.equal(markup.indexOf('id="brand"', at + 1), -1, `${page}: two marks`);
+      const tag = markup.slice(markup.lastIndexOf("<", at), markup.indexOf(">", at) + 1);
+      assert.match(tag, /^<button\s+type="button"/, `${page}: the mark is not a button`);
+      assert.match(tag, /title="Offline reading list"\s+data-i18n-title="reading_list"/, `${page}: the mark's tooltip is not the list`);
+      assert.match(tag, /aria-label="Offline reading list"\s+data-i18n-aria-label="reading_list"/, `${page}: the mark's accessible name is not the list`);
+      assert.doesNotMatch(tag, /settings/, `${page}: the mark still names the settings`);
+    }
+    // Over an article or the highlights the reader's mark is the menu's list
+    // row - the same steps back through the page's own entries - and on the
+    // list it only scrolls: the rows are not read again under a selection.
+    const reader = await source("reader/reader.js");
+    assert.match(
+      reader,
+      /brandButton\?\.addEventListener\("click", \(\) => \{\s*closePanels\(\);\s*if \(library !== null && !library\.hidden\) scrollTo\(0, 0\);\s*else leaveToList\(\);\s*\}\);/,
+      "the reader's mark is not the way to the list",
+    );
+    // The other two pages go the way their own list rows go: asking the
+    // reader when they stand in its frame (D243), the background otherwise.
+    for (const [path, press] of /** @type {[string, RegExp][]} */ ([
+      ["vocab/vocab.js", /brandButton\?\.addEventListener\("click", \(\) => \{\s*closePanels\(\);\s*goToLibrary\(\);\s*\}\);/],
+      ["options/options.js", /getElementById\("brand"\)\?\.addEventListener\("click", \(\) => \{\s*setMenu\(false\);\s*goToLibrary\(\);\s*\}\);/],
+    ])) {
+      const script = await source(path);
+      assert.match(script, press, `${path}: the mark is not the way to the list`);
+      const at = script.indexOf("function goToLibrary() {");
+      assert.ok(at > 0, `${path}: no one road to the list`);
+      const road = script.slice(at, script.indexOf("\n}\n", at));
+      assert.match(road, /if \(inReader\) \{\s*askReader\(\{ act: "view", view: "library" \}\);\s*return;/, `${path}: a framed page navigates its own frame`);
+      assert.match(road, /sendMessage\(\{ kind: Message\.OPEN_LIBRARY \}\)/, `${path}: the list is not asked of the background`);
+    }
+    // The drawn name has no text to underline, so it says the pointer with
+    // the accent the written marks take.
+    assert.match(await source("options/options.css"), /\n\.page-mark:hover \.page-wordmark \{\s*color: var\(--page-accent\);/, "the drawn mark does not answer the pointer");
+    // The sentence the guide owes about it.
+    const guide = await readFile(new URL("../docs/GUIDE.md", import.meta.url), "utf8");
+    assert.match(guide, /The name \*\*re\/read\*\* at the start of the bar opens the offline reading list from every page/, "the mark's press is promised in the user guide");
+  });
+
   it("is the reader's box on the reading list and the highlights too, the folding kept to the article view", async () => {
     const markup = await source("reader/reader.html");
     assert.match(markup, /<div class="reader-chrome page-chrome">/, "the reader's box does not wear the shared class");

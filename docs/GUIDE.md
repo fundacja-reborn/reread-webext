@@ -79,6 +79,8 @@ The ⋮ button in the reader's bar opens the menu:
 
 Where the bar has room for it (a desktop, a tablet or an e-reader; a phone held upright usually does not), the bar of every page (the reader in each of its views, the saved phrases, the settings) also carries a full-screen button next to the menu: one press asks for the whole screen, and the same button, or Back, or `Esc` on a desktop, leaves it. The bar itself stays where it is, pinned to the top of every page; the small tab at the edge of the reader's bar is what hides that bar.
 
+The name **re/read** at the start of the bar opens the offline reading list from every page; on the list itself it scrolls back to the top. The settings page shows the name only in a wide window. The settings are in the menu.
+
 The settings and the saved phrases opened from the reader's own menu keep the full screen: they are shown inside the reader's own page, so nothing is reloaded and the browser's bars stay hidden. Back, the back gesture or the arrow in their bar brings the reading back exactly where it was. Opened any other way (from the toolbar popup, from the bubble on a web page, or from the browser's own add-ons manager) they are pages of their own.
 
 On Android see also [Full screen on a phone](#full-screen-on-a-phone).
