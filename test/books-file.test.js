@@ -67,7 +67,7 @@ describe("the books' index", () => {
     const text = toBooksIndex([
       {
         meta: pictured,
-        position: { docId: "b-1", segmentIndex: 1, blockIndex: 4, updatedAt: 99, percent: 50 },
+        position: { docId: "b-1", segmentIndex: 1, blockIndex: 4, updatedAt: 99, percent: 50, offset: 77 },
         pictures: [REF_3, REF_0],
       },
       { meta: book("b-2"), pictures: [] },
@@ -80,7 +80,7 @@ describe("the books' index", () => {
     const { pictures: account, ...bare } = pictured;
     assert.deepEqual(account, { count: 2, bytes: 2000 });
     assert.deepEqual(books.map((one) => one.meta), [bare, book("b-2")]);
-    assert.deepEqual(books[0]?.position, { docId: "b-1", segmentIndex: 1, blockIndex: 4, updatedAt: 99, percent: 50 });
+    assert.deepEqual(books[0]?.position, { docId: "b-1", segmentIndex: 1, blockIndex: 4, updatedAt: 99, percent: 50, offset: 77 });
     assert.deepEqual(books[0]?.pictures, [REF_0, REF_3]);
     assert.equal(books[0]?.text, "books/b-1.json");
     assert.equal(books[1]?.position, undefined);

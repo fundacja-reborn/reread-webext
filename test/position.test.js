@@ -41,6 +41,22 @@ describe("positionRecord", () => {
       assert.ok(record !== null && !("percent" in record));
     }
   });
+
+  it("carries the first line's offset on the same terms (D303)", () => {
+    assert.deepEqual(positionRecord("doc", 2, 7, 1000, 42, 318), {
+      docId: "doc",
+      segmentIndex: 2,
+      blockIndex: 7,
+      updatedAt: 1000,
+      percent: 42,
+      offset: 318,
+    });
+    assert.equal(positionRecord("doc", 0, 1, 1000, null, 0)?.offset, 0);
+    for (const broken of [null, undefined, -1, 4.5, NaN, Infinity]) {
+      const record = positionRecord("doc", 0, 1, 1000, 42, broken);
+      assert.deepEqual(record, { docId: "doc", segmentIndex: 0, blockIndex: 1, updatedAt: 1000, percent: 42 });
+    }
+  });
 });
 
 describe("asPosition", () => {
@@ -76,6 +92,17 @@ describe("asPosition", () => {
       assert.notEqual(read, null);
       assert.ok(read !== null && !("percent" in read));
     }
+  });
+
+  it("keeps the anchor when only the offset is broken, and the offset when whole (D303)", () => {
+    const row = { docId: "doc", segmentIndex: 0, blockIndex: 3, updatedAt: 5, percent: 42 };
+    assert.deepEqual(asPosition({ ...row, offset: 318 }), { ...row, offset: 318 });
+    assert.equal(asPosition({ ...row, offset: 0 })?.offset, 0);
+    for (const broken of [-1, 4.5, "318", NaN, null]) {
+      assert.deepEqual(asPosition({ ...row, offset: broken }), row);
+    }
+    // A row written before the field existed reads as it always did.
+    assert.deepEqual(asPosition(row), row);
   });
 });
 

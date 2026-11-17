@@ -109,8 +109,14 @@ export function bookTextEntryName(id) {
  *
  * @param {ReadingPosition} position
  */
-function filePosition({ segmentIndex, blockIndex, updatedAt, percent }) {
-  return { segmentIndex, blockIndex, updatedAt, ...(percent === undefined ? {} : { percent }) };
+function filePosition({ segmentIndex, blockIndex, updatedAt, percent, offset }) {
+  return {
+    segmentIndex,
+    blockIndex,
+    updatedAt,
+    ...(percent === undefined ? {} : { percent }),
+    ...(offset === undefined ? {} : { offset }),
+  };
 }
 
 /**
