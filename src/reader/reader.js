@@ -10420,8 +10420,13 @@ function openRoom(kind, section, fromHistory = false) {
   // The room's own name, for whoever hears the frame rather than sees it.
   frame.title = t(kind === "settings" ? "settings" : "saved_phrases");
   frame.src = webext().runtime.getURL(ROOM_PAGE[kind] + (section === undefined ? "" : `#${section}`));
+  // Read before the room shows: the room takes the window's scrollbar away
+  // (D305), and what the reading's column measures now is what it must
+  // keep. One room leading to the other finds the scrollbar already gone.
+  const columnBefore = standing ? null : rootWidth();
   roomBox.replaceChildren(frame);
   roomBox.hidden = false;
+  if (columnBefore !== null) holdColumn(columnBefore);
   roomShown = kind;
   // Nothing behind the room answers a key either: the sheet covers the
   // reading, and a Tab that walked into the article under it would move a
@@ -10474,10 +10479,35 @@ function closeRoom() {
     roomBox.replaceChildren();
     roomBox.hidden = true;
   }
+  // The scrollbar is back with the room gone, and takes its own width again.
+  document.documentElement.style.removeProperty("--room-gutter");
   dressRoomRest(false);
   const opener = roomOpener;
   roomOpener = null;
   if (opener !== null && opener.isConnected) opener.focus();
+}
+
+/** The width the page is laid out in: the window's, less its scrollbar. */
+function rootWidth() {
+  return document.documentElement.getBoundingClientRect().width;
+}
+
+/**
+ * The reading's column kept at its width under a standing room (D305): the
+ * stylesheet takes the window's scrollbar away with the room shown, the
+ * page grows by the scrollbar's width, and that width is handed back as
+ * padding - so the text under the room is not wrapped anew, the page count
+ * is not cut again (`settlePage` watches the body's box), and the reading
+ * is found where it was left. Measured rather than assumed: a scrollbar's
+ * width is the system's, a fraction of a pixel at some zooms, and nothing
+ * at all where scrollbars are drawn over the page or the paged layout has
+ * already put the scroller away.
+ *
+ * @param {number} before the page's width before the room showed
+ */
+function holdColumn(before) {
+  const gutter = Math.max(0, rootWidth() - before);
+  document.documentElement.style.setProperty("--room-gutter", `${gutter}px`);
 }
 
 /**

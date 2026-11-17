@@ -3435,6 +3435,23 @@ body.reader:has(#mark-bar:not([hidden])) {
   border: 0;
 }
 
+/* The reading's own scroller is put away while a room stands (D305). The
+   room is fixed over the window, but the window's scrollbar is not the
+   page's to cover: it stood beside the room's own, a second bar that moved
+   nothing anybody could see (Michał's screenshot, 2026-11-17) - and a wheel
+   turned past the end of the room went on to move the reading under it.
+   `hidden`, the paged layout's word (D233): the position stays where it
+   was and the script may still move it.
+   The padding is the width the scrollbar took, measured at the opening
+   (`openRoom`, reader.js) and nothing where scrollbars are drawn over the
+   page: with it the column under the room keeps its width to the pixel, so
+   no line of the reading wraps anew for the visit and the place it is left
+   at is the place it is found at. */
+:root:has(.room:not([hidden])) {
+  overflow: hidden;
+  padding-inline-end: var(--room-gutter, 0px);
+}
+
 /* The head's curtain: the same paper from the window's top down to where
    the page's first line stands (its height set by script) - the page's top
    margin, and the strip under the bar's tab, which the tail of the page
