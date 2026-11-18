@@ -1569,12 +1569,15 @@ body.reader:has(#library:not([hidden])) {
   margin: 0.75rem 0 0;
 }
 
+/* The field wears the shared cross (D306; `.clear-field` in page.css wraps
+   it, as on the saved phrases page), so the end padding is the cross's
+   room: the words stop before it rather than running under it. */
 .filter-line input {
   flex: 1 1 auto;
   min-height: 44px;
   min-width: 0;
   font: inherit;
-  padding: 0.35rem 0.6rem;
+  padding: 0.35rem 2.6rem 0.35rem 0.6rem;
   border-radius: 6px;
   border: 1px solid var(--page-border);
   background: transparent;
@@ -1591,13 +1594,14 @@ body.reader:has(#library:not([hidden])) {
    list without it; greyed while a press would do nothing, and lit with the
    accent - the note dialog's Save, the page's word for "this is the one
    press" - while the field holds words the list on screen was not narrowed
-   by. Its word never breaks. */
-.filter-line button {
+   by. Its word never breaks. The line's own child alone: the cross inside
+   the field (D306) is a button too, and keeps the dress page.css gives it. */
+.filter-line > button {
   padding: 0.35rem 1rem;
   white-space: nowrap;
 }
 
-.filter-line button[data-stale] {
+.filter-line > button[data-stale] {
   border-color: var(--page-accent);
   background: color-mix(in srgb, var(--page-accent) 12%, transparent);
 }

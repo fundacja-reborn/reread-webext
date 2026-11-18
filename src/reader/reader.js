@@ -38,6 +38,7 @@ import {
   stop as stopReadingSide,
 } from "../content/reading.js";
 import { applyReading } from "../lib/appearance.js";
+import { clearableField } from "../lib/clear-field.js";
 import { ReadLedger } from "../lib/counting.js";
 import { dresser } from "../lib/user-css.js";
 import { inPrivateContext, webext } from "../lib/browser.js";
@@ -454,6 +455,20 @@ const libraryRows = document.getElementById("library-rows");
 const libraryFilter = /** @type {HTMLInputElement | null} */ (
   document.getElementById("library-filter")
 );
+// The field's own cross (D306; `lib/clear-field.js`, the one the saved
+// phrases' filter wears): Firefox draws none on a search field, and without
+// it the only way to take a search back was to select the words and delete
+// them. A press does what an emptied field does - the whole list at once.
+const libraryFilterCross =
+  libraryFilter === null
+    ? null
+    : clearableField(libraryFilter, {
+        label: t("reader_filter_clear"),
+        onClear: () => {
+          if (forgetLibrarySearch()) void refreshLibrary();
+          updateSearchControls();
+        },
+      });
 // The deep search's own furniture (D119): the checkbox line under the
 // filter, and the section its results stand in.
 const librarySearchToggle = /** @type {HTMLInputElement | null} */ (
@@ -5029,6 +5044,10 @@ async function showPage(firstLoad = false) {
     const doc = asDocState(history.state);
     const quotes = asMarksState(history.state);
     if (doc === null && quotes === null) {
+      // Asked for the list over a live page, which has no entry of ours to
+      // step back over: the same door as below, so the same fresh start
+      // (D306). On the list itself nothing is taken back - nobody left it.
+      if (shown !== null) clearLibrarySearch();
       await showLibrary();
     } else if (firstLoad) {
       // A reload or a restored session, standing on an entry this page
@@ -5050,7 +5069,8 @@ async function showPage(firstLoad = false) {
       // stand stacked (a document under the highlights under a document),
       // the walk in popstate steps through all of them, so the next Back
       // over the list keeps meaning "leave this page", not "reread that
-      // article".
+      // article". A door named for the list, so the list starts over (D306).
+      clearLibrarySearch();
       unwindToList = true;
       history.back();
     }
@@ -6155,14 +6175,9 @@ async function refreshLibrary() {
       clear.type = "button";
       clear.textContent = t("reader_filter_clear");
       clear.addEventListener("click", () => {
-        libraryQuery = "";
-        libraryPage = 1;
-        if (libraryFilter !== null) {
-          libraryFilter.value = "";
-          libraryFilter.focus();
-        }
+        clearLibrarySearch();
+        libraryFilter?.focus();
         void refreshLibrary();
-        updateSearchControls();
       });
       libraryEmpty.append(sentence, clear);
     } else {
@@ -6395,6 +6410,36 @@ async function pressLibrarySearch() {
     libraryPage = 1;
     await refreshLibrary();
   }
+  updateSearchControls();
+}
+
+/**
+ * The question taken back from the list (D306): the deep results dismissed
+ * and the plain list no longer narrowed, from its first page - the page
+ * number was a place in the answer, not in the whole list. A list that was
+ * not narrowed keeps its page. The field is left alone, and the caller
+ * redraws whatever it has on screen.
+ *
+ * @returns {boolean} whether there was a question to take back
+ */
+function forgetLibrarySearch() {
+  if (libraryQuery.length === 0 && !librarySearchShown()) return false;
+  if (librarySearchShown()) dismissLibrarySearch();
+  libraryQuery = "";
+  libraryPage = 1;
+  return true;
+}
+
+/**
+ * The search taken back whole, the field with it (D306) - for the ways that
+ * empty the field by script, which fires no `input`: the button under "no
+ * match", and a visit to the list that starts over (`leaveToList`). The
+ * cross and the Search button follow what the field now holds.
+ */
+function clearLibrarySearch() {
+  forgetLibrarySearch();
+  if (libraryFilter !== null) libraryFilter.value = "";
+  libraryFilterCross?.refresh();
   updateSearchControls();
 }
 
@@ -9055,7 +9100,10 @@ async function onRemovePress(button) {
   }
   if (target.origin !== "book") setKeepDeclined(target.url, true);
   if (shown !== target) return;
-  leaveToList();
+  // The walk without the fresh start (D306): a document found by a search
+  // and deleted lands on the results it was found in - the next one of a
+  // kind is right there.
+  walkToList();
 }
 
 /**
@@ -9720,14 +9768,10 @@ librarySegments?.addEventListener("click", (event) => {
 // stands as it is until Search is pressed, and the button lights up
 // meanwhile. An emptied box is the one exception - taking the question back
 // needs no press: the deep results go and the whole list comes back at once.
+// The field's cross (D306) is the same act in one press.
 libraryFilter?.addEventListener("input", () => {
   if (libraryFilter === null) return;
-  if (libraryFilter.value.trim().length === 0 && (libraryQuery.length > 0 || librarySearchShown())) {
-    if (librarySearchShown()) dismissLibrarySearch();
-    libraryQuery = "";
-    libraryPage = 1;
-    void refreshLibrary();
-  }
+  if (libraryFilter.value.trim().length === 0 && forgetLibrarySearch()) void refreshLibrary();
   updateSearchControls();
 });
 
@@ -10191,18 +10235,37 @@ function onBackPress() {
 }
 
 /**
- * The menu's list row: to the list however deep this page's own entries
- * stand - a document under the highlights under a document leaves the row
- * meaning the same one room. The walk is real history steps (the flag makes
- * popstate keep stepping over entries of ours), so the Back that follows
- * still means "leave this page".
+ * To the list however deep this page's own entries stand - a document under
+ * the highlights under a document is still one walk to the same one room.
+ * The walk is real history steps (the flag makes popstate keep stepping over
+ * entries of ours), so the Back that follows still means "leave this page".
+ * The list is found as it was left: this is the walk alone, which a deleted
+ * document's page takes too.
  */
-function leaveToList() {
+function walkToList() {
   hideNotice();
   if (asDocState(history.state) !== null || asMarksState(history.state) !== null) {
     unwindToList = true;
     history.back();
   } else void showLibrary();
+}
+
+/**
+ * The doors named for the list - the menu's list row, the mark in the bar,
+ * a room's list row, the button on the empty highlights page: the walk
+ * above, to a list that starts over (D306). A search left standing over the
+ * list is taken back on the way, field and all, so the door named "reading
+ * list" opens the reading list and not the answer to a question asked
+ * before the reading. A step back is the other way to the same room and
+ * keeps the search (`onBackPress`, popstate): Back from a found document
+ * lands on the results it was opened from, so the next one is a press away
+ * and not a phrase typed again - the rule the highlights page keeps (D108).
+ * Only from a document or the highlights: a room standing over the list
+ * itself never left it.
+ */
+function leaveToList() {
+  if (shown !== null || marksShown !== null) clearLibrarySearch();
+  walkToList();
 }
 
 // One way back, two doors: the arrow in the bar and the line under the

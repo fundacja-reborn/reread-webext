@@ -1000,10 +1000,11 @@ body:not(.reader):has(.panel-scrim:not([hidden])) .page-chrome::before {
   white-space: nowrap;
 }
 
-/* A field with its cross inside (`lib/clear-field.js`: the look-up field
-   and the saved-phrases list's filter): the box takes the row, the cross
-   stands at the field's far end over the field's own padding, which the
-   field's own rule has to leave it (2.6rem at the end). */
+/* A field with its cross inside (`lib/clear-field.js`: the look-up field,
+   the saved-phrases list's filter and the reading list's search): the box
+   takes the row, the cross stands at the field's far end over the field's
+   own padding, which the field's own rule has to leave it (2.6rem at the
+   end). */
 .clear-field {
   position: relative;
   display: flex;
