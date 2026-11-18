@@ -16,7 +16,7 @@ The reading list opens from the toolbar popup, from the reader's menu, and from 
 
 **Mark as read, delete.** Both are shown next to the title and under the last line of a document in the reader, and in the reader's menu. Deleting a document removes everything stored for it (text, pictures, highlights and notes, reading position) from the database and from the reading list's safety copy. Saved phrases are not part of a document: a phrase you saved while reading an article stays in your vocabulary, with no record of where it came from.
 
-**Search across the list.** The search box searches titles, sites and your notes on documents, and, with **Search in the texts too** ticked, the stored texts, with snippets; clicking a snippet opens the document at that place. A row found by its note shows the note under the title.
+**Search across the list.** The search box searches titles, sites and your notes on documents, and, with **Search in the texts too** ticked, the stored texts, with snippets; clicking a snippet opens the document at that place. A row found by its note shows the note under the title. The cross at the end of the search box clears the search and shows the whole list again. Going back from a document returns to the search results it was opened from; opening the reading list from the reader's menu or with the name **re/read** in the bar shows the whole list, with the search box empty.
 
 **Select.** **Select** ticks articles or books, for a backup of only those (see [Backup and safety copies](#backup-and-safety-copies)) or for exporting each as a file of its own (see [Export a document](#export-a-document)).
 

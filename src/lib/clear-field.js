@@ -1,8 +1,8 @@
 /**
  * A cross inside a text field - the "x" of a search box, made ours (the
- * panel's second round, block 3): one component for the look-up field and
- * the saved-phrases list's filter, so the two fields look and behave the
- * same empty and filled. Our own rather than the browser's, because
+ * panel's second round, block 3): one component for the look-up field,
+ * the saved-phrases list's filter and the reading list's search (D306), so
+ * the fields look and behave the same empty and filled. Our own rather than the browser's, because
  * Firefox draws none on a search field and Chromium's is a small target
  * that fires no event a page can count on.
  *
